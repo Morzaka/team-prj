@@ -1,0 +1,20 @@
+stages:
+  - vetting
+  - tests
+  - deploy
+  
+lint:
+  stage: vetting
+  script:
+    - go get github.com/golang/lint/golint
+    - golint
+
+unitests:
+  stage: tests
+
+deploying:
+  stage: deploy
+  script:
+    - gem install dpl # dpl is a library for deploying
+    - dpl --provider=heroku --app=team-project-deploy --api-key=$HEROKU_API_KEY
+    
