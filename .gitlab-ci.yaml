@@ -19,4 +19,5 @@ deploying:
   #script:
     #- gem install dpl # dpl is a library for deploying
     #- dpl --provider=heroku --app=team-project-deploy --api-key=$HEROKU_API_KEY
-  
+  only:
+    - master
