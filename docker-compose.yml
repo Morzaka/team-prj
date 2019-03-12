@@ -1,0 +1,8 @@
+version: "3.7"
+services:
+  team-project:
+    container_name: team-project
+    image: team-project:latest
+    build: .
+    ports:
+      - "8080:8080"
