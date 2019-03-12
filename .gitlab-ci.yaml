@@ -7,14 +7,16 @@ lint:
   stage: vetting
   script:
     - go get github.com/golang/lint/golint
-    - golint
+    - golint -set_exit_status
 
 unitests:
   stage: tests
+  script:
+    - go test ./...
 
 deploying:
   stage: deploy
-  script:
-    - gem install dpl # dpl is a library for deploying
-    - dpl --provider=heroku --app=team-project-deploy --api-key=$HEROKU_API_KEY
-    
+  #script:
+    #- gem install dpl # dpl is a library for deploying
+    #- dpl --provider=heroku --app=team-project-deploy --api-key=$HEROKU_API_KEY
+  
