@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-/*
-	This code just for testing and setting up Docker
-*/
 package main
 
 import (
