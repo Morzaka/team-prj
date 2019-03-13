@@ -29,10 +29,8 @@ vendor/
 # IDEs:
 .idea/
 
-<<<<<<< HEAD
+
 # logs:
 *.log
 *.log.*
-=======
 
->>>>>>> config
