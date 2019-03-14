@@ -1,48 +1,35 @@
 package main
 
 import (
-	"flag"
-	"log"
+	"github.com/sirupsen/logrus"
 	"net/http"
 	"os"
 	"team-project/config"
 )
 
+
 func main(){
 
-	configFile := flag.String("config", "./package_config.json", "Configuration file in JSON-format")
-	flag.Parse()
-
-	if len(*configFile) > 0 {
-		config.FilePath = *configFile
-	}
-
-	err := config.Load()
-	if err != nil {
-		log.Fatalf("error while reading config: %s", err)
-	}
-
+	err := config.ReadAndLoad("project_config.json")
 	f, err := os.OpenFile(config.Config.LogFilePath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0600)
 	if err != nil {
-		log.Fatalf("error opening file: %v", err)
+		logrus.Fatal("Error while opening log file", err)
 	}
 	defer func() {
 		err = f.Close()
 		if err != nil {
-			log.Fatalf("error while close log file: %s", err)
+			logrus.Fatal("Error while closing log file", err)
 		}
 	}()
 
-	log.SetOutput(f)
+	logrus.SetOutput(f)
 
-
-
-	log.Println("Starting HTTP listener...")
+	logrus.Info("Starting HTTP listening...")
 	err = http.ListenAndServe(config.Config.ListenURL, nil)
 	if err != nil {
-		log.Println(err)
+		logrus.Info(err)
 	}
-	log.Printf("Stop running application: %s", err)
+	logrus.Info("Stop running server: ", err)
 }
 
 

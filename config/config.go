@@ -3,15 +3,15 @@ package config
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
+	"github.com/sirupsen/logrus"
 	"io/ioutil"
-	"log"
+
 )
 
-var (
-	Config   Configuration
-	FilePath = "package_confic.json"
-)
+
+// Config is variable for config, log for display logs
+var Config	Configuration
+
 
 // Configuration is a singleton object for application config
 type Configuration struct {
@@ -20,29 +20,26 @@ type Configuration struct {
 }
 
 // Load loads config once
-func Load() error {
-	err := readFromJSON(FilePath)
-	if err != nil {
-		return errors.New("configuration not found. Please specify configuration")
-	}
-
-	return nil
-}
-
-// readFromJSON reads config data from JSON-file
-func readFromJSON(configFilePath string) error {
-	log.Printf("Looking for JSON config file (%s)", configFilePath)
-
-	contents, err := ioutil.ReadFile(configFilePath)
+func ReadAndLoad(FilePath string) error{
+	contents, err := ioutil.ReadFile(FilePath)
 	if err == nil {
 		reader := bytes.NewBuffer(contents)
 		err = json.NewDecoder(reader).Decode(&Config)
 	}
 	if err != nil {
-		log.Printf("Reading configuration from JSON (%s) failed: %s\n", configFilePath, err)
+		logrus.WithFields(logrus.Fields{
+			"function": "ReadAndLoad()",
+			"action": "Reading config from JSON file",
+			"result": "File was not read",
+		}).Fatal("Error while reading file")
 	} else {
-		log.Printf("Configuration has been read from JSON (%s) successfully\n", configFilePath)
+		logrus.WithFields(logrus.Fields{
+			"function": "ReadAndLoad()",
+			"action": "Reading from JSON file",
+			"result": "File was read successfully!",
+		}).Info("Configurations was loaded")
 	}
 
 	return err
 }
+
