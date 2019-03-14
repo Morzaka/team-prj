@@ -14,6 +14,7 @@ lint:
 unitests:
   stage: tests
   script:
+    - go get -u github.com/gorilla/mux
     - go test ./...
 
 #deploying:
