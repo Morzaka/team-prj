@@ -1,5 +1,0 @@
-{
-  "ListenURL": ":8080",
-  "APIVersion": "/v1",
-  "LogFilePath": "project_log_file.log"
-}

@@ -1,35 +1,68 @@
+/*
+	This code just for testing and setting up Docker
+*/
 package main
 
 import (
-	"github.com/sirupsen/logrus"
+	"context"
+	"fmt"
+	"log"
 	"net/http"
 	"os"
-	"team-project/config"
+	"os/signal"
+	"syscall"
+	"time"
+
+	"github.com/gorilla/mux"
 )
 
-
-func main(){
-
-	err := config.ReadAndLoad("project_config.json")
-	f, err := os.OpenFile(config.Config.LogFilePath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0600)
-	if err != nil {
-		logrus.Fatal("Error while opening log file", err)
+func handler(w http.ResponseWriter, r *http.Request) {
+	query := r.URL.Query()
+	name := query.Get("name")
+	if name == "" {
+		name = "Guest"
 	}
-	defer func() {
-		err = f.Close()
-		if err != nil {
-			logrus.Fatal("Error while closing log file", err)
+	log.Printf("Received request for %s\n", name)
+	_, _ = w.Write([]byte(fmt.Sprintf("Hello, %s\n", name)))
+}
+
+func main() {
+	// Create Server and Route Handlers
+	r := mux.NewRouter()
+
+	r.HandleFunc("/", handler)
+
+	srv := &http.Server{
+		Handler:      r,
+		Addr:         ":8080",
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 10 * time.Second,
+	}
+
+	// Start Server
+	go func() {
+		log.Println("Starting Server")
+		if err := srv.ListenAndServe(); err != nil {
+			log.Fatal(err)
 		}
 	}()
 
-	logrus.SetOutput(f)
-
-	logrus.Info("Starting HTTP listening...")
-	err = http.ListenAndServe(config.Config.ListenURL, nil)
-	if err != nil {
-		logrus.Info(err)
-	}
-	logrus.Info("Stop running server: ", err)
+	// Graceful Shutdown
+	waitForShutdown(srv)
 }
 
+func waitForShutdown(srv *http.Server) {
+	interruptChan := make(chan os.Signal, 1)
+	signal.Notify(interruptChan, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 
+	// Block until we receive our signal.
+	<-interruptChan
+
+	// Create a deadline to wait for.
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	defer cancel()
+	_ = srv.Shutdown(ctx)
+
+	log.Println("Shutting down")
+	os.Exit(0)
+}
