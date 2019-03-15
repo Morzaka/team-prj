@@ -1,23 +1,24 @@
 package authorization
 
 import (
-	"html/template"
-	"net/http"
-	"time"
+	"fmt"
 	"golang.org/x/crypto/bcrypt"
-	"github.com/satori/go.uuid"
-	"gitlab.com/golang-lv-388/team-project/services/authorization/models"
-	"gitlab.com/golang-lv-388/team-project/services/authorization/session"
+	"html/template"
+	"log"
+	"net/http"
+	"team-project/services/authorization/models"
+	"team-project/services/authorization/session"
+	"time"
+	"team-project/services/database"
 )
 
-var users []*models.User
 var InMemorySession *session.Session
 
 const (
-	COOKIE_NAME = "sessionId"
+	CookieName = "sessionId"
 )
 
-func init(){
+func init() {
 	InMemorySession = session.NewSession()
 }
 
@@ -32,34 +33,29 @@ func checkPasswordHash(password, hash string) bool {
 
 }
 
-
 func LoginPage(w http.ResponseWriter, r *http.Request) {
-	tmpl, err := template.ParseFiles("gitlab.com/golang-lv-388/team-project/services/authorization/frontend/login.html")
+	tmpl, err := template.ParseFiles("team-project/services/authorization/frontend/login.html")
 	if err != nil {
 		http.Error(w, err.Error(), 400)
 		return
 	}
-	tmpl.ExecuteTemplate(w, "login", nil)
+	log.Fatal(tmpl.ExecuteTemplate(w, "login", nil))
 }
 
 func SigninFunc(w http.ResponseWriter, r *http.Request) {
-	var IsAuthorized bool = false
+	var IsAuthorized bool
 	var t time.Time
-	var IsRegistered bool = false
+	var IsRegistered = false
 	login := r.FormValue("login")
 	password := r.FormValue("password")
-	for _, value := range users {
-		if value.Login == login {
-			if checkPasswordHash(password, value.Password) {
-				IsRegistered = true
-				break
-			}
-		}
+	dbpassword := database.GetUser(login)
+	if checkPasswordHash(password, dbpassword) {
+		IsRegistered = true
 	}
-	if IsRegistered == true{
+	if IsRegistered == true {
 		t = time.Now().Add(1 * time.Minute)
 		sessionId := InMemorySession.Init(login)
-		cookie := &http.Cookie{Name: COOKIE_NAME,
+		cookie := &http.Cookie{Name: CookieName,
 			Value:   sessionId,
 			Expires: t,
 		}
@@ -67,6 +63,7 @@ func SigninFunc(w http.ResponseWriter, r *http.Request) {
 		if cookie != nil {
 			if login == InMemorySession.GetUser(cookie.Value) {
 				IsAuthorized = true
+				log.Println("User is autorized", IsAuthorized)
 			}
 		}
 		http.Redirect(w, r, "/api/v1/startpage", 302)
@@ -77,24 +74,23 @@ func SigninFunc(w http.ResponseWriter, r *http.Request) {
 }
 
 func RegisterPage(w http.ResponseWriter, r *http.Request) {
-	tmpl, err := template.ParseFiles("gitlab.com/golang-lv-388/team-project/services/authorization/frontend/register.html")
+	tmpl, err := template.ParseFiles("team-project/services/authorization/frontend/register.html")
 	if err != nil {
 		http.Error(w, err.Error(), 400)
 		return
 	}
-	tmpl.ExecuteTemplate(w, "register", nil)
+	log.Fatal(tmpl.ExecuteTemplate(w, "register", nil))
 }
 
 func SignupFunc(w http.ResponseWriter, r *http.Request) {
-	id, _ :=uuid.NewV4()
-	name:=r.FormValue("name")
-	surname:=r.FormValue("surname")
-	role:=r.FormValue("role")
+	name := r.FormValue("name")
+	surname := r.FormValue("surname")
+	role := r.FormValue("role")
 	login := r.FormValue("login")
 	passwordtmp := r.FormValue("password")
 	password, _ := hashPassword(passwordtmp)
-	user := models.NewUser(id, password, name, surname,login,role)
-	users=append(users,user)
+	user := models.NewUser(password, name, surname, login, role)
+	id := database.AddUser(user)
+	log.Println("You are registered with id :",id)
 	http.Redirect(w, r, "/api/v1/login", 302)
 }
-
