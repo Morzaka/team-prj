@@ -7,6 +7,7 @@ import (
 	"github.com/satori/go.uuid"
 	"golang.org/x/crypto/bcrypt"
 	"html/template"
+	"log"
 	"net/http"
 	"time"
 )
@@ -43,9 +44,9 @@ func LoginPage(w http.ResponseWriter, r *http.Request) {
 }
 
 func SigninFunc(w http.ResponseWriter, r *http.Request) {
-	var IsAuthorized = false
+	var IsAuthorized bool
 	var t time.Time
-	var IsRegistered bool = false
+	var IsRegistered = false
 	login := r.FormValue("login")
 	password := r.FormValue("password")
 	for _, value := range users {
@@ -67,6 +68,7 @@ func SigninFunc(w http.ResponseWriter, r *http.Request) {
 		if cookie != nil {
 			if login == InMemorySession.GetUser(cookie.Value) {
 				IsAuthorized = true
+				log.Println("User is autorized", IsAuthorized)
 			}
 		}
 		http.Redirect(w, r, "/api/v1/startpage", 302)
