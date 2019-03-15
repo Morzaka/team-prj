@@ -88,11 +88,7 @@ func RegisterPage(w http.ResponseWriter, r *http.Request) {
 }
 
 func SignupFunc(w http.ResponseWriter, r *http.Request) {
-	id, err := uuid.NewV4()
-	if err != nil {
-		fmt.Printf("Something went wrong: %s", err)
-		return
-	}
+	id := uuid.NewV4()
 	name := r.FormValue("name")
 	surname := r.FormValue("surname")
 	role := r.FormValue("role")
