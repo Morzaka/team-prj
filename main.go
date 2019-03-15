@@ -1,16 +1,15 @@
 package main
 
 import (
+	"./config"
+	"./services"
 	"github.com/sirupsen/logrus"
+	"github.com/urfave/negroni"
 	"net/http"
 	"os"
-	"team-project/config"
-	 "github.com/urfave/negroni"
-        "./services"
 )
 
-
-func main(){
+func main() {
 
 	err := config.ReadAndLoad("project_config.json")
 	f, err := os.OpenFile(config.Config.LogFilePath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0600)
@@ -25,10 +24,10 @@ func main(){
 	}()
 
 	logrus.SetOutput(f)
-	 // setting up web server middlewares
-        middlewareManager := negroni.New()
-        middlewareManager.Use(negroni.NewRecovery())
-        middlewareManager.UseHandler(services.NewRouter())
+	// setting up web server middlewares
+	middlewareManager := negroni.New()
+	middlewareManager.Use(negroni.NewRecovery())
+	middlewareManager.UseHandler(services.NewRouter())
 	logrus.Info("Starting HTTP listening...")
 	err = http.ListenAndServe(config.Config.ListenURL, middlewareManager)
 	if err != nil {
@@ -36,5 +35,3 @@ func main(){
 	}
 	logrus.Info("Stop running server: ", err)
 }
-
-

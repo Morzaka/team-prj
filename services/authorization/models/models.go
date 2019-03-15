@@ -11,8 +11,6 @@ type User struct {
 	Role     string
 }
 
-
-func NewUser(id uuid.UUID, password, name,surname,login,role string) *User {
-	return &User{id, password, name,surname,login,role}
+func NewUser(id uuid.UUID, password, name, surname, login, role string) *User {
+	return &User{id, password, name, surname, login, role}
 }
-
