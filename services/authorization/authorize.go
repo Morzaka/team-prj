@@ -15,7 +15,7 @@ import (
 var InMemorySession *session.Session
 
 const (
-	COOKIE_NAME = "sessionId"
+	CookieName = "sessionId"
 )
 
 func init() {
@@ -39,7 +39,7 @@ func LoginPage(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), 400)
 		return
 	}
-	tmpl.ExecuteTemplate(w, "login", nil)
+	log.Fatal(tmpl.ExecuteTemplate(w, "login", nil))
 }
 
 func SigninFunc(w http.ResponseWriter, r *http.Request) {
@@ -55,7 +55,7 @@ func SigninFunc(w http.ResponseWriter, r *http.Request) {
 	if IsRegistered == true {
 		t = time.Now().Add(1 * time.Minute)
 		sessionId := InMemorySession.Init(login)
-		cookie := &http.Cookie{Name: COOKIE_NAME,
+		cookie := &http.Cookie{Name: CookieName,
 			Value:   sessionId,
 			Expires: t,
 		}
@@ -79,7 +79,7 @@ func RegisterPage(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), 400)
 		return
 	}
-	tmpl.ExecuteTemplate(w, "register", nil)
+	log.Fatal(tmpl.ExecuteTemplate(w, "register", nil))
 }
 
 func SignupFunc(w http.ResponseWriter, r *http.Request) {
