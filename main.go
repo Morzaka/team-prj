@@ -19,8 +19,6 @@ func main(){
 		fmt.Println("Config file was read")
 	}
 	err := configurations.LoadConfig(*configFile)
-)
-
 	if err != nil {
 		logger.LogFatal("Fatal error while reading config, %s", err)
 	}
