@@ -12,8 +12,6 @@ import (
 
 var users []*models.User
 var InMemorySession *session.Session
-var IsAuthorized bool = false
-var t time.Time
 
 const (
 	COOKIE_NAME = "sessionId"
@@ -45,6 +43,8 @@ func LoginPage(w http.ResponseWriter, r *http.Request) {
 }
 
 func SigninFunc(w http.ResponseWriter, r *http.Request) {
+	var IsAuthorized bool = false
+	var t time.Time
 	var IsRegistered bool = false
 	login := r.FormValue("login")
 	password := r.FormValue("password")
@@ -97,5 +97,4 @@ func SignupFunc(w http.ResponseWriter, r *http.Request) {
 	users=append(users,user)
 	http.Redirect(w, r, "/api/v1/login", 302)
 }
-
 
