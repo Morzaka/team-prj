@@ -1,8 +1,8 @@
 package authorization
 
 import (
-	"./models"
-	"./session"
+	"team-project/services/authorization/models"
+	"team-project/services/authorization/session"
 	"fmt"
 	"github.com/satori/go.uuid"
 	"golang.org/x/crypto/bcrypt"
@@ -10,13 +10,6 @@ import (
 	"log"
 	"net/http"
 	"time"
-<<<<<<< HEAD
-	"golang.org/x/crypto/bcrypt"
-	"github.com/satori/go.uuid"
-	"./services/authorization/models"
-	"./services/authorization/session"
-=======
->>>>>>> 1aa5d329f6abd061e71950a90bdb990a20b080c3
 )
 
 var users []*models.User
@@ -95,7 +88,7 @@ func RegisterPage(w http.ResponseWriter, r *http.Request) {
 }
 
 func SignupFunc(w http.ResponseWriter, r *http.Request) {
-	id, _ := uuid.NewV4()
+	id := uuid.NewV4()
 	name := r.FormValue("name")
 	surname := r.FormValue("surname")
 	role := r.FormValue("role")

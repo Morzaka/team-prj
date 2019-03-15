@@ -1,16 +1,8 @@
 package services
 
-<<<<<<< HEAD
-import(
-	"log"
-        "net/http"
-	"./services/handlers"
-        "./services/authorization"
-=======
 import (
-	"./authorization"
-	"./handlers"
->>>>>>> 1aa5d329f6abd061e71950a90bdb990a20b080c3
+	"team-project/services/authorization"
+	"team-project/services/handlers"
 	"github.com/go-zoo/bone"
 )
 
