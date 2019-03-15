@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"os"
 	"team-project/config"
+	 "github.com/urfave/negroni"
+        "gitlab.com/golang-lv-388/team-project/services"
 )
 
 
@@ -23,9 +25,12 @@ func main(){
 	}()
 
 	logrus.SetOutput(f)
-
+	 // setting up web server middlewares
+        middlewareManager := negroni.New()
+        middlewareManager.Use(negroni.NewRecovery())
+        middlewareManager.UseHandler(services.NewRouter())
 	logrus.Info("Starting HTTP listening...")
-	err = http.ListenAndServe(config.Config.ListenURL, nil)
+	err = http.ListenAndServe(config.Config.ListenURL, middlewareManager)
 	if err != nil {
 		logrus.Info(err)
 	}
