@@ -1,6 +1,7 @@
 package models
 
 import "github.com/satori/go.uuid"
+
 type User struct {
 	Id       uuid.UUID
 	Password string
@@ -11,7 +12,7 @@ type User struct {
 }
 
 
-func NewUser(id uuid.UUID,password, name,surname,login,role string) *User {
+func NewUser(id uuid.UUID, password, name,surname,login,role string) *User {
 	return &User{id, password, name,surname,login,role}
 }
 

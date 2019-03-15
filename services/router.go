@@ -10,7 +10,7 @@ import(
 
 //NewRouter creates a router for URL
 func NewRouter()*bone.Mux {
-      router := bone.New().Prefix("/api")
+    router := bone.New().Prefix("/api")
         subV1 := bone.New()
         router.SubRoute("/v1", subV1)
          // GetFunc, PostFunc etc ... takes http.HandlerFunc
@@ -19,7 +19,6 @@ func NewRouter()*bone.Mux {
 	subV1.PostFunc("/signin", authorization.SigninFunc)
 	subV1.GetFunc("/login", authorization.LoginPage)
 	subV1.GetFunc("/register", authorization.RegisterPage)
-	log.Fatal(http.ListenAndServe(":8080", router))
 	return router
 }
 
