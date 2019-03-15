@@ -1,14 +1,14 @@
 package authorization
 
 import (
-	"team-project/services/authorization/models"
-	"team-project/services/authorization/session"
 	"fmt"
 	"github.com/satori/go.uuid"
 	"golang.org/x/crypto/bcrypt"
 	"html/template"
 	"log"
 	"net/http"
+	"team-project/services/authorization/models"
+	"team-project/services/authorization/session"
 	"time"
 )
 
