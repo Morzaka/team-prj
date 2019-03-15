@@ -1,40 +1,32 @@
 package main
 
 import (
-	"github.com/sirupsen/logrus"
+	"flag"
+	"fmt"
 	"net/http"
-	"os"
-	"team-project/config"
-	 "github.com/urfave/negroni"
-        "gitlab.com/golang-lv-388/team-project/services"
+	"team-project/configurations"
+	"team-project/logger"
 )
 
 
 func main(){
+	configFile := flag.String("config", "./project_config.json", "Configuration file in JSON-format")
+	flag.Parse()
 
-	err := config.ReadAndLoad("project_config.json")
-	f, err := os.OpenFile(config.Config.LogFilePath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0600)
-	if err != nil {
-		logrus.Fatal("Error while opening log file", err)
+	if len(*configFile) > 0 {
+		fmt.Println("Config file was read")
 	}
-	defer func() {
-		err = f.Close()
-		if err != nil {
-			logrus.Fatal("Error while closing log file", err)
-		}
-	}()
+	err := configurations.LoadConfig(*configFile)
+	if err != nil {
+		logger.LogFatal("Fatal error while reading config, %s", err)
+	}
 
-	logrus.SetOutput(f)
-	 // setting up web server middlewares
-        middlewareManager := negroni.New()
-        middlewareManager.Use(negroni.NewRecovery())
-        middlewareManager.UseHandler(services.NewRouter())
-	logrus.Info("Starting HTTP listening...")
-	err = http.ListenAndServe(config.Config.ListenURL, middlewareManager)
+	logger.LogInfo("Starting HTTP listener...")
+	err = http.ListenAndServe(configurations.Config.ListenURL, nil)
 	if err != nil {
-		logrus.Info(err)
+		logger.LogError("Error, %s",err)
 	}
-	logrus.Info("Stop running server: ", err)
+	logger.LogWarn("Stop running application, %s", err)
 }
 
 
