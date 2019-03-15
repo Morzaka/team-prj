@@ -3,6 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/urfave/negroni"
+        "gitlab.com/golang-lv-388/team-project/services"
 	"net/http"
 	"team-project/configurations"
 	"team-project/logger"
@@ -20,9 +22,10 @@ func main(){
 	if err != nil {
 		logger.LogFatal("Fatal error while reading config, %s", err)
 	}
-
+	middlewareManager.Use(negroni.NewRecovery())
+        middlewareManager.UseHandler(services.NewRouter())
 	logger.LogInfo("Starting HTTP listener...")
-	err = http.ListenAndServe(configurations.Config.ListenURL, nil)
+	err = http.ListenAndServe(configurations.Config.ListenURL, middlewareManager)
 	if err != nil {
 		logger.LogError("Error, %s",err)
 	}
