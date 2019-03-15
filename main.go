@@ -1,8 +1,8 @@
 package main
 
 import (
-	"./config"
-	"./services"
+	"team-project/config"
+	"team-project/services"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/negroni"
 	"net/http"
@@ -10,7 +10,6 @@ import (
 )
 
 func main() {
-
 	err := config.ReadAndLoad("project_config.json")
 	f, err := os.OpenFile(config.Config.LogFilePath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0600)
 	if err != nil {
