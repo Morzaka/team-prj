@@ -1,12 +1,12 @@
 package main
 
 import (
-	"./config"
-	"./services"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/negroni"
 	"net/http"
 	"os"
+	"team-project/config"
+	"team-project/services"
 )
 
 func main() {

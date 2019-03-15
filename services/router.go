@@ -1,9 +1,9 @@
 package services
 
 import (
-	"./authorization"
-	"./handlers"
 	"github.com/go-zoo/bone"
+	"team-project/services/authorization"
+	"team-project/services/handlers"
 )
 
 //NewRouter creates a router for URL
