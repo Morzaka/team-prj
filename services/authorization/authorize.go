@@ -16,7 +16,7 @@ var users []*models.User
 var InMemorySession *session.Session
 
 const (
-	COOKIE_NAME = "sessionId"
+	CookieName = "sessionId"
 )
 
 func init() {
@@ -35,12 +35,12 @@ func checkPasswordHash(password, hash string) bool {
 }
 
 func LoginPage(w http.ResponseWriter, r *http.Request) {
-	tmpl, err := template.ParseFiles("gitlab.com/golang-lv-388/team-project/services/authorization/frontend/login.html")
+	tmpl, err := template.ParseFiles("team-project/services/authorization/frontend/login.html")
 	if err != nil {
 		http.Error(w, err.Error(), 400)
 		return
 	}
-	tmpl.ExecuteTemplate(w, "login", nil)
+	log.Fatal(tmpl.ExecuteTemplate(w, "login", nil))
 }
 
 func SigninFunc(w http.ResponseWriter, r *http.Request) {
@@ -60,7 +60,7 @@ func SigninFunc(w http.ResponseWriter, r *http.Request) {
 	if IsRegistered == true {
 		t = time.Now().Add(1 * time.Minute)
 		sessionId := InMemorySession.Init(login)
-		cookie := &http.Cookie{Name: COOKIE_NAME,
+		cookie := &http.Cookie{Name: CookieName,
 			Value:   sessionId,
 			Expires: t,
 		}
@@ -79,22 +79,30 @@ func SigninFunc(w http.ResponseWriter, r *http.Request) {
 }
 
 func RegisterPage(w http.ResponseWriter, r *http.Request) {
-	tmpl, err := template.ParseFiles("gitlab.com/golang-lv-388/team-project/services/authorization/frontend/register.html")
+	tmpl, err := template.ParseFiles("team-project/services/authorization/frontend/register.html")
 	if err != nil {
 		http.Error(w, err.Error(), 400)
 		return
 	}
-	tmpl.ExecuteTemplate(w, "register", nil)
+	log.Fatal(tmpl.ExecuteTemplate(w, "register", nil))
 }
 
 func SignupFunc(w http.ResponseWriter, r *http.Request) {
-	id, _ := uuid.NewV4()
+	id, err := uuid.NewV4()
+	if err != nil {
+		fmt.Printf("Something went wrong: %s", err)
+		return
+	}
 	name := r.FormValue("name")
 	surname := r.FormValue("surname")
 	role := r.FormValue("role")
 	login := r.FormValue("login")
 	passwordtmp := r.FormValue("password")
-	password, _ := hashPassword(passwordtmp)
+	password, err := hashPassword(passwordtmp)
+	if err != nil {
+		fmt.Printf("Something went wrong: %s", err)
+		return
+	}
 	user := models.NewUser(id, password, name, surname, login, role)
 	users = append(users, user)
 	http.Redirect(w, r, "/api/v1/login", 302)
