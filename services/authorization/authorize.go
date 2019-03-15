@@ -1,13 +1,14 @@
 package authorization
 
 import (
+	"golang.org/x/crypto/bcrypt"
+	"github.com/satori/go.uuid"
+	"fmt"
 	"html/template"
 	"net/http"
 	"time"
-	"golang.org/x/crypto/bcrypt"
-	"github.com/satori/go.uuid"
-	"gitlab.com/golang-lv-388/team-project/services/authorization/models"
-	"gitlab.com/golang-lv-388/team-project/services/authorization/session"
+	"./models"
+	"./session"
 )
 
 var users []*models.User
@@ -43,7 +44,7 @@ func LoginPage(w http.ResponseWriter, r *http.Request) {
 }
 
 func SigninFunc(w http.ResponseWriter, r *http.Request) {
-	var IsAuthorized bool = false
+	var IsAuthorized = false
 	var t time.Time
 	var IsRegistered bool = false
 	login := r.FormValue("login")
@@ -97,4 +98,3 @@ func SignupFunc(w http.ResponseWriter, r *http.Request) {
 	users=append(users,user)
 	http.Redirect(w, r, "/api/v1/login", 302)
 }
-

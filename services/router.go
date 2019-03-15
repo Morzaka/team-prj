@@ -1,11 +1,9 @@
 package services
 
-import(
-	"log"
-        "net/http"
-	"gitlab.com/golang-lv-388/team-project/services/handlers"
-        "gitlab.com/golang-lv-388/team-project/services/authorization"
+import (
 	"github.com/go-zoo/bone"
+	"./authorization"
+	"./handlers"
 )
 
 //NewRouter creates a router for URL
@@ -21,4 +19,3 @@ func NewRouter()*bone.Mux {
 	subV1.GetFunc("/register", authorization.RegisterPage)
 	return router
 }
-

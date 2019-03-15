@@ -2,11 +2,11 @@ package main
 
 import (
 	"github.com/sirupsen/logrus"
+	"github.com/urfave/negroni"
 	"net/http"
 	"os"
-	"team-project/config"
-	 "github.com/urfave/negroni"
-        "gitlab.com/golang-lv-388/team-project/services"
+	"./config"
+    "./services"
 )
 
 
@@ -36,5 +36,3 @@ func main(){
 	}
 	logrus.Info("Stop running server: ", err)
 }
-
-
