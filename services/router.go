@@ -3,8 +3,8 @@ package services
 import(
 	"log"
         "net/http"
-	"gitlab.com/golang-lv-388/team-project/services/handlers"
-        "gitlab.com/golang-lv-388/team-project/services/authorization"
+	"./services/handlers"
+        "./services/authorization"
 	"github.com/go-zoo/bone"
 )
 

@@ -6,8 +6,8 @@ import (
 	"time"
 	"golang.org/x/crypto/bcrypt"
 	"github.com/satori/go.uuid"
-	"gitlab.com/golang-lv-388/team-project/services/authorization/models"
-	"gitlab.com/golang-lv-388/team-project/services/authorization/session"
+	"./services/authorization/models"
+	"./services/authorization/session"
 )
 
 var users []*models.User
