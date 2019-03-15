@@ -29,6 +29,8 @@ vendor/
 # IDEs:
 .idea/
 
+
 # logs:
 *.log
 *.log.*
+

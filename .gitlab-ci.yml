@@ -1,0 +1,26 @@
+image: golang:1.12
+
+stages:
+  - vetting
+  - tests
+  #- deploy
+  
+lint:
+  stage: vetting
+  script:
+    - go get -u golang.org/x/lint/golint
+    - golint #-set_exit_status
+
+unitests:
+  stage: tests
+  script:
+    - go get -u github.com/gorilla/mux
+    - go test ./...
+
+#deploying:
+  #stage: deploy
+  #script:
+    #- gem install dpl # dpl is a library for deploying
+    #- dpl --provider=heroku --app=team-project-deploy --api-key=$HEROKU_API_KEY
+  #only:
+    #- master
