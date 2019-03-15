@@ -8,6 +8,7 @@ import (
 	"os"
 )
 
+//LogError for display error massage
 func LogError(massage string, args ... interface{}){
 	filename := "project_log_file.log"
 	f, err := os.OpenFile(filename, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0600)
@@ -34,6 +35,7 @@ func LogError(massage string, args ... interface{}){
 	}()
 }
 
+//LogWarn for display warn massage
 func LogWarn(massage string, args ... interface{}){
 	filename := "project_log_file.log"
 	f, err := os.OpenFile(filename, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0600)
@@ -60,6 +62,7 @@ func LogWarn(massage string, args ... interface{}){
 	}()
 }
 
+//LogInfo for display info massage
 func LogInfo(massage string){
 	filename := "project_log_file.log"
 	f, err := os.OpenFile(filename, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0600)
@@ -86,6 +89,7 @@ func LogInfo(massage string){
 	}()
 }
 
+//LogDebug for display debug massage
 func LogDebug(massage string, args ... interface{}){
 	filename := "project_log_file.log"
 	f, err := os.OpenFile(filename, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0600)
@@ -112,6 +116,7 @@ func LogDebug(massage string, args ... interface{}){
 	}()
 }
 
+//LogFatal for display fatal error
 func LogFatal(massage string, args ... interface{}){
 	filename := "project_log_file.log"
 	f, err := os.OpenFile(filename, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0600)
