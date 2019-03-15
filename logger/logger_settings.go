@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/sirupsen/logrus"
 	"github.com/x-cray/logrus-prefixed-formatter"
+	"log"
 	"os"
 )
 
@@ -25,6 +26,12 @@ func LogError(massage string, args ... interface{}){
 		},
 	}
 	loggerErr.Errorf(massage, args...)
+	defer func() {
+		err = f.Close()
+		if err != nil {
+			log.Fatalf("error while close log file: %s", err)
+		}
+	}()
 }
 
 func LogWarn(massage string, args ... interface{}){
@@ -45,6 +52,12 @@ func LogWarn(massage string, args ... interface{}){
 		},
 	}
 	loggerWarn.Warnf(massage, args...)
+	defer func() {
+		err = f.Close()
+		if err != nil {
+			log.Fatalf("error while close log file: %s", err)
+		}
+	}()
 }
 
 func LogInfo(massage string){
@@ -65,6 +78,12 @@ func LogInfo(massage string){
 		},
 	}
 	loggerInfo.Infof(massage)
+	defer func() {
+		err = f.Close()
+		if err != nil {
+			log.Fatalf("error while close log file: %s", err)
+		}
+	}()
 }
 
 func LogDebug(massage string, args ... interface{}){
@@ -85,6 +104,12 @@ func LogDebug(massage string, args ... interface{}){
 		},
 	}
 	loggerDebug.Debugf(massage, args...)
+	defer func() {
+		err = f.Close()
+		if err != nil {
+			log.Fatalf("error while close log file: %s", err)
+		}
+	}()
 }
 
 func LogFatal(massage string, args ... interface{}){
@@ -105,6 +130,12 @@ func LogFatal(massage string, args ... interface{}){
 		},
 	}
 	loggerErr.Fatalf(massage, args...)
+	defer func() {
+		err = f.Close()
+		if err != nil {
+			log.Fatalf("error while close log file: %s", err)
+		}
+	}()
 }
 
 
