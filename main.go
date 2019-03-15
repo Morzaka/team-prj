@@ -22,6 +22,7 @@ func main(){
 	if err != nil {
 		logger.LogFatal("Fatal error while reading config, %s", err)
 	}
+	middlewareManager := negroni.New()
 	middlewareManager.Use(negroni.NewRecovery())
         middlewareManager.UseHandler(services.NewRouter())
 	logger.LogInfo("Starting HTTP listener...")
