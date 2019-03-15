@@ -1,14 +1,14 @@
 package authorization
 
 import (
-	"golang.org/x/crypto/bcrypt"
-	"github.com/satori/go.uuid"
+	"./models"
+	"./session"
 	"fmt"
+	"github.com/satori/go.uuid"
+	"golang.org/x/crypto/bcrypt"
 	"html/template"
 	"net/http"
 	"time"
-	"./models"
-	"./session"
 )
 
 var users []*models.User
@@ -18,7 +18,7 @@ const (
 	COOKIE_NAME = "sessionId"
 )
 
-func init(){
+func init() {
 	InMemorySession = session.NewSession()
 }
 
@@ -32,7 +32,6 @@ func checkPasswordHash(password, hash string) bool {
 	return err == nil
 
 }
-
 
 func LoginPage(w http.ResponseWriter, r *http.Request) {
 	tmpl, err := template.ParseFiles("gitlab.com/golang-lv-388/team-project/services/authorization/frontend/login.html")
@@ -57,7 +56,7 @@ func SigninFunc(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
-	if IsRegistered == true{
+	if IsRegistered == true {
 		t = time.Now().Add(1 * time.Minute)
 		sessionId := InMemorySession.Init(login)
 		cookie := &http.Cookie{Name: COOKIE_NAME,
@@ -87,14 +86,14 @@ func RegisterPage(w http.ResponseWriter, r *http.Request) {
 }
 
 func SignupFunc(w http.ResponseWriter, r *http.Request) {
-	id, _ :=uuid.NewV4()
-	name:=r.FormValue("name")
-	surname:=r.FormValue("surname")
-	role:=r.FormValue("role")
+	id, _ := uuid.NewV4()
+	name := r.FormValue("name")
+	surname := r.FormValue("surname")
+	role := r.FormValue("role")
 	login := r.FormValue("login")
 	passwordtmp := r.FormValue("password")
 	password, _ := hashPassword(passwordtmp)
-	user := models.NewUser(id, password, name, surname,login,role)
-	users=append(users,user)
+	user := models.NewUser(id, password, name, surname, login, role)
+	users = append(users, user)
 	http.Redirect(w, r, "/api/v1/login", 302)
 }
