@@ -6,7 +6,7 @@ import (
 	"os"
 	"team-project/config"
 	 "github.com/urfave/negroni"
-        "gitlab.com/golang-lv-388/team-project/services"
+        "./services"
 )
 
 
