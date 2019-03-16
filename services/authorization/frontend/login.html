@@ -1,0 +1,27 @@
+{{define "login"}}
+
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Login</title>
+    </head>
+    <body>
+    <h2>Log in</h2>
+    <form role="form" method="POST" action="/api/v1/signin">
+        <div class="form-group">
+            <label>Login</label>
+            <input type="text" class="form-control" id="login" name="login" value="" size="25"
+                   placeholder="Your login...">
+        </div>
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" class="form-control" id="password" name="password" value="" size="25"
+                   placeholder="Your password...">
+        </div>
+        <button type="submit" class="btn btn-default">Submit</button>
+    </form>
+    </body>
+    </html>
+
+{{end}}
