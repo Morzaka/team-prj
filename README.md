@@ -1,5 +1,13 @@
 # team-project
 
+**Deploy project localy**
+-
+* `$ go get -u golang.org/x/vgo`
+* run `vgo build`
+* . . .
+#
+
+
 **Docker setup:**
 - 
 Compile app depend on OS 
