@@ -1,0 +1,35 @@
+{
+  "swagger": "2.0",
+  "info": {},
+  "paths": {
+    "/hello/{name}": {
+      "get": {
+        "description": "Returns a simple Hello message",
+        "consumes": [
+          "text/plain"
+        ],
+        "produces": [
+          "text/plain"
+        ],
+        "tags": [
+          "hello"
+        ],
+        "operationId": "Hello",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Name to be returned.",
+            "name": "name",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The hello message"
+          }
+        }
+      }
+    }
+  }
+}
