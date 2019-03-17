@@ -7,7 +7,7 @@ import (
 	"os"
 )
 
-func LogError(massage string, args ... interface{}){
+func LogError(massage string, args ...interface{}) {
 	filename := "project_log_file.log"
 	f, err := os.OpenFile(filename, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0600)
 	if err != nil {
@@ -27,7 +27,7 @@ func LogError(massage string, args ... interface{}){
 	loggerErr.Errorf(massage, args...)
 }
 
-func LogWarn(massage string, args ... interface{}){
+func LogWarn(massage string, args ...interface{}) {
 	filename := "project_log_file.log"
 	f, err := os.OpenFile(filename, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0600)
 	if err != nil {
@@ -47,7 +47,7 @@ func LogWarn(massage string, args ... interface{}){
 	loggerWarn.Warnf(massage, args...)
 }
 
-func LogInfo(massage string){
+func LogInfo(massage string) {
 	filename := "project_log_file.log"
 	f, err := os.OpenFile(filename, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0600)
 	if err != nil {
@@ -67,7 +67,7 @@ func LogInfo(massage string){
 	loggerInfo.Infof(massage)
 }
 
-func LogDebug(massage string, args ... interface{}){
+func LogDebug(massage string, args ...interface{}) {
 	filename := "project_log_file.log"
 	f, err := os.OpenFile(filename, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0600)
 	if err != nil {
@@ -87,7 +87,7 @@ func LogDebug(massage string, args ... interface{}){
 	loggerDebug.Debugf(massage, args...)
 }
 
-func LogFatal(massage string, args ... interface{}){
+func LogFatal(massage string, args ...interface{}) {
 	filename := "project_log_file.log"
 	f, err := os.OpenFile(filename, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0600)
 	if err != nil {
@@ -106,5 +106,3 @@ func LogFatal(massage string, args ... interface{}){
 	}
 	loggerErr.Fatalf(massage, args...)
 }
-
-
