@@ -8,12 +8,13 @@ stages:
 lint:
   stage: vetting
   script:
-    - go get github.com/golang/lint/golint
+    - go get -u golang.org/x/lint/golint
     - golint #-set_exit_status
 
 unitests:
   stage: tests
   script:
+    - go get -u github.com/gorilla/mux
     - go test ./...
 
 #deploying:
