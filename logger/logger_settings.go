@@ -1,5 +1,4 @@
 package logger
-
 import (
 	"fmt"
 	"github.com/sirupsen/logrus"
