@@ -3,8 +3,8 @@ package database
 import (
 	"database/sql"
 	"fmt"
-	"team-project/services/authorization/models"
 	_ "github.com/lib/pq"
+	"team-project/services/authorization/models"
 )
 
 const (
@@ -43,6 +43,7 @@ func AddUser(user models.User) int {
 	}
 	return id
 }
+
 //GetUser get's user's password and returns password
 func GetUser(login string) string {
 	var password string
@@ -65,4 +66,3 @@ func GetUser(login string) string {
 	}
 	return password
 }
-

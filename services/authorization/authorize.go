@@ -8,8 +8,8 @@ import (
 	"net/http"
 	"team-project/services/authorization/models"
 	"team-project/services/authorization/session"
-	"time"
 	"team-project/services/database"
+	"time"
 )
 
 var InMemorySession *session.Session
@@ -91,6 +91,6 @@ func SignupFunc(w http.ResponseWriter, r *http.Request) {
 	password, _ := hashPassword(passwordtmp)
 	user := models.NewUser(password, name, surname, login, role)
 	id := database.AddUser(user)
-	log.Println("You are registered with id :",id)
+	log.Println("You are registered with id :", id)
 	http.Redirect(w, r, "/api/v1/login", 302)
 }
