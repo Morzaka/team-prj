@@ -3,6 +3,7 @@ package train
 import (
 	"database/sql"
 	"fmt"
+	train "team-project/services/train/model"
 
 	_ "github.com/lib/pq"
 )
@@ -21,7 +22,7 @@ func ConnectToDb() *sql.DB {
 }
 
 //GetAllTrains is a method
-func GetAllTrains() []Train {
+func GetAllTrains() []train.Train {
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		panic(err)
@@ -36,9 +37,9 @@ func GetAllTrains() []Train {
 		panic(err)
 	}
 
-	trains := []Train{}
+	trains := []train.Train{}
 	for rows.Next() {
-		t := Train{}
+		t := train.Train{}
 		err := rows.Scan(&t.ID, &t.Route)
 		if err != nil {
 			t.Route = 0
@@ -51,7 +52,7 @@ func GetAllTrains() []Train {
 }
 
 //GetTrain is a method
-func GetTrain(id int) Train {
+func GetTrain(id int) train.Train {
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		panic(err)
@@ -59,7 +60,7 @@ func GetTrain(id int) Train {
 	defer db.Close()
 
 	row := db.QueryRow("select * from Train where trainid = $1", id)
-	t := Train{}
+	t := train.Train{}
 	err = row.Scan(&t.ID, &t.Route)
 	if err != nil {
 		panic(err)
@@ -68,7 +69,7 @@ func GetTrain(id int) Train {
 }
 
 //AddTrain is a method
-func AddTrain(t Train) {
+func AddTrain(t train.Train) {
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		panic(err)
