@@ -8,6 +8,7 @@ type User struct {
 	Role     string
 }
 
+//NewUser creates new user with data, received from registration
 func NewUser(password, name, surname, login, role string) User {
 	return User{password, name, surname, login, role}
 }

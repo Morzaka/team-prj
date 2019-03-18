@@ -2,15 +2,17 @@ package logger
 
 import (
 	"fmt"
-	"github.com/sirupsen/logrus"
-	"github.com/x-cray/logrus-prefixed-formatter"
 	"os"
+
+	"github.com/sirupsen/logrus"
+	prefixed "github.com/x-cray/logrus-prefixed-formatter"
 )
 
 var Logger *logrus.Logger
 
 func LoadLog(filePath string) error {
 	LogFile, err := os.OpenFile(filePath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0600)
+
 	if err != nil {
 		fmt.Printf("Error while opening %s ", filePath)
 		return err

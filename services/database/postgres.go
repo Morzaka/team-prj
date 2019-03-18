@@ -18,20 +18,23 @@ const (
 //Database travelling
 //table user (id serial, name text, surname text, login text, password text, role text)
 
-//AddUser ads info about new user to the database
+//AddUser adds info about new user to the database
 func AddUser(user models.User) int {
+	//database connection string
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+"password=%s dbname=%s sslmode=disable",
 		host, port, dbuser, dbpassword, dbname)
-	fmt.Println(psqlInfo)
+	//connect to database
 	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
 		panic(err)
 	}
 	defer db.Close()
+	//open database for operations on it
 	err = db.Ping()
 	if err != nil {
 		panic(err)
 	}
+	//insert values to the database
 	sqlStatement := `
         INSERT INTO users(name,surname,login, password,role)
         VALUES ($1, $2, $3, $4, $5)
@@ -44,12 +47,11 @@ func AddUser(user models.User) int {
 	return id
 }
 
-//GetUser get's user's password and returns password
+//GetUser gets user's password and returns password
 func GetUser(login string) string {
 	var password string
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+"password=%s dbname=%s sslmode=disable",
 		host, port, dbuser, dbpassword, dbname)
-	fmt.Println(psqlInfo)
 	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
 		panic(err)
@@ -59,10 +61,13 @@ func GetUser(login string) string {
 	if err != nil {
 		panic(err)
 	}
+	//get user's password for given login
 	sqlStatement := `SELECT password FROM users WHERE login=$1;`
 	err = db.QueryRow(sqlStatement, login).Scan(&password)
+	//if there's no matches for login return empty value
 	if err != nil {
-		panic(err)
+		return ""
 	}
+	//else return password
 	return password
 }
