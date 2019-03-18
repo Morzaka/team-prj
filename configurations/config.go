@@ -7,7 +7,7 @@ import (
 	"team-project/logger"
 )
 
-// Config is variable for configurations, log for display logs
+// Config is variable for configurations
 var Config Configuration
 
 // Configuration is a singleton object for application configurations
