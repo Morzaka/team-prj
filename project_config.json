@@ -1,0 +1,21 @@
+{
+  "ListenURL": ":8080",
+  "APIVersion": "/v1",
+  "LogFilePath": "project_log_file.log",
+  "Database": {
+    "Type": [
+      "PostgreSQL",
+      "Redis"
+    ],
+    "PostgreSQL": {
+      "Username": "postgres",
+      "Password": "postgres",
+      "DatabaseName": "team-project",
+      "Hostname": "postgres",
+      "Port": 5432
+    },
+    "Redis": {
+      "URL": "redis",
+      "Port": 6379
+    }
+  },
