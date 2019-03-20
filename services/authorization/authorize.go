@@ -61,7 +61,7 @@ func SigninFunc(w http.ResponseWriter, r *http.Request) {
 	var isRegistered = false
 	login := r.FormValue("login")
 	password := r.FormValue("password")
-	dbpassword := database.GetUser(login)
+	dbpassword := database.GetUserPassword(login)
 	//if entered password matches the password from database than user is registered
 	if checkPasswordHash(password, dbpassword) {
 		isRegistered = true
