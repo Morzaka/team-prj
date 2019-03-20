@@ -109,14 +109,14 @@ func RegisterPage(w http.ResponseWriter, r *http.Request) {
 }
 //SignupFunc function implements user's registration
 func SignupFunc(w http.ResponseWriter, r *http.Request) {
-	// get entered values from the registration form 
+	// get entered values from the registration form
 	name := r.FormValue("name")
 	surname := r.FormValue("surname")
 	role := r.FormValue("role")
 	login := r.FormValue("login")
 	passwordtmp := r.FormValue("password")
 	password, _ := hashPassword(passwordtmp)
-	//create user with received data 
+	//create user with received data
 	user := models.NewUser(password, name, surname, login, role)
 	//add user to database and get his id
 	id := database.AddUser(user)
