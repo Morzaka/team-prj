@@ -2,15 +2,15 @@ package authorization
 
 import (
 	"golang.org/x/crypto/bcrypt"
-	"html/template"
+	"fmt"
 	"log"
 	"net/http"
 	"team-project/services/authorization/models"
 	"team-project/services/authorization/session"
 	"time"
 	"team-project/services/database"
-	"os"
-	"path/filepath"
+	"io/ioutil"
+	"encoding/json"
 )
 
 var InMemorySession *session.Session
@@ -35,93 +35,77 @@ func checkPasswordHash(password, hash string) bool {
 	return err == nil
 
 }
-//LoginPage function loads html form for logging in
-func LoginPage(w http.ResponseWriter, r *http.Request) {
-	cwd, err := os.Getwd()
-        if err != nil {
-                http.Error(w, err.Error(), 400)
-                return
-        }
-	tmpl, err := template.ParseFiles(filepath.Join(cwd, "/services/authorization/frontend/login.html"))
-	if err != nil {
-		http.Error(w, err.Error(), 400)
-		return
-	}
-	err=tmpl.ExecuteTemplate(w, "login", nil)
-	if err != nil {
-                http.Error(w, err.Error(), 400)
-                return
-        }
-}
 
 //SigninFunc implements signing in
 func SigninFunc(w http.ResponseWriter, r *http.Request) {
 	var IsAuthorized bool
 	var t time.Time
 	var isRegistered = false
-	login := r.FormValue("login")
-	password := r.FormValue("password")
-	dbpassword := database.GetUserPassword(login)
+	var user models.Signin
+	data,err:=ioutil.ReadAll(r.Body)
+	defer r.Body.Close()
+	if err!=nil{
+		http.Error(w, err.Error(), 500)
+		return
+	}
+	err=json.Unmarshal(data,&user)
+	if err!=nil{
+		http.Error(w, err.Error(), 500)
+		return
+	}
+	dbpassword := database.GetUserPassword(user.Login)
 	//if entered password matches the password from database than user is registered
-	if checkPasswordHash(password, dbpassword) {
+	if checkPasswordHash(user.Password, dbpassword) {
 		isRegistered = true
 	}
 	//if user is registered than write session id for this user to cookie to tack authorized users
 	if isRegistered == true {
 		t = time.Now().Add(1 * time.Minute)
-		sessionId := InMemorySession.Init(login)
+		sessionId := InMemorySession.Init(user.Login)
 		cookie := &http.Cookie{Name: CookieName,
 			Value:   sessionId,
 			Expires: t,
 		}
 		http.SetCookie(w, cookie)
 		if cookie != nil {
-			if login == InMemorySession.GetUser(cookie.Value) {
+			if user.Login == InMemorySession.GetUser(cookie.Value) {
 				IsAuthorized = true
 				log.Println("User is authorized", IsAuthorized)
 			}
 		}
-		log.Println("cookie: ", cookie)
-		http.Redirect(w, r, "/api/v1/startpage", 302)
+		output,err:=json.Marshal(user)
+		if err!=nil{
+			http.Error(w, err.Error(), 500)
+			return
+		}
+		w.Header().Set("content-type", "application/json")
+		w.Write(output)
 	//else if passwords don't match then redirect user to registration page
 	} else if isRegistered == false {
-		log.Println("Not registered")
-		http.Redirect(w, r, "/api/v1/register", 302)
+		w.Write([]byte("Something went wrong"))
 	}
 }
-//RegisterPage function loads html registration form
-func RegisterPage(w http.ResponseWriter, r *http.Request) {
-	cwd, err := os.Getwd()
-	if err != nil {
-                http.Error(w, err.Error(), 400)
-                return
-        }
-	tmpl, err := template.ParseFiles(filepath.Join(cwd, "/services/authorization/frontend/register.html"))
-	if err != nil {
-		http.Error(w, err.Error(), 400)
-		return
-	}
-	err=tmpl.ExecuteTemplate(w, "register", nil)
-	if err != nil {
-                http.Error(w, err.Error(), 400)
-                return
-        }
-}
+
 //SignupFunc function implements user's registration
 func SignupFunc(w http.ResponseWriter, r *http.Request) {
+	var user models.User
+        data, err := ioutil.ReadAll(r.Body)
+	defer r.Body.Close()
+	if err!=nil{
+		http.Error(w, err.Error(), 500)
+                return
+	}
+        err=json.Unmarshal(data, &user)
+	if err!=nil{
+		http.Error(w, err.Error(), 500)
+                return
+	}
 	// get entered values from the registration form
-	name := r.FormValue("name")
-	surname := r.FormValue("surname")
-	role := r.FormValue("role")
-	login := r.FormValue("login")
-	passwordtmp := r.FormValue("password")
-	password, _ := hashPassword(passwordtmp)
-	//create user with received data
-	user := models.NewUser(password, name, surname, login, role)
+	password, _ := hashPassword(user.Signin.Password)
+	user.Signin.Password=password
 	//add user to database and get his id
 	id := database.AddUser(user)
-	log.Println("You are registered with id :",id)
+	w.Write([]byte(fmt.Sprintf("You are registered with id %d", id)))
 	//redirect registered user to log in page
-	http.Redirect(w, r, "/api/v1/login", 302)
 }
 

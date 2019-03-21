@@ -1,14 +1,14 @@
 package models
 
 type User struct {
-	Password string
-	Name     string
-	Surname  string
-	Login    string
-	Role     string
+	Signin Signin `json:"signin"`
+	Name     string `json:"name"`
+	Surname  string `json:"surname"`
+	Role     string `json:"role"`
 }
 
-//NewUser creates new user with data, received from registration
-func NewUser(password, name, surname, login, role string) User {
-	return User{password, name, surname, login, role}
+type Signin struct{
+	Login string `json:"login"`
+	Password string `json:"password"`
 }
+

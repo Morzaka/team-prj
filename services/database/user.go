@@ -14,7 +14,7 @@ func AddUser(user models.User) int {
         VALUES ($1, $2, $3, $4, $5)
         RETURNING id`
         id := 0
-        err := db.QueryRow(sqlStatement, user.Name, user.Surname, user.Login, user.Password, user.Role).Scan(&id)
+        err := db.QueryRow(sqlStatement, user.Name, user.Surname, user.Signin.Login, user.Signin.Password, user.Role).Scan(&id)
         if err != nil {
                 panic(err)
         }
