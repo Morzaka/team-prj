@@ -16,16 +16,19 @@ func main() {
 	configFile := flag.String("config", "./project_fig.json", "Configuration file in JSON-format")
 	logFile := flag.String("logFile", "project_log_file.log", "Logging out file .log")
 	flag.Parse()
-	// Invoke LoadLog functions and checking err
-	err := logger.LoadLog(*logFile)
+
+	err := configurations.LoadConfig(*configFile)
 	if err != nil {
-		fmt.Printf("Logger not loaded,", err)
+		fmt.Printf("Error while loading configurations, %s \n", err)
+		return
 	}
-	//Invoke LoadConfig functions
-	err = configurations.LoadConfig(*configFile)
+
+	err = logger.LoadLog(*logFile)
 	if err != nil {
-		logger.Logger.Errorf("Error while reading config, %s", err)
+		fmt.Printf("Error logger not loaded, %s \n", err)
+		return
 	}
+
 	//Middleware manager
 	middlewareManager := negroni.New()
 	middlewareManager.Use(negroni.NewRecovery())
@@ -35,6 +38,7 @@ func main() {
 	err = http.ListenAndServe(configurations.Config.ListenURL, middlewareManager)
 	if err != nil {
 		logger.Logger.Errorf("Error, %s", err)
+
 	}
 	logger.Logger.Infof("Stop running application, %s", err)
 }
