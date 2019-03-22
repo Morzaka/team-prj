@@ -15,15 +15,19 @@ func main() {
 	logFile := flag.String("logFile", "project_log_file.log", "Logging out file .log")
 	flag.Parse()
 
-	err := logger.LoadLog(*logFile)
+	err := configurations.LoadConfig(*configFile)
 	if err != nil {
-		fmt.Printf("Logger not loaded,", err)
+		fmt.Printf("Error while loading configurations, %s \n", err)
+		return
 	}
 
-	err = configurations.LoadConfig(*configFile)
+	err = logger.LoadLog(*logFile)
 	if err != nil {
-		logger.Logger.Errorf("Error while reading config, %s", err)
+		fmt.Printf("Error logger not loaded, %s \n", err)
+		return
 	}
+
+
 	middlewareManager := negroni.New()
 	middlewareManager.Use(negroni.NewRecovery())
 	middlewareManager.UseHandler(services.NewRouter())
@@ -31,6 +35,7 @@ func main() {
 	err = http.ListenAndServe(configurations.Config.ListenURL, middlewareManager)
 	if err != nil {
 		logger.Logger.Errorf("Error, %s", err)
+
 	}
 	logger.Logger.Infof("Stop running application, %s", err)
 }
