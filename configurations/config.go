@@ -13,7 +13,7 @@ var Config Configuration
 type Configuration struct {
 	ListenURL   string `json:"ListenURL"`
 	LogFilePath string `json:"LogFilePath"`
-	RedisAddr   string `json:"localhost:6379"`
+	RedisAddr   string `json:"RedisAddr"`
 	LogLevel    string `json:"LogLevel"`
 }
 
