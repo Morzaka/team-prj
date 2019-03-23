@@ -1,12 +1,34 @@
 image: golang:1.12
 
+before_script:
+  - echo "deb http://toolbelt.heroku.com/ubuntu ./" > /etc/apt/sources.list.d/heroku.list
+  - wget -O- https://toolbelt.heroku.com/apt/release.key | apt-key add -
+  - apt-get update -yq
+  - apt-get install -y heroku-toolbelt
+  - apt-get install -y ruby-dev
+  - gem install dpl # dpl is a library for deploying
+
 stages:
+  - vetting
+  - tests
   - deploy
+
+lint:
+  stage: vetting
+  script:
+    - go get -u golang.org/x/lint/golint
+    - golint -set_exit_status ./...
+
+unitests:
+  stage: tests
+  script:
+    - go get -u github.com/gorilla/mux
+    - go test ./...
 
 deploying:
   stage: deploy
   script:
-    - gem install dpl # dpl is a library for deploying
     - dpl --provider=heroku --app=team-project-deploy --api-key=$HEROKU_KEY
+    - heroku logs --tail
   only:
     - master
