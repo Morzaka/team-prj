@@ -7,19 +7,17 @@ import (
 	"net/http"
 	"team-project/services/authorization/models"
 	"team-project/services/authorization/session"
-	"time"
 	"team-project/services/database"
 	"io/ioutil"
+	"time"
 	"encoding/json"
 )
 
 var InMemorySession *session.Session
 
-const (
-	CookieName = "sessionId"
-)
 //init function initializes new session
 func init() {
+	database.Init()
 	InMemorySession = session.NewSession()
 }
 
@@ -39,18 +37,17 @@ func checkPasswordHash(password, hash string) bool {
 //SigninFunc implements signing in
 func SigninFunc(w http.ResponseWriter, r *http.Request) {
 	var IsAuthorized bool
-	var t time.Time
 	var isRegistered = false
 	var user models.Signin
 	data,err:=ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
 	if err!=nil{
-		http.Error(w, err.Error(), 500)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	err=json.Unmarshal(data,&user)
 	if err!=nil{
-		http.Error(w, err.Error(), 500)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	dbpassword := database.GetUserPassword(user.Login)
@@ -60,22 +57,27 @@ func SigninFunc(w http.ResponseWriter, r *http.Request) {
 	}
 	//if user is registered than write session id for this user to cookie to tack authorized users
 	if isRegistered == true {
-		t = time.Now().Add(1 * time.Minute)
 		sessionId := InMemorySession.Init(user.Login)
-		cookie := &http.Cookie{Name: CookieName,
+		cookie := &http.Cookie{Name: user.Login,
 			Value:   sessionId,
-			Expires: t,
+			Expires: time.Now().Add(15*time.Minute),
 		}
-		http.SetCookie(w, cookie)
 		if cookie != nil {
 			if user.Login == InMemorySession.GetUser(cookie.Value) {
 				IsAuthorized = true
 				log.Println("User is authorized", IsAuthorized)
+				//add cookie to redis db
+				err := database.SetRedisValue(cookie.Name, cookie.Value)
+				if err != nil {
+					w.WriteHeader(http.StatusInternalServerError)
+					return
+				}
 			}
 		}
+		http.SetCookie(w, cookie)
 		output,err:=json.Marshal(user)
 		if err!=nil{
-			http.Error(w, err.Error(), 500)
+			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 		w.Header().Set("content-type", "application/json")
@@ -92,12 +94,12 @@ func SignupFunc(w http.ResponseWriter, r *http.Request) {
         data, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
 	if err!=nil{
-		http.Error(w, err.Error(), 500)
+		w.WriteHeader(http.StatusInternalServerError)
                 return
 	}
         err=json.Unmarshal(data, &user)
 	if err!=nil{
-		http.Error(w, err.Error(), 500)
+		w.WriteHeader(http.StatusInternalServerError)
                 return
 	}
 	// get entered values from the registration form
@@ -109,3 +111,20 @@ func SignupFunc(w http.ResponseWriter, r *http.Request) {
 	//redirect registered user to log in page
 }
 
+//LogoutFunc implements logging out - deletes cookie from db
+func LogoutFunc(w http.ResponseWriter, r *http.Request){
+	id,arr:=len(r.Cookies())-1, r.Cookies()
+        cookie := arr[id]
+        sessionToken := cookie.Name
+	cookie=&http.Cookie{
+		Name: sessionToken,
+		MaxAge: -1,
+	}
+	http.SetCookie(w,cookie)
+	err:=database.DelRedisValue(sessionToken)
+	if err!=nil{
+		w.WriteHeader(http.StatusInternalServerError)
+                return
+	}
+	w.Write([]byte("You're logged out!\n"))
+}

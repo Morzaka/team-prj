@@ -9,5 +9,5 @@ require (
 	github.com/sirupsen/logrus v1.4.0
 	github.com/urfave/negroni v1.0.0
 	github.com/x-cray/logrus-prefixed-formatter v0.5.2
-	golang.org/x/crypto v0.0.0-20190313024323-a1f597ede03a
+	golang.org/x/crypto v0.0.0-20190320223903-b7391e95e576
 )
