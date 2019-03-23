@@ -1,21 +1,7 @@
 image: golang:1.12
 
 stages:
-  - vetting
-  - tests
   - deploy
-  
-lint:
-  stage: vetting
-  script:
-    - go get -u golang.org/x/lint/golint
-    - golint -set_exit_status ./...
-
-unitests:
-  stage: tests
-  script:
-    - go get -u github.com/gorilla/mux
-    - go test ./...
 
 deploying:
   stage: deploy
