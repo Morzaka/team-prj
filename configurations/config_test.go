@@ -4,18 +4,20 @@ import (
 	"testing"
 )
 
+//Testing LoadConfig function
 func TestLoadConfig(t *testing.T) {
 	FilePath := "../project_config.json"
 	err := LoadConfig(FilePath)
-	if err != nil{
+	if err != nil {
 		t.Errorf("Reading configuration failed: %s\n", err)
 	}
 }
 
+//Testing LoadConfig function with wrong FilePath
 func TestLoadConfigWithWrongPath(t *testing.T) {
 	FilePath := ""
 	err := LoadConfig(FilePath)
-	if err == nil{
+	if err == nil {
 		t.Errorf("Error while reading config from wrong path: %s\n", err)
 	}
 }
