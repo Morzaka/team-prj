@@ -5,8 +5,8 @@ import (
 	"fmt"
 )
 
-//GenerateId generates id for the session
-func GenerateId() string {
+//GenerateID generates id for the session
+func GenerateID() string {
 	b := make([]byte, 16)
 	rand.Read(b)
 	return fmt.Sprintf("%x", b)
@@ -30,7 +30,7 @@ func NewSession() *Session {
 
 //Init method  initialize the session
 func (obj *Session) Init(username string) string {
-	sessionID := GenerateId()
+	sessionID := GenerateID()
 	data := &sessionData{username}
 	obj.Data[sessionID] = data
 	return sessionID
