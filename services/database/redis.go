@@ -8,6 +8,7 @@ import (
 
 var client *redis.Client
 
+//Init function for storing new client
 func Init() {
 	client = redis.NewClient(&redis.Options{
 		Addr:     configurations.Config.RedisAddr,

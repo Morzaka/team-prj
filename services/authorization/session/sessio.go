@@ -16,6 +16,7 @@ type sessionData struct {
 	Username string
 }
 
+//Session structure for saving user session
 type Session struct {
 	Data map[string]*sessionData
 }
@@ -27,17 +28,17 @@ func NewSession() *Session {
 	return obj
 }
 
-//Method Init initialize the session
+//Init method  initialize the session
 func (obj *Session) Init(username string) string {
-	sessionId := GenerateId()
+	sessionID := GenerateId()
 	data := &sessionData{username}
-	obj.Data[sessionId] = data
-	return sessionId
+	obj.Data[sessionID] = data
+	return sessionID
 }
 
 //GetUser method returns authorized username
-func (obj *Session) GetUser(sessionId string) string {
-	data := obj.Data[sessionId]
+func (obj *Session) GetUser(sessionID string) string {
+	data := obj.Data[sessionID]
 	if data == nil {
 		return ""
 	}
