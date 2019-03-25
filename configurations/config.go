@@ -17,7 +17,7 @@ type Configuration struct {
 	LogLevel    string `json:"LogLevel"`
 }
 
-// Load loads configurations once
+// LoadConfig loads configurations once
 func LoadConfig(filePath string) error {
 	contents, err := ioutil.ReadFile(filePath)
 	if err != nil {

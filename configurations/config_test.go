@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-//Testing LoadConfig function
+//TestLoadConfig function for testing LoadConfig
 func TestLoadConfig(t *testing.T) {
 	FilePath := "../project_config.json"
 	err := LoadConfig(FilePath)
@@ -13,7 +13,7 @@ func TestLoadConfig(t *testing.T) {
 	}
 }
 
-//Testing LoadConfig function with wrong FilePath
+//TestLoadConfig function with wrong FilePath
 func TestLoadConfigWithWrongPath(t *testing.T) {
 	FilePath := ""
 	err := LoadConfig(FilePath)

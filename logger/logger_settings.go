@@ -7,16 +7,19 @@ import (
 	"team-project/configurations"
 )
 
-// Global var for LoadLog function
+//Logger is a var for LoadLog function
 var Logger *logrus.Logger
 
-//Function for opening and loading log file
+//LoadLog is a function for opening and loading log file
 func LoadLog(FileName string) error {
 	LogFile, err := os.OpenFile(FileName, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0600)
 	if err != nil {
 		return err
 	}
-	LogLevel, err := logrus.ParseLevel(configurations.Config.LogLevel)
+	LogLevel, er := logrus.ParseLevel(configurations.Config.LogLevel)
+	if err != nil {
+		return er
+	}
 
 	Logger = &logrus.Logger{
 		Out:   LogFile,
