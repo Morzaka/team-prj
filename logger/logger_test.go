@@ -1,12 +1,19 @@
 package logger
 
-import "testing"
+import (
+	"team-project/configurations"
+	"testing"
+)
 
 //TestLoadLog will test our LoadLog function
 func TestLoadLog(t *testing.T) {
-	FileName := "project_log_file.log"
-	err := LoadLog(FileName)
+	err := configurations.LoadConfig("../project_config.json")
 	if err != nil {
-		t.Errorf("Opening logging file was failed, %s", err)
+		t.Errorf("Testing logging file was failed, LogLevel didn't read %s", err)
+	}
+	LogFileName := "project_log_file.log"
+	err = LoadLog(LogFileName)
+	if err != nil {
+		t.Errorf("Testing logging file was failed, %s", err)
 	}
 }

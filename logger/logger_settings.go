@@ -2,7 +2,7 @@ package logger
 
 import (
 	"github.com/sirupsen/logrus"
-	prefixed "github.com/x-cray/logrus-prefixed-formatter"
+	"github.com/x-cray/logrus-prefixed-formatter"
 	"os"
 	"team-project/configurations"
 )
@@ -16,9 +16,9 @@ func LoadLog(FileName string) error {
 	if err != nil {
 		return err
 	}
-	LogLevel, er := logrus.ParseLevel(configurations.Config.LogLevel)
+	LogLevel, err := logrus.ParseLevel(configurations.Config.LogLevel)
 	if err != nil {
-		return er
+		return err
 	}
 
 	Logger = &logrus.Logger{

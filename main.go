@@ -33,12 +33,11 @@ func main() {
 	middlewareManager := negroni.New()
 	middlewareManager.Use(negroni.NewRecovery())
 	middlewareManager.UseHandler(services.NewRouter())
-	logger.Logger.Infof("Starting HTTP listener...")
+	fmt.Println("Starting HTTP listener...")
 	//Starting server
 	err = http.ListenAndServe(configurations.Config.ListenURL, middlewareManager)
 	if err != nil {
 		logger.Logger.Errorf("Error, %s", err)
-
 	}
-	logger.Logger.Infof("Stop running application, %s", err)
+	fmt.Println("Stop running application")
 }

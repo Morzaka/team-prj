@@ -23,8 +23,7 @@ func LoadConfig(filePath string) error {
 	if err != nil {
 		return err
 	}
-	reader := bytes.NewBuffer(contents)
-	err = json.NewDecoder(reader).Decode(&Config)
+	_ = json.NewDecoder(bytes.NewBuffer(contents)).Decode(&Config)
 
 	return err
 }
