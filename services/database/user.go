@@ -36,7 +36,4 @@ func GetUserPassword(login string) string {
         //else return password
         return password
 }
-<<<<<<< HEAD
-=======
 
->>>>>>> master

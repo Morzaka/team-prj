@@ -18,7 +18,7 @@ const (
 //Database travelling
 //table user (id serial, name text, surname text, login text, password text, role text)
 
-//AddUser adds info about new user to the database
+//OpenDatabase connects to postgres database
 func OpenDatabase() *sql.DB {
 	//database connection string
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+"password=%s dbname=%s sslmode=disable",
@@ -36,8 +36,4 @@ func OpenDatabase() *sql.DB {
 	return db
 }
 
-<<<<<<< HEAD
-=======
-
->>>>>>> master
 
