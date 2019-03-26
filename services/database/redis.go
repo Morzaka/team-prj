@@ -5,18 +5,18 @@ import (
 	"github.com/sirupsen/logrus"
 	"team-project/configurations"
 )
+//Client  for redis instance
+var Client *redis.Client
 
-var client *redis.Client
-
-//Init function for storing new client
+//Init initializes a new redis client
 func Init() {
-	client = redis.NewClient(&redis.Options{
+	Client = redis.NewClient(&redis.Options{
 		Addr:     configurations.Config.RedisAddr,
 		Password: "", // no password set
 		DB:       0,  // use default DB
 	})
 
-	_, err := client.Ping().Result()
+	_, err := Client.Ping().Result()
 	if err != nil {
 		logrus.Errorf("Redis Error - %s", err.Error())
 		panic(err)
