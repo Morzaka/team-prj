@@ -11,23 +11,32 @@ import (
 )
 
 func main() {
+	//Flags for LoadLog and LoadConfig functions
 	configFile := flag.String("config", "./project_config.json", "Configuration file in JSON-format")
+	logFile := flag.String("logFile", "project_log_file.log", "Logging out file .log")
 	flag.Parse()
 
-	if len(*configFile) > 0 {
-		fmt.Println("Config file was read")
-	}
 	err := configurations.LoadConfig(*configFile)
 	if err != nil {
-		logger.LogFatal("Fatal error while reading config, %s", err)
+		fmt.Printf("Error while loading configurations, %s \n", err)
+		return
 	}
+
+	err = logger.LoadLog(*logFile)
+	if err != nil {
+		fmt.Printf("Error logger not loaded, %s \n", err)
+		return
+	}
+
+	//Middleware manager
 	middlewareManager := negroni.New()
 	middlewareManager.Use(negroni.NewRecovery())
 	middlewareManager.UseHandler(services.NewRouter())
-	logger.LogInfo("Starting HTTP listener...")
+	fmt.Println("Starting HTTP listener...")
+	//Starting server
 	err = http.ListenAndServe(configurations.Config.ListenURL, middlewareManager)
 	if err != nil {
-		logger.LogError("Error, %s", err)
+		logger.Logger.Errorf("Error, %s", err)
 	}
-	logger.LogWarn("Stop running application, %s", err)
+	fmt.Println("Stop running application")
 }

@@ -1,5 +1,6 @@
 package models
 
+//User structure for adding users in db
 type User struct {
 	Password string
 	Name     string
