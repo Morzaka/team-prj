@@ -60,14 +60,14 @@ func SigninFunc(w http.ResponseWriter, r *http.Request) {
 		sessionId := InMemorySession.Init(user.Login)
 		cookie := &http.Cookie{Name: user.Login,
 			Value:   sessionId,
-			Expires: time.Now().Add(15*time.Minute),
+			Expires: time.Now().Add(1*time.Minute),
 		}
 		if cookie != nil {
 			if user.Login == InMemorySession.GetUser(cookie.Value) {
 				IsAuthorized = true
 				log.Println("User is authorized", IsAuthorized)
 				//add cookie to redis db
-				err := database.SetRedisValue(cookie.Name, cookie.Value)
+				_, err := database.Client.LPush(cookie.Name, cookie.Value).Result()
 				if err != nil {
 					w.WriteHeader(http.StatusInternalServerError)
 					return
@@ -108,7 +108,6 @@ func SignupFunc(w http.ResponseWriter, r *http.Request) {
 	//add user to database and get his id
 	id := database.AddUser(user)
 	w.Write([]byte(fmt.Sprintf("You are registered with id %d", id)))
-	//redirect registered user to log in page
 }
 
 //LogoutFunc implements logging out - deletes cookie from db
@@ -116,15 +115,15 @@ func LogoutFunc(w http.ResponseWriter, r *http.Request){
 	id,arr:=len(r.Cookies())-1, r.Cookies()
         cookie := arr[id]
         sessionToken := cookie.Name
+        _, err:=database.Client.LRem(sessionToken,0,cookie.Value).Result()
+	if err!=nil{
+                w.WriteHeader(http.StatusInternalServerError)
+                return
+        }
 	cookie=&http.Cookie{
 		Name: sessionToken,
 		MaxAge: -1,
 	}
 	http.SetCookie(w,cookie)
-	err:=database.DelRedisValue(sessionToken)
-	if err!=nil{
-		w.WriteHeader(http.StatusInternalServerError)
-                return
-	}
 	w.Write([]byte("You're logged out!\n"))
 }

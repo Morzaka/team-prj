@@ -7,6 +7,7 @@ import (
 
 //GetStartFunc is a handler function for start page
 func GetStartFunc(w http.ResponseWriter, r *http.Request) {
+	var active bool = false
 	if len(r.Cookies())<=0{
                 // If the cookie is not set, return an unauthorized status
                 w.WriteHeader(http.StatusUnauthorized)
@@ -16,23 +17,27 @@ func GetStartFunc(w http.ResponseWriter, r *http.Request) {
 		id,arr:=len(r.Cookies())-1, r.Cookies()
 		cookie := arr[id]
 		sessionToken := cookie.Name
-		response, err := database.GetRedisValue(sessionToken)
+		response, err := database.Client.LRange(sessionToken,0,-1).Result()
 		if err != nil {
 		// If there is an error fetching from cache, return an internal server error status
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		if response != cookie.Value {
-		// If the session token is not present in db, return an unauthorized error
-			w.WriteHeader(http.StatusUnauthorized)
-			return
+		for _,v:=range response {
+			if v == cookie.Value {
+				active=true
+			}
 		}
 	}
+	if active{
 	// Finally, return the website page to the user
-	_, err := w.Write([]byte("Hello golang group-388"))
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
+		_, err := w.Write([]byte("Hello golang group-388"))
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+	}else{
+		w.WriteHeader(http.StatusUnauthorized)
+                return
 	}
-
 }
