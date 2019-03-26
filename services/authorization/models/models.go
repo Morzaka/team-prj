@@ -12,3 +12,7 @@ type Signin struct{
 	Password string `json:"password"`
 }
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> master

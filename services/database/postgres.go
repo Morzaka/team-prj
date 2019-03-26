@@ -35,4 +35,8 @@ func OpenDatabase() *sql.DB {
 	return db
 }
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> master
 
