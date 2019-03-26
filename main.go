@@ -11,7 +11,6 @@ import (
 )
 
 func main() {
-
 	//Flags for LoadLog and LoadConfig functions
 	configFile := flag.String("config", "./project_config.json", "Configuration file in JSON-format")
 	logFile := flag.String("logFile", "project_log_file.log", "Logging out file .log")
