@@ -24,6 +24,7 @@ unitests:
   script:
     - go get -u github.com/gorilla/mux
     - go test ./...
+    - go vet
 
 deploying:
   stage: deploy
