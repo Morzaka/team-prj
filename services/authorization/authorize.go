@@ -12,7 +12,7 @@ import (
 	"time"
 	"encoding/json"
 )
-
+//InMemorySession creates new session in memory
 var InMemorySession *session.Session
 
 //init function initializes new session
@@ -57,9 +57,9 @@ func SigninFunc(w http.ResponseWriter, r *http.Request) {
 	}
 	//if user is registered than write session id for this user to cookie to tack authorized users
 	if isRegistered == true {
-		sessionId := InMemorySession.Init(user.Login)
+		sessionID := InMemorySession.Init(user.Login)
 		cookie := &http.Cookie{Name: user.Login,
-			Value:   sessionId,
+			Value:   sessionID,
 			Expires: time.Now().Add(1*time.Minute),
 		}
 		if cookie != nil {

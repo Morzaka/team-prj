@@ -3,6 +3,7 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	//pq lib for using postgres
 	_ "github.com/lib/pq"
 )
 
