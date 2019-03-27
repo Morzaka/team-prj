@@ -28,7 +28,7 @@ deploying:
   stage: deploy
   script:
     - heroku git:remote -a team-project-testing
-    - K8S_SECRET_email
+    - echo $email
     - heroku logs --tail
     - git remote -v
   #only:
