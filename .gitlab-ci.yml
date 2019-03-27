@@ -5,8 +5,6 @@ before_script:
   - wget -O- https://toolbelt.heroku.com/apt/release.key | apt-key add -
   - apt-get update -yq
   - apt-get install -y heroku-toolbelt
-  - apt-get install -y ruby-dev
-  - gem install dpl # dpl is a library for deploying
 
 stages:
   - vetting
@@ -29,7 +27,8 @@ unitests:
 deploying:
   stage: deploy
   script:
-    - dpl --provider=heroku --app=team-project-deploy --api-key=$HEROKU_KEY
+    - heroku git:remote -a team-project-testing
     - heroku logs --tail
+    - git remote -v
   only:
     - master
