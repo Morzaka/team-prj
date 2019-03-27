@@ -3,8 +3,8 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	_ "github.com/lib/pq" // pq lib for using postgres
 	"team-project/services/authorization/models"
-	_ "github.com/lib/pq"
 )
 
 const (
@@ -66,9 +66,8 @@ func GetUser(login string) string {
 	err = db.QueryRow(sqlStatement, login).Scan(&password)
 	//if there's no matches for login return empty value
 	if err != nil {
-		 return ""
+		return ""
 	}
 	//else return password
 	return password
 }
-
