@@ -30,5 +30,5 @@ deploying:
     - heroku git:remote -a team-project-testing
     - heroku logs --tail
     - git remote -v
-  only:
-    - master
+  #only:
+    #- master
