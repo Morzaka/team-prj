@@ -28,7 +28,6 @@ deploying:
   stage: deploy
   script:
     - heroku git:remote -a team-project-testing
-    - candyluckone@yahoo.com.ua
     - heroku logs --tail
     - git remote -v
   #only:
