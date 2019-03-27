@@ -27,7 +27,7 @@ unitests:
 deploying:
   stage: deploy
   script:
-    - heroku git:remote -a team-project-testing
+    - heroku git:remote -a https://git.heroku.com/team-project-testing.git
     - heroku logs --tail
     - git remote -v
   #only:
