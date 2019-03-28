@@ -5,6 +5,8 @@ before_script:
   - wget -O- https://toolbelt.heroku.com/apt/release.key | apt-key add -
   - apt-get update -yq
   - apt-get install -y heroku-toolbelt
+  - git config user.email "supermaaan@test.com"
+  - git config user.name "Super puper"
 
 stages:
   #- vetting
