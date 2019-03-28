@@ -31,7 +31,7 @@ deploying:
     - git remote -v
     - git remote add heroku https://heroku:35ce1746-94bf-4d66-a729-5778d2987b9f@git.heroku.com/team-project-testing.git
     - git remote -v
-    - git push heroku master
+    - git push heroku deploy-heroku:master
     - heroku logs --tail
   #only:
     #- master
