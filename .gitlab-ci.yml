@@ -1,5 +1,8 @@
 image: golang:1.12
 
+variables:
+  email:${email}
+
 before_script:
   - echo "deb http://toolbelt.heroku.com/ubuntu ./" > /etc/apt/sources.list.d/heroku.list
   - wget -O- https://toolbelt.heroku.com/apt/release.key | apt-key add -
@@ -27,8 +30,9 @@ unitests:
 deploying:
   stage: deploy
   script:
-    - heroku git:remote -a team-project-testing
-    - echo $email
+    #- heroku git:remote -a team-project-testing
+    - git remote add heroku https://heroku:$HEROKU_KEY@git.heroku.com/team-project-testing.git
+    - git push heroku master
     - heroku logs --tail
     - git remote -v
   #only:
