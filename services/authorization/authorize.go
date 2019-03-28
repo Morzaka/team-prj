@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"team-project/services/authorization/models"
+	"team-project/services/models"
 	"team-project/services/authorization/session"
 	"team-project/services/database"
 	"io/ioutil"

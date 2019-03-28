@@ -1,7 +1,7 @@
 package database
 
 import (
-	 "team-project/services/authorization/models"
+	 "team-project/services/models"
 )
 
 //AddUser adds info about new user to the database
