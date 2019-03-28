@@ -1,7 +1,8 @@
 package database
 
 import (
-	 "team-project/services/models"
+	"log"
+	"team-project/services/models"
 )
 
 //AddUser adds info about new user to the database
@@ -16,7 +17,7 @@ func AddUser(user models.User) int {
         id := 0
         err := db.QueryRow(sqlStatement, user.Name, user.Surname, user.Signin.Login, user.Signin.Password, user.Role).Scan(&id)
         if err != nil {
-                panic(err)
+                log.Fatal(err)
         }
         return id
 }

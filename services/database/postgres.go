@@ -3,17 +3,12 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	"log"
+	"team-project/configurations"
 	//pq lib for using postgres
 	_ "github.com/lib/pq"
 )
 
-const (
-	host       = "localhost"
-	port       = 5432
-	dbuser     = "postgres"
-	dbpassword = "postgres"
-	dbname     = "travelling"
-)
 
 //Database travelling
 //table user (id serial, name text, surname text, login text, password text, role text)
@@ -21,17 +16,17 @@ const (
 //OpenDatabase connects to postgres database
 func OpenDatabase() *sql.DB {
 	//database connection string
-	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+"password=%s dbname=%s sslmode=disable",
-		host, port, dbuser, dbpassword, dbname)
+	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s "+"password=%s dbname=%s sslmode=disable",
+	configurations.Config.PgHost,configurations.Config.PgPort,configurations.Config.PgUser,configurations.Config.PgPassword, configurations.Config.PgName)
 	//connect to database
 	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 	//open database for operations on it
 	err = db.Ping()
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 	return db
 }
