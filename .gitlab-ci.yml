@@ -32,8 +32,8 @@ deploying:
     #- heroku git:remote -a team-project-testing
     #- git remote add heroku https://heroku:35ce1746-94bf-4d66-a729-5778d2987b9f@git.heroku.com/team-projectv1.git
     - git checkout -b publish-to-heroku
-    - git commit --allow-empty -m "Test pushing to heroku"
+    - git commit --allow-empty -m "$CI_COMMIT_MESSAGE"
     - git branch -v
-    - git push https://heroku:35ce1746-94bf-4d66-a729-5778d2987b9f@git.heroku.com/team-projectv1.git publish-to-heroku:master
+    - git push https://heroku:'${HEROKU_KEY}'@git.heroku.com/team-projectv1.git publish-to-heroku:master
   #only:
     #- master
