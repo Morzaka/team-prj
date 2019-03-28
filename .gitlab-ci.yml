@@ -1,10 +1,18 @@
 image: golang:1.12
 
+before_script:
+  - echo "deb http://toolbelt.heroku.com/ubuntu ./" > /etc/apt/sources.list.d/heroku.list
+  - wget -O- https://toolbelt.heroku.com/apt/release.key | apt-key add -
+  - apt-get update -yq
+  - apt-get install -y heroku-toolbelt
+  - git config user.email "supermaaan@test.com"
+  - git config user.name "Super puper"
+
 stages:
   - vetting
   - tests
-  #- deploy
-  
+  - deploy
+
 lint:
   stage: vetting
   script:
@@ -16,11 +24,16 @@ unitests:
   script:
     - go get -u github.com/gorilla/mux
     - go test ./...
+    - go vet
 
-#deploying:
-  #stage: deploy
-  #script:
-    #- gem install dpl # dpl is a library for deploying
-    #- dpl --provider=heroku --app=team-project-deploy --api-key=$HEROKU_API_KEY
-  #only:
-    #- master
+deploying:
+  stage: deploy
+  script:
+    #- heroku git:remote -a team-project-testing
+    #- git remote add heroku https://heroku:35ce1746-94bf-4d66-a729-5778d2987b9f@git.heroku.com/team-projectv1.git
+    - git checkout -b publish-to-heroku
+    - git commit --allow-empty -m "$CI_COMMIT_MESSAGE"
+    - git branch -v
+    - git push -f https://heroku:${HEROKU_KEY}@git.heroku.com/team-projectv1.git publish-to-heroku:master
+  only:
+    - master
