@@ -29,8 +29,8 @@ deploying:
   script:
     #- heroku git:remote -a team-project-testing
     - git remote add heroku https://heroku:$HEROKU_KEY@git.heroku.com/team-project-testing.git
+    - git remote -v
     - git push heroku master
     - heroku logs --tail
-    - git remote -v
   #only:
     #- master
