@@ -9,22 +9,22 @@ before_script:
   - git config user.name "Super puper"
 
 stages:
-  #- vetting
-  #- tests
+  - vetting
+  - tests
   - deploy
 
-#lint:
-  #stage: vetting
-  #script:
-   # - go get -u golang.org/x/lint/golint
-   # - golint -set_exit_status ./...
+lint:
+  stage: vetting
+  script:
+    - go get -u golang.org/x/lint/golint
+    - golint -set_exit_status ./...
 
-#unitests:
-  #stage: tests
-  #script:
-  #  - go get -u github.com/gorilla/mux
-   # - go test ./...
-   # - go vet
+unitests:
+  stage: tests
+  script:
+    - go get -u github.com/gorilla/mux
+    - go test ./...
+    - go vet
 
 deploying:
   stage: deploy
@@ -35,5 +35,5 @@ deploying:
     - git commit --allow-empty -m "$CI_COMMIT_MESSAGE"
     - git branch -v
     - git push -f https://heroku:${HEROKU_KEY}@git.heroku.com/team-projectv1.git publish-to-heroku:master
-  #only:
-    #- master
+  only:
+    - master
