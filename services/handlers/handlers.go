@@ -33,7 +33,7 @@ func GetStartFunc(w http.ResponseWriter, r *http.Request) {
                 return
 	}
 	// Finally, return the website page to the user
-	_, err := w.Write([]byte("Hello golang group-388!"))
+	_, err = w.Write([]byte("Hello golang group-388!"))
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
