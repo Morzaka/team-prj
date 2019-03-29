@@ -15,6 +15,8 @@ func NewRouter() *bone.Mux {
 	subV1.GetFunc("/startpage", handlers.GetStartFunc)
 	subV1.PostFunc("/register", authorization.SignupFunc)
 	subV1.PostFunc("/login", authorization.SigninFunc)
-	subV1.PostFunc("/logout",authorization.LogoutFunc)
+	subV1.PostFunc("/logout", authorization.LogoutFunc)
+	subV1.DeleteFunc("/delete/:id", authorization.DeletePageFunc)
+	subV1.PatchFunc("/update/:id", authorization.UpdatePageFunc)
 	return router
 }

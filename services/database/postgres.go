@@ -9,7 +9,6 @@ import (
 	_ "github.com/lib/pq"
 )
 
-
 //Database travelling
 //table user (id serial, name text, surname text, login text, password text, role text)
 
@@ -17,7 +16,7 @@ import (
 func OpenDatabase() *sql.DB {
 	//database connection string
 	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s "+"password=%s dbname=%s sslmode=disable",
-	configurations.Config.PgHost,configurations.Config.PgPort,configurations.Config.PgUser,configurations.Config.PgPassword, configurations.Config.PgName)
+		configurations.Config.PgHost, configurations.Config.PgPort, configurations.Config.PgUser, configurations.Config.PgPassword, configurations.Config.PgName)
 	//connect to database
 	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
@@ -30,5 +29,3 @@ func OpenDatabase() *sql.DB {
 	}
 	return db
 }
-
-

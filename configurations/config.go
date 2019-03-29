@@ -16,10 +16,10 @@ type Configuration struct {
 	RedisAddr   string `json:"RedisAddr"`
 	LogLevel    string `json:"LogLevel"`
 	PgHost      string `json:"PgHost"`
-        PgPort      string `json:"PgPort"`
-        PgUser      string `json:"PgUser"`
-        PgPassword  string `json:"PgPassword"`
-        PgName      string `json:"PgName"`
+	PgPort      string `json:"PgPort"`
+	PgUser      string `json:"PgUser"`
+	PgPassword  string `json:"PgPassword"`
+	PgName      string `json:"PgName"`
 }
 
 // LoadConfig loads configurations once

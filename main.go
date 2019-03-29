@@ -8,8 +8,8 @@ import (
 	"team-project/logger"
 	"team-project/services"
 	//invoking init function of package database
-	_ "team-project/services/database"
 	"github.com/urfave/negroni"
+	_ "team-project/services/database"
 )
 
 func main() {

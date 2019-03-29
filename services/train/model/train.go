@@ -18,4 +18,3 @@ func (t Train) Add(id int, route int) {
 func (t Train) Print() {
 	fmt.Println(`Train Id:`, t.ID, `Route Id:`, t.Route)
 }
-

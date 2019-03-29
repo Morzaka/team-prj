@@ -5,6 +5,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"team-project/configurations"
 )
+
 //Client  for redis instance
 var Client *redis.Client
 
