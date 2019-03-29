@@ -5,7 +5,7 @@ import (
 	"fmt"
 	train "team-project/services/train/model"
 
-	_ "github.com/lib/pq"
+	_ "github.com/lib/pq" // pq lib for using postgres
 )
 
 const (

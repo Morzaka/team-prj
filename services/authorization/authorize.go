@@ -5,19 +5,22 @@ import (
 	"html/template"
 	"log"
 	"net/http"
-	"team-project/services/authorization/models"
-	"team-project/services/authorization/session"
-	"time"
-	"team-project/services/database"
 	"os"
 	"path/filepath"
+	"team-project/services/authorization/models"
+	"team-project/services/authorization/session"
+	"team-project/services/database"
+	"time"
 )
 
+// InMemorySession variable for storing user session in memory
 var InMemorySession *session.Session
 
+//CookieName const
 const (
 	CookieName = "sessionId"
 )
+
 //init function initializes new session
 func init() {
 	InMemorySession = session.NewSession()
@@ -35,23 +38,24 @@ func checkPasswordHash(password, hash string) bool {
 	return err == nil
 
 }
+
 //LoginPage function loads html form for logging in
 func LoginPage(w http.ResponseWriter, r *http.Request) {
 	cwd, err := os.Getwd()
-        if err != nil {
-                http.Error(w, err.Error(), 400)
-                return
-        }
+	if err != nil {
+		http.Error(w, err.Error(), 400)
+		return
+	}
 	tmpl, err := template.ParseFiles(filepath.Join(cwd, "/services/authorization/frontend/login.html"))
 	if err != nil {
 		http.Error(w, err.Error(), 400)
 		return
 	}
-	err=tmpl.ExecuteTemplate(w, "login", nil)
+	err = tmpl.ExecuteTemplate(w, "login", nil)
 	if err != nil {
-                http.Error(w, err.Error(), 400)
-                return
-        }
+		http.Error(w, err.Error(), 400)
+		return
+	}
 }
 
 //SigninFunc implements signing in
@@ -69,9 +73,9 @@ func SigninFunc(w http.ResponseWriter, r *http.Request) {
 	//if user is registered than write session id for this user to cookie to tack authorized users
 	if isRegistered == true {
 		t = time.Now().Add(1 * time.Minute)
-		sessionId := InMemorySession.Init(login)
+		sessionID := InMemorySession.Init(login)
 		cookie := &http.Cookie{Name: CookieName,
-			Value:   sessionId,
+			Value:   sessionID,
 			Expires: t,
 		}
 		http.SetCookie(w, cookie)
@@ -83,30 +87,32 @@ func SigninFunc(w http.ResponseWriter, r *http.Request) {
 		}
 		log.Println("cookie: ", cookie)
 		http.Redirect(w, r, "/api/v1/startpage", 302)
-	//else if passwords don't match then redirect user to registration page
+		//else if passwords don't match then redirect user to registration page
 	} else if isRegistered == false {
 		log.Println("Not registered")
 		http.Redirect(w, r, "/api/v1/register", 302)
 	}
 }
+
 //RegisterPage function loads html registration form
 func RegisterPage(w http.ResponseWriter, r *http.Request) {
 	cwd, err := os.Getwd()
 	if err != nil {
-                http.Error(w, err.Error(), 400)
-                return
-        }
+		http.Error(w, err.Error(), 400)
+		return
+	}
 	tmpl, err := template.ParseFiles(filepath.Join(cwd, "/services/authorization/frontend/register.html"))
 	if err != nil {
 		http.Error(w, err.Error(), 400)
 		return
 	}
-	err=tmpl.ExecuteTemplate(w, "register", nil)
+	err = tmpl.ExecuteTemplate(w, "register", nil)
 	if err != nil {
-                http.Error(w, err.Error(), 400)
-                return
-        }
+		http.Error(w, err.Error(), 400)
+		return
+	}
 }
+
 //SignupFunc function implements user's registration
 func SignupFunc(w http.ResponseWriter, r *http.Request) {
 	// get entered values from the registration form
@@ -120,8 +126,8 @@ func SignupFunc(w http.ResponseWriter, r *http.Request) {
 	user := models.NewUser(password, name, surname, login, role)
 	//add user to database and get his id
 	id := database.AddUser(user)
-	log.Println("You are registered with id :",id)
+
+	log.Println("You are registered with id :", id)
 	//redirect registered user to log in page
 	http.Redirect(w, r, "/api/v1/login", 302)
 }
-
