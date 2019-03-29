@@ -152,7 +152,7 @@ func UpdatePageFunc(w http.ResponseWriter, r *http.Request) {
 	password, _ := hashPassword(user.Signin.Password)
 	user.Signin.Password = password
 	//add user to database and get his id
-	database.UpdateUserInfo(user, id)
+	database.UpdateUser(user, id)
 	w.Write([]byte(fmt.Sprintf("User with id %d is updated", id)))
 }
 

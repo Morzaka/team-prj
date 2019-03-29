@@ -39,7 +39,7 @@ func GetUserPassword(login string) string {
 }
 
 //UpdateUserInfo updates user's personal information
-func UpdateUserInfo(user models.User, id int) {
+func UpdateUser(user models.User, id int) {
 	db := OpenDatabase()
 	defer db.Close()
 	sqlStatement := `UPDATE users
