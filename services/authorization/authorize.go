@@ -17,7 +17,6 @@ var InMemorySession *session.Session
 
 //init function initializes new session
 func init() {
-	database.Init()
 	InMemorySession = session.NewSession()
 }
 

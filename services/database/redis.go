@@ -8,8 +8,8 @@ import (
 //Client  for redis instance
 var Client *redis.Client
 
-//Init initializes a new redis client
-func Init() {
+//init initializes a new redis client
+func init() {
 	Client = redis.NewClient(&redis.Options{
 		Addr:     configurations.Config.RedisAddr,
 		Password: "", // no password set
@@ -19,7 +19,7 @@ func Init() {
 	_, err := Client.Ping().Result()
 	if err != nil {
 		logrus.Errorf("Redis Error - %s", err.Error())
-		panic(err)
+		return
 	}
 	logrus.Infof("launch Redis successful.")
 }
