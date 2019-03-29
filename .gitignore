@@ -20,15 +20,10 @@ src/src
 *.out
 src/static-analysis.xml
 
-# Project-local glide cache, RE: https://github.com/Masterminds/glide/issues/736
-.glide/
-glide.lock
-
 vendor/
 
 # IDEs:
 .idea/
-
 
 # logs:
 *.log

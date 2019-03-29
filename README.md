@@ -1,28 +1,27 @@
 # team-project
 
-**Deploy project localy**
+**Preparation before running the web server**
 -
-* `$ go get -u golang.org/x/vgo`
-* run `vgo build`
-* . . .
-#
+**Download and install all resources**
 
+install `Golang`, `Redis`, `PostgreSQL`, `Docker`, `docker-compose`
 
-**Docker setup:**
-- 
-Compile app depend on OS 
- * `CGO_ENABLED=0 GOOS={OS} go build -a -installsuffix cgo -o {appname} .`
- * {OS} == `linux` , `windows` , `darwin`
+run
+* `git clone git@gitlab.com:golang-lv-388/team-project.git`
+* `git clone https://gitlab.com/golang-lv-388/team-project.git`
+* `go get -d -v ./...`
+* `go install -v ./...`
+* `go get -u golang.org/x/vgo`
+* `vgo build`
 
-Building the image >>>  `docker build -t {appname} .`
+**Web server start:**
+-
+* go `run main.go`
+> listen http://localhost:8080
 
-Running the Docker image >>> `docker run -d -p 8080:8080 {appname/imagename}`
+**Run web server in a docker container:**
+ * remove `go.sum` and `go.mode` files
+ * run `vgo build`
+ * run `docker-compose up --build`
+> listen http://localhost:8080
 
-Finding Running containers >>> `docker container ls`
- 
-Interacting with the app
- running inside the container >>>
- 
- `curl http://localhost:8080?name=DockerWorl`
- > `Hello, DockerWorl`
- #

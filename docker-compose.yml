@@ -1,8 +1,30 @@
 version: "3.7"
 services:
-  team-project:
-    container_name: team-project
-    image: team-project:latest
-    build: ""
+
+  redis:
+    image: redis:latest
+    ports:
+      - "6379"
+
+  postgres:
+    image: postgres:latest
+    restart: always
+    volumes:
+      - /private/var/lib/postgresql:/var/lib/postgresql
+    ports:
+      - "5432"
+    environment:
+      POSTGRES_USER: pguser
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: pgdb
+
+  web-server:
+    image: main:latest
+    build: .
+    depends_on:
+      - postgres
+      - redis
     ports:
       - "8080:8080"
+    volumes:
+      - .:/var/www/html

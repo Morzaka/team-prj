@@ -1,22 +1,48 @@
-# Dockerfile References: https://docs.docker.com/engine/reference/builder/
+######## First stage: build the executable #######
+# Accept the Go version for the image to be set as a build argument.
+# Default to Go 1.11
+ARG GO_VERSION=1.11
 
-# Start from scratch (use binary code)
-FROM scratch
+# Build the executable.
+FROM golang:${GO_VERSION}-alpine AS builder
+
+# Install the Certificate-Authority certificates for the app to be able to make
+# calls to HTTPS endpoints.
+# Git is required for fetching the dependencies.
+RUN apk add --no-cache ca-certificates git
 
 # Add Maintainer Info
-LABEL maintainer="Team-Project <https://gitlab.com/golang-lv-388/team-project>"
+LABEL maintainer="team-project <https://gitlab.com/golang-lv-388/team-project>"
 
-# Add SSL root certificates. Depending on the operating system, these certificates can be in many different places.
-# This one for linux, copy the ca-certificates.crt from our running machine into project root repository.
-# COPY --from=certs /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+# Set the Current Working Directory inside the container
+WORKDIR /team-project
 
-ADD ca-certificates.crt /etc/ssl/certs/
+# Fetch dependencies first; they are less susceptible to change on every build
+# and will therefore be cached for speeding up the next build
+COPY ./go.mod ./go.sum ./
+RUN go mod download
 
-# Add main binary file
-ADD main /
+# Copy everything from the current directory to the PWD(Present Working Directory) inside the container
+COPY . .
 
-# This container exposes port 8080 to the outside world
-EXPOSE 8081
+# Build the Go app
+RUN CGO_ENABLED=0 go build \
+    -installsuffix 'static' \
+    -o team-project .
 
-# Run the executable
-CMD ["/main"]
+######## Second stage: from scratch #######
+FROM scratch AS final
+
+WORKDIR /root/
+
+# Import the Certificate-Authority certificates for enabling HTTPS.
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+
+# Copy the Pre-built binary file from the previous stage
+COPY --from=builder /team-project .
+
+# Declare the port on which the webserver will be exposed.
+EXPOSE 8080
+
+# Run the compiled binary.
+ENTRYPOINT ["./team-project"]

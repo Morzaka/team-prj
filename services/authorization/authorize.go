@@ -13,8 +13,10 @@ import (
 	"time"
 )
 
+// InMemorySession variable for storing user session in memory
 var InMemorySession *session.Session
 
+//CookieName const
 const (
 	CookieName = "sessionId"
 )
@@ -71,9 +73,9 @@ func SigninFunc(w http.ResponseWriter, r *http.Request) {
 	//if user is registered than write session id for this user to cookie to tack authorized users
 	if isRegistered == true {
 		t = time.Now().Add(1 * time.Minute)
-		sessionId := InMemorySession.Init(login)
+		sessionID := InMemorySession.Init(login)
 		cookie := &http.Cookie{Name: CookieName,
-			Value:   sessionId,
+			Value:   sessionID,
 			Expires: t,
 		}
 		http.SetCookie(w, cookie)
@@ -124,6 +126,7 @@ func SignupFunc(w http.ResponseWriter, r *http.Request) {
 	user := models.NewUser(password, name, surname, login, role)
 	//add user to database and get his id
 	id := database.AddUser(user)
+
 	log.Println("You are registered with id :", id)
 	//redirect registered user to log in page
 	http.Redirect(w, r, "/api/v1/login", 302)
