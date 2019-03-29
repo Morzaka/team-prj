@@ -38,7 +38,7 @@ func GetUserPassword(login string) string {
 	return password
 }
 
-//UpdateUserInfo updates user's personal information
+//UpdateUser updates user's personal information
 func UpdateUser(user models.User, id int) {
 	db := OpenDatabase()
 	defer db.Close()
