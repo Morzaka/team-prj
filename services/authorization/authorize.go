@@ -3,16 +3,18 @@ package authorization
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/go-zoo/bone"
-	"golang.org/x/crypto/bcrypt"
 	"io/ioutil"
-	"log"
 	"net/http"
-	"strconv"
-	"team-project/services/authorization/session"
-	"team-project/services/database"
-	"team-project/services/models"
 	"time"
+
+	"github.com/go-zoo/bone"
+	"github.com/satori/go.uuid"
+
+	"team-project/database"
+	"team-project/logger"
+	"team-project/services/authorization/session"
+	"team-project/services/data"
+	"team-project/services/models"
 )
 
 //InMemorySession creates new session in memory
@@ -23,57 +25,37 @@ func init() {
 	InMemorySession = session.NewSession()
 }
 
-//hashPassword function hashes user's password
-func hashPassword(password string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
-	return string(bytes), err
-}
-
-//checkPasswordHash function valides user's password
-func checkPasswordHash(password, hash string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
-	return err == nil
-
-}
-
 //SigninFunc implements signing in
 func SigninFunc(w http.ResponseWriter, r *http.Request) {
-	var IsAuthorized bool
 	var isRegistered = false
-	var user models.Signin
+	var user data.Signin
 	data, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
+		logger.Logger.Errorf("Error, %s", err)
 	}
 	err = json.Unmarshal(data, &user)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
+		logger.Logger.Errorf("Error, %s", err)
 	}
 	dbpassword := database.GetUserPassword(user.Login)
 	//if entered password matches the password from database than user is registered
-	if checkPasswordHash(user.Password, dbpassword) {
+	if models.CheckPasswordHash(user.Password, dbpassword) {
 		isRegistered = true
 	}
 	//if user is registered than write session id for this user to cookie to tack authorized users
 	if isRegistered == true {
 		sessionID := InMemorySession.Init(user.Login)
 		cookie := &http.Cookie{Name: user.Login,
-			Value:   sessionID,
+			Value:   sessionID.String(),
 			Expires: time.Now().Add(1 * time.Minute),
 		}
 		if cookie != nil {
-			if user.Login == InMemorySession.GetUser(cookie.Value) {
-				IsAuthorized = true
-				log.Println("User is authorized", IsAuthorized)
-				//add cookie to redis db
-				_, err := database.Client.LPush(cookie.Name, cookie.Value).Result()
-				if err != nil {
-					w.WriteHeader(http.StatusInternalServerError)
-					return
-				}
+			//add cookie to redis db
+			_, err := database.Client.LPush(cookie.Name, cookie.Value).Result()
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				return
 			}
 		}
 		http.SetCookie(w, cookie)
@@ -92,24 +74,22 @@ func SigninFunc(w http.ResponseWriter, r *http.Request) {
 
 //SignupFunc function implements user's registration
 func SignupFunc(w http.ResponseWriter, r *http.Request) {
-	var user models.User
+	var user data.User
 	data, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
+		logger.Logger.Errorf("Error, %s", err)
 	}
 	err = json.Unmarshal(data, &user)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
+		logger.Logger.Errorf("Error, %s", err)
 	}
+	user.ID = models.GenerateID()
 	// get entered values from the registration form
-	password, _ := hashPassword(user.Signin.Password)
+	password, _ := models.HashPassword(user.Signin.Password)
 	user.Signin.Password = password
 	//add user to database and get his id
-	id := database.AddUser(user)
-	w.Write([]byte(fmt.Sprintf("You are registered with id %d", id)))
+	database.AddUser(user)
 }
 
 //LogoutFunc implements logging out - deletes cookie from db
@@ -132,24 +112,22 @@ func LogoutFunc(w http.ResponseWriter, r *http.Request) {
 
 //UpdatePageFunc deletes user
 func UpdatePageFunc(w http.ResponseWriter, r *http.Request) {
-	var user models.User
-	id, err := strconv.Atoi(bone.GetValue(r, "id"))
+	var user data.User
+	id, err := uuid.FromString(bone.GetValue(r, "id"))
 	if err != nil {
-		log.Fatal(err)
+		logger.Logger.Errorf("Error, %s", err)
 	}
 	data, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
+		logger.Logger.Errorf("Error, %s", err)
 	}
 	err = json.Unmarshal(data, &user)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
+		logger.Logger.Errorf("Error, %s", err)
 	}
 	// get entered values from the registration form
-	password, _ := hashPassword(user.Signin.Password)
+	password, _ := models.HashPassword(user.Signin.Password)
 	user.Signin.Password = password
 	//add user to database and get his id
 	database.UpdateUser(user, id)
@@ -158,9 +136,9 @@ func UpdatePageFunc(w http.ResponseWriter, r *http.Request) {
 
 //DeletePageFunc deletes user's page
 func DeletePageFunc(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(bone.GetValue(r, "id"))
+	id, err := uuid.FromString(bone.GetValue(r, "id"))
 	if err != nil {
-		log.Fatal(err)
+		logger.Logger.Errorf("Error, %s", err)
 	}
 	database.DeleteUser(id)
 	w.Write([]byte(fmt.Sprintf("User with id %d is deleted", id)))

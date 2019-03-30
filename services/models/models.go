@@ -1,15 +1,29 @@
 package models
 
-//User struct contains user data
-type User struct {
-	Signin  Signin `json:"signin"`
-	Name    string `json:"name"`
-	Surname string `json:"surname"`
-	Role    string `json:"role"`
+import (
+	"github.com/satori/go.uuid"
+	"golang.org/x/crypto/bcrypt"
+
+	"team-project/logger"
+)
+
+//GenerateID generates unique id
+func GenerateID() uuid.UUID {
+	id, err := uuid.NewV4()
+	if err != nil {
+		logger.Logger.Errorf("Error, %s", err)
+	}
+	return id
 }
 
-//Signin contains data for logging in
-type Signin struct {
-	Login    string `json:"login"`
-	Password string `json:"password"`
+//HashPassword function hashes user's password
+func HashPassword(password string) (string, error) {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
+	return string(bytes), err
+}
+
+//CheckPasswordHash function valides user's password
+func CheckPasswordHash(password, hash string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+	return err == nil
 }

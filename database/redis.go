@@ -2,8 +2,9 @@ package database
 
 import (
 	"github.com/go-redis/redis"
-	"github.com/sirupsen/logrus"
+
 	"team-project/configurations"
+	"team-project/logger"
 )
 
 //Client  for redis instance
@@ -19,8 +20,7 @@ func init() {
 
 	_, err := Client.Ping().Result()
 	if err != nil {
-		logrus.Errorf("Redis Error - %s", err.Error())
-		return
+		logger.Logger.Errorf("Error, %s", err)
 	}
-	logrus.Infof("launch Redis successful.")
+	//	logger.Logger.Info("launch Redis successful.")
 }

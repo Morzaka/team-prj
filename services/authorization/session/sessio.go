@@ -1,16 +1,10 @@
 package session
 
 import (
-	"crypto/rand"
-	"fmt"
-)
+	"github.com/satori/go.uuid"
 
-//GenerateID generates id for the session
-func GenerateID() string {
-	b := make([]byte, 16)
-	rand.Read(b)
-	return fmt.Sprintf("%x", b)
-}
+	"team-project/services/models"
+)
 
 type sessionData struct {
 	Username string
@@ -18,26 +12,26 @@ type sessionData struct {
 
 //Session structure for saving user session
 type Session struct {
-	Data map[string]*sessionData
+	Data map[uuid.UUID]*sessionData
 }
 
 //NewSession creates new session
 func NewSession() *Session {
 	obj := new(Session)
-	obj.Data = make(map[string]*sessionData)
+	obj.Data = make(map[uuid.UUID]*sessionData)
 	return obj
 }
 
 //Init method  initialize the session
-func (obj *Session) Init(username string) string {
-	sessionID := GenerateID()
+func (obj *Session) Init(username string) uuid.UUID {
+	sessionID := models.GenerateID()
 	data := &sessionData{username}
 	obj.Data[sessionID] = data
 	return sessionID
 }
 
 //GetUser method returns authorized username
-func (obj *Session) GetUser(sessionID string) string {
+func (obj *Session) GetUser(sessionID uuid.UUID) string {
 	data := obj.Data[sessionID]
 	if data == nil {
 		return ""

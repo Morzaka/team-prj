@@ -1,6 +1,6 @@
 {
   "ListenURL": ":8080",
-  "APIVersion": "/v1",
+  "APIVersion": "/api/v1",
   "LogFilePath": "project_log_file.log",
   "RedisAddr": "localhost:6379",
   "LogLevel": "error",
@@ -8,6 +8,6 @@
   "PgPort": "5432",
   "PgUser":"postgres",
   "PgPassword":"postgres",
-  "PgName":"travelling"
+  "PgName":"travel"
 }
 

@@ -1,8 +1,9 @@
-package handlers
+package models
 
 import (
 	"net/http"
-	"team-project/services/database"
+
+	"team-project/database"
 )
 
 //GetStartFunc is a handler function for start page
