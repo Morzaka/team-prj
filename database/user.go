@@ -1,7 +1,7 @@
 package database
 
 import (
-	"github.com/satori/go.uuid"
+	"github.com/google/uuid"
 
 	"team-project/logger"
 	"team-project/services/data"

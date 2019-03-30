@@ -1,7 +1,7 @@
 package session
 
 import (
-	"github.com/satori/go.uuid"
+	"github.com/google/uuid"
 
 	"team-project/services/models"
 )

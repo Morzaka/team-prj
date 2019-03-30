@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/go-zoo/bone"
-	"github.com/satori/go.uuid"
+	"github.com/google/uuid"
 
 	"team-project/database"
 	"team-project/logger"
@@ -113,7 +113,7 @@ func LogoutFunc(w http.ResponseWriter, r *http.Request) {
 //UpdatePageFunc deletes user
 func UpdatePageFunc(w http.ResponseWriter, r *http.Request) {
 	var user data.User
-	id, err := uuid.FromString(bone.GetValue(r, "id"))
+	id, err := uuid.Parse(bone.GetValue(r, "id"))
 	if err != nil {
 		logger.Logger.Errorf("Error, %s", err)
 	}
@@ -136,10 +136,11 @@ func UpdatePageFunc(w http.ResponseWriter, r *http.Request) {
 
 //DeletePageFunc deletes user's page
 func DeletePageFunc(w http.ResponseWriter, r *http.Request) {
-	id, err := uuid.FromString(bone.GetValue(r, "id"))
+	id, err := uuid.Parse(bone.GetValue(r, "id"))
+	fmt.Println(id)
 	if err != nil {
 		logger.Logger.Errorf("Error, %s", err)
 	}
 	database.DeleteUser(id)
-	w.Write([]byte(fmt.Sprintf("User with id %d is deleted", id)))
+	w.Write([]byte(fmt.Sprintf("User with id %s is deleted", id)))
 }

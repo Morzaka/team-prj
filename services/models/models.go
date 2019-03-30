@@ -1,18 +1,13 @@
 package models
 
 import (
-	"github.com/satori/go.uuid"
+	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
-
-	"team-project/logger"
 )
 
 //GenerateID generates unique id
 func GenerateID() uuid.UUID {
-	id, err := uuid.NewV4()
-	if err != nil {
-		logger.Logger.Errorf("Error, %s", err)
-	}
+	id:= uuid.New()
 	return id
 }
 

@@ -1,6 +1,6 @@
 package data
 
-import "github.com/satori/go.uuid"
+import "github.com/google/uuid"
 
 //User struct contains user data
 type User struct {
