@@ -4,9 +4,12 @@ import (
 	"flag"
 	"fmt"
 	"net/http"
+
 	"team-project/configurations"
 	"team-project/logger"
 	"team-project/services"
+	//invoke database package init function
+	_ "team-project/database"
 
 	"github.com/urfave/negroni"
 )
