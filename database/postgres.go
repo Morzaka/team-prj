@@ -10,9 +10,10 @@ import (
 	"team-project/configurations"
 )
 
+//Db is a pointer to opened database
 var Db *sql.DB
 
-//OpenDatabase connects to postgres database
+//PostgresInit connects to postgres database
 func PostgresInit() error {
 	//database connection string
 	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s "+"password=%s dbname=%s sslmode=disable",

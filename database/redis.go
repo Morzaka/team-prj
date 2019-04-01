@@ -9,7 +9,7 @@ import (
 //Client  for redis instance
 var Client *redis.Client
 
-//init initializes a new redis client
+//RedisInit initializes a new redis client
 func RedisInit() error {
 	Client = redis.NewClient(&redis.Options{
 		Addr:     configurations.Config.RedisAddr,
