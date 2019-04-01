@@ -4,14 +4,13 @@ import (
 	"github.com/go-redis/redis"
 
 	"team-project/configurations"
-	"team-project/logger"
 )
 
 //Client  for redis instance
 var Client *redis.Client
 
 //init initializes a new redis client
-func init() {
+func RedisInit() error {
 	Client = redis.NewClient(&redis.Options{
 		Addr:     configurations.Config.RedisAddr,
 		Password: "", // no password set
@@ -20,7 +19,7 @@ func init() {
 
 	_, err := Client.Ping().Result()
 	if err != nil {
-		logger.Logger.Errorf("Error, %s", err)
+		return err
 	}
-	//	logger.Logger.Info("launch Redis successful.")
+	return nil
 }

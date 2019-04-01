@@ -1,4 +1,4 @@
-package models
+package model
 
 import (
 	"github.com/google/uuid"
@@ -7,7 +7,7 @@ import (
 
 //GenerateID generates unique id
 func GenerateID() uuid.UUID {
-	id:= uuid.New()
+	id := uuid.New()
 	return id
 }
 

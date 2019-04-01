@@ -3,7 +3,7 @@ package session
 import (
 	"github.com/google/uuid"
 
-	"team-project/services/models"
+	"team-project/services/model"
 )
 
 type sessionData struct {
@@ -24,7 +24,7 @@ func NewSession() *Session {
 
 //Init method  initialize the session
 func (obj *Session) Init(username string) uuid.UUID {
-	sessionID := models.GenerateID()
+	sessionID := model.GenerateID()
 	data := &sessionData{username}
 	obj.Data[sessionID] = data
 	return sessionID

@@ -14,7 +14,7 @@ import (
 	"team-project/logger"
 	"team-project/services/authorization/session"
 	"team-project/services/data"
-	"team-project/services/models"
+	"team-project/services/model"
 )
 
 //InMemorySession creates new session in memory
@@ -29,18 +29,14 @@ func init() {
 func SigninFunc(w http.ResponseWriter, r *http.Request) {
 	var isRegistered = false
 	var user data.Signin
-	data, err := ioutil.ReadAll(r.Body)
-	defer r.Body.Close()
+	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
-		logger.Logger.Errorf("Error, %s", err)
-	}
-	err = json.Unmarshal(data, &user)
-	if err != nil {
+		fmt.Println("Decoding")
 		logger.Logger.Errorf("Error, %s", err)
 	}
 	dbpassword := database.GetUserPassword(user.Login)
 	//if entered password matches the password from database than user is registered
-	if models.CheckPasswordHash(user.Password, dbpassword) {
+	if model.CheckPasswordHash(user.Password, dbpassword) {
 		isRegistered = true
 	}
 	//if user is registered than write session id for this user to cookie to tack authorized users
@@ -54,42 +50,44 @@ func SigninFunc(w http.ResponseWriter, r *http.Request) {
 			//add cookie to redis db
 			_, err := database.Client.LPush(cookie.Name, cookie.Value).Result()
 			if err != nil {
+				fmt.Println("pushing redis")
 				w.WriteHeader(http.StatusInternalServerError)
 				return
 			}
 		}
 		http.SetCookie(w, cookie)
-		output, err := json.Marshal(user)
+		w.Header().Set("content-type", "application/json")
+		err = json.NewEncoder(w).Encode(user)
 		if err != nil {
+			fmt.Println("Encoding")
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		w.Header().Set("content-type", "application/json")
-		w.Write(output)
 		//else if passwords don't match then redirect user to registration page
 	} else if isRegistered == false {
-		w.Write([]byte("Something went wrong"))
+		w.Header().Set("content-type", "application/json")
 	}
 }
 
 //SignupFunc function implements user's registration
 func SignupFunc(w http.ResponseWriter, r *http.Request) {
 	var user data.User
-	data, err := ioutil.ReadAll(r.Body)
-	defer r.Body.Close()
+	user.ID = model.GenerateID()
+	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
 		logger.Logger.Errorf("Error, %s", err)
 	}
-	err = json.Unmarshal(data, &user)
-	if err != nil {
-		logger.Logger.Errorf("Error, %s", err)
-	}
-	user.ID = models.GenerateID()
 	// get entered values from the registration form
-	password, _ := models.HashPassword(user.Signin.Password)
+	password, _ := model.HashPassword(user.Signin.Password)
 	user.Signin.Password = password
 	//add user to database and get his id
 	database.AddUser(user)
+	w.Header().Set("content-type", "application/json")
+	err = json.NewEncoder(w).Encode(user)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 }
 
 //LogoutFunc implements logging out - deletes cookie from db
@@ -127,11 +125,16 @@ func UpdatePageFunc(w http.ResponseWriter, r *http.Request) {
 		logger.Logger.Errorf("Error, %s", err)
 	}
 	// get entered values from the registration form
-	password, _ := models.HashPassword(user.Signin.Password)
+	password, _ := model.HashPassword(user.Signin.Password)
 	user.Signin.Password = password
 	//add user to database and get his id
 	database.UpdateUser(user, id)
-	w.Write([]byte(fmt.Sprintf("User with id %d is updated", id)))
+	w.Header().Set("content-type", "application/json")
+	err = json.NewEncoder(w).Encode(user)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 }
 
 //DeletePageFunc deletes user's page
