@@ -1,5 +1,8 @@
 package booking
 
+
+
+
 //Get place in train car
 
 //Train ID, Train routing, Date(Dep/Ariv), Time(Dep/Ariv), Duration(Time), Free Places(quantitu, num)
