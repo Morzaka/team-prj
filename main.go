@@ -26,7 +26,6 @@ func main() {
 		fmt.Printf("Error while loading configurations, %s \n", err)
 		return
 	}
-
 	err = logger.LoadLog(*logFile)
 	if err != nil {
 		fmt.Printf("Error logger not loaded, %s \n", err)

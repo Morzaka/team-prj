@@ -27,20 +27,22 @@ func init() {
 
 //SigninFunc implements signing in
 func SigninFunc(w http.ResponseWriter, r *http.Request) {
-	var isRegistered = false
+	var isRegistered bool
 	var user data.Signin
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
-		fmt.Println("Decoding")
 		logger.Logger.Errorf("Error, %s", err)
 	}
-	dbpassword := database.GetUserPassword(user.Login)
+	dbpassword, err := database.GetUserPassword(user.Login)
+	if err != nil {
+		isRegistered = false
+	}
 	//if entered password matches the password from database than user is registered
 	if model.CheckPasswordHash(user.Password, dbpassword) {
 		isRegistered = true
 	}
 	//if user is registered than write session id for this user to cookie to tack authorized users
-	if isRegistered == true {
+	if isRegistered {
 		sessionID := InMemorySession.Init(user.Login)
 		cookie := &http.Cookie{Name: user.Login,
 			Value:   sessionID.String(),
@@ -50,21 +52,17 @@ func SigninFunc(w http.ResponseWriter, r *http.Request) {
 			//add cookie to redis db
 			_, err := database.Client.LPush(cookie.Name, cookie.Value).Result()
 			if err != nil {
-				fmt.Println("pushing redis")
-				w.WriteHeader(http.StatusInternalServerError)
-				return
+				logger.Logger.Errorf("Error, %s", err)
 			}
 		}
 		http.SetCookie(w, cookie)
 		w.Header().Set("content-type", "application/json")
 		err = json.NewEncoder(w).Encode(user)
 		if err != nil {
-			fmt.Println("Encoding")
-			w.WriteHeader(http.StatusInternalServerError)
-			return
+			logger.Logger.Errorf("Error, %s", err)
 		}
 		//else if passwords don't match then redirect user to registration page
-	} else if isRegistered == false {
+	} else if !isRegistered {
 		w.Header().Set("content-type", "application/json")
 	}
 }
@@ -81,12 +79,14 @@ func SignupFunc(w http.ResponseWriter, r *http.Request) {
 	password, _ := model.HashPassword(user.Signin.Password)
 	user.Signin.Password = password
 	//add user to database and get his id
-	database.AddUser(user)
+	user, err = database.AddUser(user)
+	if err != nil {
+		logger.Logger.Errorf("Error, %s", err)
+	}
 	w.Header().Set("content-type", "application/json")
 	err = json.NewEncoder(w).Encode(user)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
+		logger.Logger.Errorf("Error, %s", err)
 	}
 }
 
@@ -97,8 +97,7 @@ func LogoutFunc(w http.ResponseWriter, r *http.Request) {
 	sessionToken := cookie.Name
 	_, err := database.Client.LRem(sessionToken, 0, cookie.Value).Result()
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
+		logger.Logger.Errorf("Error, %s", err)
 	}
 	cookie = &http.Cookie{
 		Name:   sessionToken,
@@ -128,22 +127,26 @@ func UpdatePageFunc(w http.ResponseWriter, r *http.Request) {
 	password, _ := model.HashPassword(user.Signin.Password)
 	user.Signin.Password = password
 	//add user to database and get his id
-	database.UpdateUser(user, id)
+	user, err = database.UpdateUser(user, id)
+	if err != nil {
+		logger.Logger.Errorf("Error, %s", err)
+	}
 	w.Header().Set("content-type", "application/json")
 	err = json.NewEncoder(w).Encode(user)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
+		logger.Logger.Errorf("Error, %s", err)
 	}
 }
 
 //DeletePageFunc deletes user's page
 func DeletePageFunc(w http.ResponseWriter, r *http.Request) {
 	id, err := uuid.Parse(bone.GetValue(r, "id"))
-	fmt.Println(id)
 	if err != nil {
 		logger.Logger.Errorf("Error, %s", err)
 	}
-	database.DeleteUser(id)
+	err = database.DeleteUser(id)
+	if err != nil {
+		logger.Logger.Errorf("Error, %s", err)
+	}
 	w.Write([]byte(fmt.Sprintf("User with id %s is deleted", id)))
 }
