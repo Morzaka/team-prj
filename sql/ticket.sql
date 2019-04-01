@@ -3,9 +3,9 @@
 CREATE TABLE tickets
 (
     id             uuid DEFAULT uuid_generate_v4() NOT NULL,
-    train_id       uuid DEFAULT uuid_generate_v4() NOT NULL, -- references train(id),
-    plane_id       uuid DEFAULT uuid_generate_v4() NOT NULL, -- references plane(id),
-    users_id       uuid DEFAULT uuid_generate_v4() NOT NULL, -- references users(id),
+    train_id       uuid DEFAULT uuid_generate_v4() NOT NULL, -- references train(id), -- uncomment when train,
+    plane_id       uuid DEFAULT uuid_generate_v4() NOT NULL, -- references plane(id), -- plane and users tables
+    users_id       uuid DEFAULT uuid_generate_v4() NOT NULL, -- references users(id), -- will be exist.
     place          SMALLINT NOT NULL,
     type           VARCHAR(30) DEFAULT 'Train' NOT NULL,
     discount       VARCHAR(10) DEFAULT '-0%' NOT NULL,
