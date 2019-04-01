@@ -1,26 +1,109 @@
 package booking
 
-//Get place in train car
+import (
+	"database/sql"
+	"team-project/configurations"
+	"net/http"
+)
 
-//Train ID, Train routing, Date(Dep/Ariv), Time(Dep/Ariv), Duration(Time), Free Places(quantitu, num)
-// select place num, quantity of selecting place
+func Index(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "GET" {
+		http.Error(w, http.StatusText(405), http.StatusMethodNotAllowed)
+		return
+	}
 
-//Rout
-// api/v1/select_place/ GET  {return quantity & number of palaces}
-// api/v1/ticket_order/ POST {
-//                send: book place in a train}
-//             receive: pas1{UserName, TrainNum}
-//                      pas2{UserName, TrainNum}
-//                      pas3{UserName, TrainNum}
-//                      pas4{UserName, TrainNum}
-// api/v1/bucket/tickets/ GET
-//                           pas1{UserName, TrainNum, Price}
-//...                        pas2{UserName, TrainNum, Price}
-//...........................SUM price
-//                           set in Redis Timer 15min
-// api/v1/bucket/tickets/id DELETE return
-//...                        pas2{UserName, TrainNum, Price}
-//...........................delete in redis
-//                           Redis Timer continue
-//.api/v1/payment/tickets/id
+	bks, err := AllBooks()
+	if err != nil {
+		http.Error(w, http.StatusText(500), http.StatusInternalServerError)
+		return
+	}
 
+	config.TPL.ExecuteTemplate(w, "books.gohtml", bks)
+}
+
+func Show(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "GET" {
+		http.Error(w, http.StatusText(405), http.StatusMethodNotAllowed)
+		return
+	}
+
+	bk, err := OneBook(r)
+	switch {
+	case err == sql.ErrNoRows:
+		http.NotFound(w, r)
+		return
+	case err != nil:
+		http.Error(w, http.StatusText(500), http.StatusInternalServerError)
+		return
+	}
+
+	config.TPL.ExecuteTemplate(w, "show.gohtml", bk)
+}
+
+func Create(w http.ResponseWriter, r *http.Request) {
+	config.TPL.ExecuteTemplate(w, "create.gohtml", nil)
+}
+
+func CreateProcess(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.Error(w, http.StatusText(405), http.StatusMethodNotAllowed)
+		return
+	}
+
+	bk, err := PutBook(r)
+	if err != nil {
+		http.Error(w, http.StatusText(406), http.StatusNotAcceptable)
+		return
+	}
+
+	config.TPL.ExecuteTemplate(w, "created.gohtml", bk)
+}
+
+func Update(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "GET" {
+		http.Error(w, http.StatusText(405), http.StatusMethodNotAllowed)
+		return
+	}
+
+	bk, err := OneBook(r)
+	switch {
+	case err == sql.ErrNoRows:
+		http.NotFound(w, r)
+		return
+	case err != nil:
+		http.Error(w, http.StatusText(500), http.StatusInternalServerError)
+		return
+	}
+
+	config.TPL.ExecuteTemplate(w, "update.gohtml", bk)
+}
+
+func UpdateProcess(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.Error(w, http.StatusText(405), http.StatusMethodNotAllowed)
+		return
+	}
+
+	bk, err := UpdateBook(r)
+	if err != nil {
+		http.Error(w, http.StatusText(406), http.StatusBadRequest)
+		return
+	}
+
+	config.TPL.ExecuteTemplate(w, "updated.gohtml", bk)
+}
+
+func DeleteProcess(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "GET" {
+		http.Error(w, http.StatusText(405), http.StatusMethodNotAllowed)
+		return
+	}
+
+	err := DeleteBook(r)
+	if err != nil {
+		http.Error(w, http.StatusText(400), http.StatusBadRequest)
+		return
+	}
+
+	http.Redirect(w, r, "/books", http.StatusSeeOther)
+}
