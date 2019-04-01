@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"net/http"
+	"os"
 
 	"team-project/configurations"
 	"team-project/database"
@@ -15,6 +16,7 @@ import (
 
 func main() {
 	//Flags for LoadLog and LoadConfig functions
+	port := os.Getenv("PORT")
 	configFile := flag.String("config", "./project_config.json", "Configuration file in JSON-format")
 	logFile := flag.String("logFile", "project_log_file.log", "Logging out file .log")
 	flag.Parse()
@@ -47,7 +49,7 @@ func main() {
 	middlewareManager.UseHandler(services.NewRouter())
 	fmt.Println("Starting HTTP listener...")
 	//Starting server
-	err = http.ListenAndServe(configurations.Config.ListenURL, middlewareManager)
+	err = http.ListenAndServe(":"+port, middlewareManager)
 	if err != nil {
 		logger.Logger.Errorf("Error, %s", err)
 	}
