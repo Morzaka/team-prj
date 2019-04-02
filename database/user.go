@@ -38,12 +38,12 @@ func GetUserPassword(login string) (string, error) {
 }
 
 //UpdateUser updates user's personal information
-func UpdateUser(user data.User, id uuid.UUID) (data.User,error) {
+func UpdateUser(user data.User, id uuid.UUID) (data.User, error) {
 	_, err := Db.Exec(updateUser, id, user.Name, user.Surname, user.Signin.Login, user.Signin.Password, user.Role)
 	if err != nil {
-		return data.User{},err
+		return data.User{}, err
 	}
-	user.ID=id
+	user.ID = id
 	return user, nil
 }
 

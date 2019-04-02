@@ -3,10 +3,10 @@ package database
 import (
 	"database/sql"
 	"fmt"
-	
+
 	//pq lib for using postgres
-	_ "github.com/lib/pq"
 	"github.com/go-redis/redis"
+	_ "github.com/lib/pq"
 
 	"team-project/configurations"
 )
@@ -14,7 +14,7 @@ import (
 //Db is a pointer to opened database
 var (
 	Db *sql.DB
-//Client  for redis instance
+	//Client  for redis instance
 	Client *redis.Client
 )
 
@@ -23,7 +23,7 @@ func PostgresInit() error {
 	//database connection string
 	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s "+"password=%s dbname=%s sslmode=disable",
 		configurations.Config.PgHost, configurations.Config.PgPort, configurations.Config.PgUser, configurations.Config.PgPassword, configurations.Config.PgName)
-		//connect to database
+	//connect to database
 	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
 		return err

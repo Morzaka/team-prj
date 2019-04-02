@@ -2,7 +2,6 @@ package authorization
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"time"
@@ -13,6 +12,7 @@ import (
 	"team-project/database"
 	"team-project/logger"
 	"team-project/services/authorization/session"
+	"team-project/services/common"
 	"team-project/services/data"
 	"team-project/services/model"
 )
@@ -35,7 +35,6 @@ func SigninFunc(w http.ResponseWriter, r *http.Request) {
 	}
 	dbpassword, err := database.GetUserPassword(user.Login)
 	if err != nil {
-		fmt.Println(err)
 		isRegistered = false
 	}
 	//if entered password matches the password from database than user is registered
@@ -57,14 +56,10 @@ func SigninFunc(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 		http.SetCookie(w, cookie)
-		w.Header().Set("content-type", "application/json")
-		err = json.NewEncoder(w).Encode(user)
-		if err != nil {
-			logger.Logger.Errorf("Error, %s", err)
-		}
+		common.RenderJson(w, r, http.StatusOK, user)
 		//else if passwords don't match then redirect user to registration page
 	} else if !isRegistered {
-		w.Header().Set("content-type", "application/json")
+		common.RenderJson(w, r, http.StatusNotFound, "You're not registered")
 	}
 }
 
@@ -84,11 +79,7 @@ func SignupFunc(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		logger.Logger.Errorf("Error, %s", err)
 	}
-	w.Header().Set("content-type", "application/json")
-	err = json.NewEncoder(w).Encode(user)
-	if err != nil {
-		logger.Logger.Errorf("Error, %s", err)
-	}
+	common.RenderJson(w, r, http.StatusOK, user)
 }
 
 //LogoutFunc implements logging out - deletes cookie from db
@@ -105,7 +96,7 @@ func LogoutFunc(w http.ResponseWriter, r *http.Request) {
 		MaxAge: -1,
 	}
 	http.SetCookie(w, cookie)
-	w.Write([]byte("You're logged out!\n"))
+	common.RenderJson(w, r, http.StatusOK, "You're logged out!")
 }
 
 //UpdatePageFunc deletes user
@@ -132,11 +123,7 @@ func UpdatePageFunc(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		logger.Logger.Errorf("Error, %s", err)
 	}
-	w.Header().Set("content-type", "application/json")
-	err = json.NewEncoder(w).Encode(user)
-	if err != nil {
-		logger.Logger.Errorf("Error, %s", err)
-	}
+	common.RenderJson(w, r, http.StatusOK, user)
 }
 
 //DeletePageFunc deletes user's page
@@ -149,5 +136,5 @@ func DeletePageFunc(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		logger.Logger.Errorf("Error, %s", err)
 	}
-	w.Write([]byte(fmt.Sprintf("User with id %s is deleted", id)))
+	common.RenderJson(w, r, http.StatusOK, "User was deleted successfully!")
 }
