@@ -17,5 +17,12 @@ func NewRouter() *bone.Mux {
 	subV1.PostFunc("/signin", authorization.SigninFunc)
 	subV1.GetFunc("/login", authorization.LoginPage)
 	subV1.GetFunc("/register", authorization.RegisterPage)
+	// tickets routs
+	subV1.GetFunc("/books", books.Index)
+	subV1.GetFunc("/books/:id", books.Show)
+	subV1.PostFunc("/books/create", books.CreateProcess)
+	subV1.PatchFunc("/books/update/:id", books.UpdateProcess)
+	subV1.DeleteFunc("/books/delete/process", books.DeleteProcess)
+
 	return router
 }

@@ -10,12 +10,12 @@ import (
 	"github.com/google/uuid"
 )
 
-type Book struct {
-	Isbn   string
-	Title  string
-	Author string
-	Price  float32
-}
+//type Book struct {
+//	Isbn   string
+//	Title  string
+//	Author string
+//	Price  float32
+//}
 
 type Ticket struct {
 	Id             uuid.UUID `json:"id"`
@@ -63,11 +63,11 @@ func AllTickets() ([]Ticket, error) {
 	return tkts, nil
 }
 
-func OneBook(r *http.Request) (Book, error) {
-	bk := Book{}
+func OneTicket(r *http.Request) (Ticket, error) {
+	tk := Ticket{}
 	isbn := r.FormValue("isbn")
 	if isbn == "" {
-		return bk, errors.New("400. Bad Request.")
+		return tk, errors.New("400. Bad Request.")
 	}
 
 	row := configurations.DB.QueryRow("SELECT * FROM books WHERE isbn = $1", isbn)
