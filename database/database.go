@@ -5,13 +5,18 @@ import (
 	"fmt"
 
 	//pq lib for using postgres
+	"github.com/go-redis/redis"
 	_ "github.com/lib/pq"
 
 	"team-project/configurations"
 )
 
 //Db is a pointer to opened database
-var Db *sql.DB
+var (
+	Db *sql.DB
+	//Client  for redis instance
+	Client *redis.Client
+)
 
 //PostgresInit connects to postgres database
 func PostgresInit() error {
@@ -28,5 +33,19 @@ func PostgresInit() error {
 		return err
 	}
 	Db = db
+	return nil
+}
+
+//RedisInit initializes a new redis client
+func RedisInit() error {
+	Client = redis.NewClient(&redis.Options{
+		Addr:     configurations.Config.RedisAddr,
+		Password: "", // no password set
+		DB:       0,  // use default DB
+	})
+	_, err := Client.Ping().Result()
+	if err != nil {
+		return err
+	}
 	return nil
 }

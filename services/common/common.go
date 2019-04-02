@@ -1,0 +1,23 @@
+package common
+
+import (
+	"encoding/json"
+	"net/http"
+	"team-project/logger"
+)
+
+func RenderJson(w http.ResponseWriter, r *http.Request, status int, response interface{}) {
+	data, err := json.Marshal(response)
+	if err != nil {
+		logger.Logger.Errorf("Error, %s", err)
+	}
+	w.WriteHeader(status)
+	if data == nil {
+		return
+	}
+	w.Header().Set("content-type", "application/json")
+	_, err = w.Write(data)
+	if err != nil {
+		logger.Logger.Errorf("Error, %s", err)
+	}
+}
