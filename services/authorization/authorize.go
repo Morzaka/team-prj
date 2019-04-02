@@ -94,7 +94,6 @@ func LogoutFunc(w http.ResponseWriter, r *http.Request) {
 	cookie = &http.Cookie{
 		Name:   sessionToken,
 		MaxAge: -1,
-
 	}
 	http.SetCookie(w, cookie)
 	common.RenderJson(w, r, http.StatusOK, "You're logged out!")

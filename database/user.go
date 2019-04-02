@@ -11,11 +11,7 @@ var (
 	VALUES ($1, $2, $3, $4, $5, $6) returning id`
 	selectUser = `SELECT password FROM public.user WHERE login=$1;`
 	updateUser = `UPDATE public.user SET name = $2, surname = $3, login=$4, password=$5, role=$6 WHERE id = $1;`
-<<<<<<< HEAD
 	deleteUser = `DELETE FROM public.user WHERE id = $1;`
-=======
-	deleteUser = `DELETE FROM public.user WHERE id = $1 returning id;`
->>>>>>> userworld
 )
 
 //AddUser adds info about new user to the database
@@ -47,10 +43,7 @@ func UpdateUser(user data.User, id uuid.UUID) (data.User, error) {
 	if err != nil {
 		return data.User{}, err
 	}
-<<<<<<< HEAD
-=======
 	user.ID = id
->>>>>>> userworld
 	return user, nil
 }
 
