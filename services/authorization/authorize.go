@@ -35,6 +35,7 @@ func SigninFunc(w http.ResponseWriter, r *http.Request) {
 	}
 	dbpassword, err := database.GetUserPassword(user.Login)
 	if err != nil {
+		fmt.Println(err)
 		isRegistered = false
 	}
 	//if entered password matches the password from database than user is registered
