@@ -56,10 +56,10 @@ func SigninFunc(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 		http.SetCookie(w, cookie)
-		common.RenderJson(w, r, http.StatusOK, user)
+		common.RenderJSON(w, r, http.StatusOK, user)
 		//else if passwords don't match then redirect user to registration page
 	} else if !isRegistered {
-		common.RenderJson(w, r, http.StatusNotFound, "You're not registered")
+		common.RenderJSON(w, r, http.StatusNotFound, "You're not registered")
 	}
 }
 
@@ -79,7 +79,7 @@ func SignupFunc(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		logger.Logger.Errorf("Error, %s", err)
 	}
-	common.RenderJson(w, r, http.StatusOK, user)
+	common.RenderJSON(w, r, http.StatusOK, user)
 }
 
 //LogoutFunc implements logging out - deletes cookie from db
@@ -96,7 +96,7 @@ func LogoutFunc(w http.ResponseWriter, r *http.Request) {
 		MaxAge: -1,
 	}
 	http.SetCookie(w, cookie)
-	common.RenderJson(w, r, http.StatusOK, "You're logged out!")
+	common.RenderJSON(w, r, http.StatusOK, "You're logged out!")
 }
 
 //UpdatePageFunc deletes user
@@ -123,7 +123,7 @@ func UpdatePageFunc(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		logger.Logger.Errorf("Error, %s", err)
 	}
-	common.RenderJson(w, r, http.StatusOK, user)
+	common.RenderJSON(w, r, http.StatusOK, user)
 }
 
 //DeletePageFunc deletes user's page
@@ -136,5 +136,5 @@ func DeletePageFunc(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		logger.Logger.Errorf("Error, %s", err)
 	}
-	common.RenderJson(w, r, http.StatusOK, "User was deleted successfully!")
+	common.RenderJSON(w, r, http.StatusOK, "User was deleted successfully!")
 }
