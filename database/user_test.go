@@ -32,7 +32,11 @@ func TestAddUser(t *testing.T) {
 		return
 	}
 	s := "08307904-f18e-4fb8-9d18-29cfad38ffaf"
-	id, _ := uuid.Parse(s)
+	id, err := uuid.Parse(s)
+	if err != nil {
+		fmt.Printf("Error while parsing string to uuid, %s \n", err)
+		return
+	}
 	testData := data.User{
 		ID: id,
 		Signin: data.Signin{
@@ -43,9 +47,8 @@ func TestAddUser(t *testing.T) {
 		Surname: "Zhykin",
 		Role:    "User",
 	}
-
-	user, err := AddUser(testData)
-	if err != nil || user != testData {
+	_, err = AddUser(testData)
+	if err != nil {
 		t.Errorf("Failed adding user")
 	}
 }
@@ -76,14 +79,21 @@ func TestGetUserPassword(t *testing.T) {
 
 func TestUpdateUser(t *testing.T) {
 	err := MockDatabase()
-	defer Db.Close()
 	if err != nil {
 		fmt.Printf("Error while mocking connection database, %s \n", err)
 		return
 	}
-	s := "08307904-f18e-4fb8-9d18-29cfad38ffaf"
-	id, _ := uuid.Parse(s)
-	userSent := data.User{
+	str := "08307904-f18e-4fb8-9d18-29cfad38ffaf"
+	id, err := uuid.Parse(str)
+	if err != nil {
+		fmt.Printf("Error while parsing string to uuid, %s \n", err)
+		return
+	}
+	if err != nil {
+		fmt.Printf("Error while parsing string to uuid, %s \n", err)
+		return
+	}
+	user := data.User{
 		ID: id,
 		Signin: data.Signin{
 			Login:    "whyso",
@@ -93,21 +103,24 @@ func TestUpdateUser(t *testing.T) {
 		Surname: "Zhykin",
 		Role:    "User",
 	}
-	userGot, err := UpdateUser(userSent, id)
-	if err != nil || userGot != userSent {
+	err = UpdateUser(user, id)
+	if err != nil {
 		t.Errorf("Failed updating user")
 	}
 }
 
 func TestDeleteUser(t *testing.T) {
 	err := MockDatabase()
-	defer Db.Close()
 	if err != nil {
 		fmt.Printf("Error while mocking connection database, %s \n", err)
 		return
 	}
 	strOK := "08307904-f18e-4fb8-9d18-29cfad38ffaf"
-	idOK, _ := uuid.Parse(strOK)
+	idOK, err := uuid.Parse(strOK)
+	if err != nil {
+		fmt.Printf("Error while parsing string to uuid, %s \n", err)
+		return
+	}
 	if dberr := DeleteUser(idOK); dberr != nil {
 		t.Errorf("Failed deleting user")
 	}

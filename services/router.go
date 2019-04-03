@@ -12,11 +12,11 @@ func NewRouter() *bone.Mux {
 	subV1 := bone.New()
 	router.SubRoute("/v1", subV1)
 	// GetFunc, PostFunc etc ... takes http.HandlerFunc
-	subV1.GetFunc("/startpage", model.GetStartFunc)
-	subV1.PostFunc("/register", authorization.SignupFunc)
-	subV1.PostFunc("/login", authorization.SigninFunc)
-	subV1.PostFunc("/logout", authorization.LogoutFunc)
-	subV1.DeleteFunc("/user/:id", authorization.DeletePageFunc)
-	subV1.PatchFunc("/user/:id", authorization.UpdatePageFunc)
+	subV1.GetFunc("/startpage", model.GetStart)
+	subV1.PostFunc("/register", authorization.Signup)
+	subV1.PostFunc("/login", authorization.Signin)
+	subV1.PostFunc("/logout", authorization.Logout)
+	subV1.DeleteFunc("/user/:id", authorization.DeleteUserPage)
+	subV1.PatchFunc("/user/:id", authorization.UpdateUserPage)
 	return router
 }

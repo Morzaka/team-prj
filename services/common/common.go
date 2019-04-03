@@ -6,7 +6,7 @@ import (
 	"team-project/logger"
 )
 
-func RenderJson(w http.ResponseWriter, r *http.Request, status int, response interface{}) {
+func RenderJSON(w http.ResponseWriter, r *http.Request, status int, response interface{}) {
 	data, err := json.Marshal(response)
 	if err != nil {
 		logger.Logger.Errorf("Error, %s", err)

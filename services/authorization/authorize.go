@@ -25,9 +25,8 @@ func init() {
 	InMemorySession = session.NewSession()
 }
 
-//SigninFunc implements signing in
-func SigninFunc(w http.ResponseWriter, r *http.Request) {
-	var isRegistered bool
+//Signin implements signing in
+func Signin(w http.ResponseWriter, r *http.Request) {
 	var user data.Signin
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
@@ -35,14 +34,11 @@ func SigninFunc(w http.ResponseWriter, r *http.Request) {
 	}
 	dbpassword, err := database.GetUserPassword(user.Login)
 	if err != nil {
-		isRegistered = false
+		common.RenderJSON(w, r, http.StatusUnauthorized, "_")
 	}
 	//if entered password matches the password from database than user is registered
 	if model.CheckPasswordHash(user.Password, dbpassword) {
-		isRegistered = true
-	}
-	//if user is registered than write session id for this user to cookie to tack authorized users
-	if isRegistered {
+		//if user is registered than write session id for this user to cookie to tack authorized users
 		sessionID := InMemorySession.Init(user.Login)
 		cookie := &http.Cookie{Name: user.Login,
 			Value:   sessionID.String(),
@@ -52,19 +48,19 @@ func SigninFunc(w http.ResponseWriter, r *http.Request) {
 			//add cookie to redis db
 			_, err := database.Client.LPush(cookie.Name, cookie.Value).Result()
 			if err != nil {
-				logger.Logger.Errorf("Error, %s", err)
+				common.RenderJSON(w, r, http.StatusInternalServerError, "_")
 			}
 		}
 		http.SetCookie(w, cookie)
-		common.RenderJson(w, r, http.StatusOK, user)
+		common.RenderJSON(w, r, http.StatusOK, user)
 		//else if passwords don't match then redirect user to registration page
-	} else if !isRegistered {
-		common.RenderJson(w, r, http.StatusNotFound, "You're not registered")
+	} else {
+		common.RenderJSON(w, r, http.StatusUnauthorized, "_")
 	}
 }
 
-//SignupFunc function implements user's registration
-func SignupFunc(w http.ResponseWriter, r *http.Request) {
+//Signup function implements user's registration
+func Signup(w http.ResponseWriter, r *http.Request) {
 	var user data.User
 	user.ID = model.GenerateID()
 	err := json.NewDecoder(r.Body).Decode(&user)
@@ -72,35 +68,38 @@ func SignupFunc(w http.ResponseWriter, r *http.Request) {
 		logger.Logger.Errorf("Error, %s", err)
 	}
 	// get entered values from the registration form
-	password, _ := model.HashPassword(user.Signin.Password)
+	password, err := model.HashPassword(user.Signin.Password)
+	if err != nil {
+		logger.Logger.Errorf("Error, %s", err)
+	}
 	user.Signin.Password = password
 	//add user to database and get his id
 	user, err = database.AddUser(user)
 	if err != nil {
-		logger.Logger.Errorf("Error, %s", err)
+		common.RenderJSON(w, r, http.StatusInternalServerError, "_")
 	}
-	common.RenderJson(w, r, http.StatusOK, user)
+	common.RenderJSON(w, r, http.StatusOK, user)
 }
 
-//LogoutFunc implements logging out - deletes cookie from db
-func LogoutFunc(w http.ResponseWriter, r *http.Request) {
+//Logout implements logging out - deletes cookie from db
+func Logout(w http.ResponseWriter, r *http.Request) {
 	id, arr := len(r.Cookies())-1, r.Cookies()
 	cookie := arr[id]
 	sessionToken := cookie.Name
 	_, err := database.Client.LRem(sessionToken, 0, cookie.Value).Result()
 	if err != nil {
-		logger.Logger.Errorf("Error, %s", err)
+		common.RenderJSON(w, r, http.StatusInternalServerError, "_")
 	}
 	cookie = &http.Cookie{
 		Name:   sessionToken,
 		MaxAge: -1,
 	}
 	http.SetCookie(w, cookie)
-	common.RenderJson(w, r, http.StatusOK, "You're logged out!")
+	common.RenderJSON(w, r, http.StatusNoContent, "_")
 }
 
-//UpdatePageFunc deletes user
-func UpdatePageFunc(w http.ResponseWriter, r *http.Request) {
+//UpdateUserPage deletes user
+func UpdateUserPage(w http.ResponseWriter, r *http.Request) {
 	var user data.User
 	id, err := uuid.Parse(bone.GetValue(r, "id"))
 	if err != nil {
@@ -116,25 +115,28 @@ func UpdatePageFunc(w http.ResponseWriter, r *http.Request) {
 		logger.Logger.Errorf("Error, %s", err)
 	}
 	// get entered values from the registration form
-	password, _ := model.HashPassword(user.Signin.Password)
-	user.Signin.Password = password
-	//add user to database and get his id
-	user, err = database.UpdateUser(user, id)
+	password, err := model.HashPassword(user.Signin.Password)
 	if err != nil {
 		logger.Logger.Errorf("Error, %s", err)
 	}
-	common.RenderJson(w, r, http.StatusOK, user)
+	user.Signin.Password = password
+	//add user to database and get his id
+	err = database.UpdateUser(user, id)
+	if err != nil {
+		common.RenderJSON(w, r, http.StatusInternalServerError, "_")
+	}
+	common.RenderJSON(w, r, http.StatusOK, user)
 }
 
-//DeletePageFunc deletes user's page
-func DeletePageFunc(w http.ResponseWriter, r *http.Request) {
+//DeleteUserPage deletes user's page
+func DeleteUserPage(w http.ResponseWriter, r *http.Request) {
 	id, err := uuid.Parse(bone.GetValue(r, "id"))
 	if err != nil {
 		logger.Logger.Errorf("Error, %s", err)
 	}
 	err = database.DeleteUser(id)
 	if err != nil {
-		logger.Logger.Errorf("Error, %s", err)
+		common.RenderJSON(w, r, http.StatusInternalServerError, "_")
 	}
-	common.RenderJson(w, r, http.StatusOK, "User was deleted successfully!")
+	common.RenderJSON(w, r, http.StatusNotFound, "User was deleted successfully!")
 }
