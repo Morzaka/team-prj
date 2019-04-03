@@ -31,6 +31,7 @@ func main() {
 		fmt.Printf("Error logger not loaded, %s \n", err)
 		return
 	}
+
 	err = database.PostgresInit()
 	if err != nil {
 		fmt.Printf("Error while connecting to postgres database, %s \n", err)
