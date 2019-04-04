@@ -35,5 +35,6 @@ deploying:
     - git commit --allow-empty -m "$CI_COMMIT_MESSAGE"
     - git branch -v
     - git push -f https://heroku:${HEROKU_KEY}@git.heroku.com/team-projectv1.git publish-to-heroku:master
+    - heroku logs
   only:
     - master
