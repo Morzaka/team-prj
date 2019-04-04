@@ -1,14 +1,51 @@
 package database
 
 import (
-	"database/sql"
-	"errors"
-	"fmt"
-	"github.com/google/uuid"
-	"team-project/services/data"
 	"testing"
+	"fmt"
+
+	"github.com/google/uuid"
+	"github.com/DATA-DOG/go-sqlmock"
+
+	"team-project/services/data"
 )
 
+func TestAddUser(t *testing.T){
+	s := "08307904-f18e-4fb8-9d18-29cfad38ffaf"
+	id, err := uuid.Parse(s)
+	if err != nil {
+		fmt.Printf("Error while parsing string to uuid, %s \n", err)
+		return
+	}
+	user:=data.User{ID: id,
+		Signin: data.Signin{
+			Login:    "whythat",
+			Password: "whythat",
+		},
+		Name:    "Yuri",
+		Surname: "Zhykin",
+		Role:    "User"}
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+	}
+	Db=db
+	defer db.Close()
+	mock.ExpectBegin()
+	mock.ExpectExec("INSERT INTO public.user").WithArgs(user).WillReturnResult(sqlmock.NewResult(user))
+	mock.ExpectCommit()
+
+	// now we execute our method
+	if user, err = AddUser(user); err != nil {
+		t.Errorf("error was not expected while adding user: %s", err)
+	}
+	// we make sure that all expectations were met
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Errorf("there were unfulfilled expectations: %s", err)
+	}
+}
+
+/*
 func MockDatabase() error {
 	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s "+"password=%s dbname=%s sslmode=disable",
 		"localhost", "5432", "postgres", "postgres", "travel_test")
@@ -121,3 +158,4 @@ func TestDeleteUser(t *testing.T) {
 		t.Errorf("Failed deleting user")
 	}
 }
+*/
