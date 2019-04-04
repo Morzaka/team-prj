@@ -1,9 +1,11 @@
 package services
 
 import (
-	"github.com/go-zoo/bone"
 	"team-project/services/authorization"
+	"team-project/services/booking"
 	"team-project/services/model"
+
+	"github.com/go-zoo/bone"
 )
 
 //NewRouter creates a router for URL
@@ -19,12 +21,12 @@ func NewRouter() *bone.Mux {
 	subV1.DeleteFunc("/user/:id", authorization.DeletePageFunc)
 	subV1.PatchFunc("/user/:id", authorization.UpdatePageFunc)
 
-	// tickets routs
-	subV1.GetFunc("/books", books.Index)
-	subV1.GetFunc("/books/:id", books.Show)
-	subV1.PostFunc("/books/create", books.CreateProcess)
-	subV1.PatchFunc("/books/update/:id", books.UpdateProcess)
-	subV1.DeleteFunc("/books/delete/process", books.DeleteProcess)
+	// Tickets routs
+	subV1.GetFunc("/tickets", booking.GetAllTickets)
+	subV1.GetFunc("/ticket/:id", booking.GetOneTicket)
+	subV1.PostFunc("/ticket", booking.CreateTicket)
+	subV1.PatchFunc("/ticket/:id", booking.UpdateTicket)
+	subV1.DeleteFunc("/ticket/:id", booking.DeleteTicket)
 
 	return router
 }
