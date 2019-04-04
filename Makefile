@@ -1,9 +1,14 @@
+validate:
+	swagger validate ./swagger/swagger.yaml
+
+
 serve:
 	swagger serve -F=swagger ./swagger/swagger.yaml
 
 
-validate:
-	swagger validate ./swagger/swagger.yml
+all:
+	swagger validate ./swagger/swagger.yaml
+	swagger serve -F=swagger ./swagger/swagger.yaml
 
 
-.PHONY:swaggerApi validate
+
