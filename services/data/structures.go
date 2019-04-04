@@ -19,6 +19,11 @@ type Signin struct {
 
 //Train is Model
 type Train struct {
-	ID    int
-	Route int
+	ID            int    `json:"id"`
+	DepartureCity string `json:"DepartureCity"`
+	ArrivalCity   string `json:"ArrivalCity"`
+	DepartureTime string `json:"DepartureTime"`
+	DepartureDate string `json:"DepartureDate"`
+	ArrivalTime   string `json:"ArrivalTime"`
+	ArrivalDate   string `json:"ArrivalDate"`
 }
