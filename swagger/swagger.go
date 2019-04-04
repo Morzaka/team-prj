@@ -22,6 +22,7 @@ import (
 //
 // swagger:meta
 
+//GetHello is a handler function for swagger testing
 func GetHello(w http.ResponseWriter, r *http.Request) {
 	// swagger:operation GET /hello/{name} hello Hello
 	//
