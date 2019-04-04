@@ -30,20 +30,20 @@ func CheckPasswordHash(password, hash string) bool {
 	return err == nil
 }
 
-//JsonEncoding encode data to JSON
-func JsonEncoding(w http.ResponseWriter, data interface{}) {
-	dataJson, err := json.Marshal(data)
+//JSONEncoding encode data to JSON
+func JSONEncoding(w http.ResponseWriter, data interface{}) {
+	dataJSON, err := json.Marshal(data)
 	if err != nil {
 		fmt.Fprintf(w, "Error: %s", err)
 	}
-	_, err = w.Write(dataJson)
+	_, err = w.Write(dataJSON)
 	if err != nil {
 		logger.Logger.Errorf("Error, %s", err)
 	}
 }
 
-//GetId parse id from request
-func GetId(r *http.Request) (uuid.UUID, error) {
+//GetID parse id from request
+func GetID(r *http.Request) (uuid.UUID, error) {
 	id, err := uuid.Parse(bone.GetValue(r, "id"))
 	if err != nil {
 		return id, err

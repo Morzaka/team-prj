@@ -25,6 +25,7 @@ var (
 	deleteItem = "DELETE FROM tickets WHERE id=$1;"
 )
 
+//AllTickets sends a query for all tickets
 func AllTickets() (data.Tickets, error) {
 	//rows, err := configurations.DB.Query("SELECT * FROM tickets")
 	rows, err := Db.Query(getAllItems)
@@ -36,7 +37,7 @@ func AllTickets() (data.Tickets, error) {
 	tkts := make(data.Tickets, 0)
 	for rows.Next() {
 		tk := data.Ticket{}
-		err := rows.Scan(&tk.Id, &tk.TrainId, &tk.PlaneId, &tk.UserId,
+		err := rows.Scan(&tk.ID, &tk.TrainID, &tk.PlaneID, &tk.UserID,
 			&tk.Place, &tk.TicketType, &tk.Discount, &tk.Price, &tk.TotalPrice,
 			&tk.Name, &tk.Surname) /*, &tk.From_place, &tk.Departure_date,
 		&tk.Departure_time, &tk.To_place, &tk.Arrival_date,
@@ -52,11 +53,12 @@ func AllTickets() (data.Tickets, error) {
 	return tkts, nil
 }
 
+//OneTicket sends a query for one ticket
 func OneTicket(id uuid.UUID) (data.Ticket, error) {
 	tk := data.Ticket{}
 	row := Db.QueryRow(getOneItem, id)
 
-	err := row.Scan(&tk.Id, &tk.TrainId, &tk.PlaneId, &tk.UserId,
+	err := row.Scan(&tk.ID, &tk.TrainID, &tk.PlaneID, &tk.UserID,
 		&tk.Place, &tk.TicketType, &tk.Discount, &tk.Price, &tk.TotalPrice,
 		&tk.Name, &tk.Surname) /*, &tk.From_place, &tk.Departure_date,
 	&tk.Departure_time, &tk.To_place, &tk.Arrival_date,
@@ -67,8 +69,9 @@ func OneTicket(id uuid.UUID) (data.Ticket, error) {
 	return tk, nil
 }
 
+//PutTicket sends a query for creating new one ticket
 func PutTicket(tk data.Ticket) error {
-	_, err := Db.Exec(addOneItem, tk.Id, tk.Place, tk.TicketType, tk.Discount,
+	_, err := Db.Exec(addOneItem, tk.ID, tk.Place, tk.TicketType, tk.Discount,
 		tk.Price, tk.TotalPrice, tk.Name, tk.Surname)
 	if err != nil {
 		return errors.New("500. Internal Server Error." + err.Error())
@@ -76,8 +79,9 @@ func PutTicket(tk data.Ticket) error {
 	return nil
 }
 
+//UpdTicket sends a query for updating one ticket by ID
 func UpdTicket(tk data.Ticket) error {
-	_, err := Db.Exec(updateItem, tk.Id, tk.Place, tk.TicketType, tk.Discount,
+	_, err := Db.Exec(updateItem, tk.ID, tk.Place, tk.TicketType, tk.Discount,
 		tk.Price, tk.TotalPrice, tk.Name, tk.Surname)
 	if err != nil {
 		return err
@@ -85,6 +89,7 @@ func UpdTicket(tk data.Ticket) error {
 	return nil
 }
 
+//DelTicket sends a query for deleting one ticket by ID
 func DelTicket(id uuid.UUID) error {
 	_, err := Db.Exec(deleteItem, id)
 	if err != nil {

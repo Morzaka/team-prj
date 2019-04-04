@@ -21,10 +21,10 @@ type Signin struct {
 
 //Ticket datastructure
 type Ticket struct {
-	Id         uuid.UUID `json:"id"`
-	TrainId    uuid.UUID `json:"train_id"`
-	PlaneId    uuid.UUID `json:"plane_id"`
-	UserId     uuid.UUID `json:"user_id"`
+	ID         uuid.UUID `json:"id"`
+	TrainID    uuid.UUID `json:"train_id"`
+	PlaneID    uuid.UUID `json:"plane_id"`
+	UserID     uuid.UUID `json:"user_id"`
 	Place      int       `json:"place"`
 	TicketType string    `json:"ticket_type"`
 	Discount   string    `json:"discount"`
@@ -40,4 +40,5 @@ type Ticket struct {
 	//Arrival_time   time.Time `json:"arrival_time"`
 }
 
+//Tickets is a slice of Ticket
 type Tickets []Ticket

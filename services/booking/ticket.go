@@ -21,6 +21,7 @@ func validateForm(tk data.Ticket) error {
 	return nil
 }
 
+//GetAllTickets for GETing information about all tickets
 func GetAllTickets(w http.ResponseWriter, r *http.Request) {
 	tkts, err := database.AllTickets()
 	if err != nil {
@@ -28,11 +29,12 @@ func GetAllTickets(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
-	model.JsonEncoding(w, tkts)
+	model.JSONEncoding(w, tkts)
 }
 
+//GetOneTicket for GETing information about one tickets
 func GetOneTicket(w http.ResponseWriter, r *http.Request) {
-	id, err := model.GetId(r)
+	id, err := model.GetID(r)
 	if err != nil {
 		http.Error(w, http.StatusText(400), http.StatusBadRequest)
 	}
@@ -47,13 +49,14 @@ func GetOneTicket(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
-	model.JsonEncoding(w, tk)
+	model.JSONEncoding(w, tk)
 }
 
+//CreateTicket (POST) for creating one tickets & add to DB
 func CreateTicket(w http.ResponseWriter, r *http.Request) {
 	// get values from client (json format)
 	tk := data.Ticket{}
-	tk.Id = model.GenerateID()
+	tk.ID = model.GenerateID()
 	err := json.NewDecoder(r.Body).Decode(&tk)
 	if err != nil {
 		logger.Logger.Errorf("Error, %s", err)
@@ -85,9 +88,10 @@ func CreateTicket(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+//UpdateTicket (PATCH) for updating one tickets in DB
 func UpdateTicket(w http.ResponseWriter, r *http.Request) {
 	// get values from client (json format)
-	id, err := model.GetId(r)
+	id, err := model.GetID(r)
 	if err != nil {
 		http.Error(w, http.StatusText(400), http.StatusBadRequest)
 	}
@@ -97,7 +101,7 @@ func UpdateTicket(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(400), http.StatusBadRequest)
 	}
 
-	tk.Id = id
+	tk.ID = id
 
 	// validate form values
 	err = validateForm(tk)
@@ -124,8 +128,9 @@ func UpdateTicket(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+//DeleteTicket (DELETE) for deleting one tickets in DB by id
 func DeleteTicket(w http.ResponseWriter, r *http.Request) {
-	id, err := model.GetId(r)
+	id, err := model.GetID(r)
 	if err != nil {
 		http.Error(w, http.StatusText(400), http.StatusBadRequest)
 	}
