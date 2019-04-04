@@ -16,3 +16,9 @@ type Signin struct {
 	Login    string `json:"login"`
 	Password string `json:"password"`
 }
+
+//Train is Model
+type Train struct {
+	ID    int
+	Route int
+}

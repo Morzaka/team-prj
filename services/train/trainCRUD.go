@@ -3,7 +3,8 @@ package train
 import (
 	"database/sql"
 	"fmt"
-	train "team-project/services/train/model"
+	"strconv"
+	"team-project/services/data"
 
 	_ "github.com/lib/pq" // pq lib for using postgres
 )
@@ -22,7 +23,7 @@ func ConnectToDb() *sql.DB {
 }
 
 //GetAllTrains is a method
-func GetAllTrains() []train.Train {
+func GetAllTrains() []data.Train {
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		panic(err)
@@ -37,9 +38,9 @@ func GetAllTrains() []train.Train {
 		panic(err)
 	}
 
-	trains := []train.Train{}
+	trains := []data.Train{}
 	for rows.Next() {
-		t := train.Train{}
+		t := data.Train{}
 		err := rows.Scan(&t.ID, &t.Route)
 		if err != nil {
 			t.Route = 0
@@ -52,24 +53,25 @@ func GetAllTrains() []train.Train {
 }
 
 //GetTrain is a method
-func GetTrain(id int) train.Train {
+func GetTrain(id string) (data.Train, error) {
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		panic(err)
 	}
 	defer db.Close()
 
-	row := db.QueryRow("select * from Train where trainid = $1", id)
-	t := train.Train{}
+	idint, err := strconv.Atoi(id)
+	row := db.QueryRow("select * from Train where trainid = $1", idint)
+	t := data.Train{}
 	err = row.Scan(&t.ID, &t.Route)
 	if err != nil {
 		panic(err)
 	}
-	return t
+	return t, nil
 }
 
 //AddTrain is a method
-func AddTrain(t train.Train) {
+func AddTrain(t data.Train) {
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		panic(err)
@@ -81,19 +83,25 @@ func AddTrain(t train.Train) {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("Added Train: ")
-	t.Print()
 }
 
 //UpdateTrain is a method
-func UpdateTrain(id int, route int) {
+func UpdateTrain(id string, route string) {
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		panic(err)
 	}
 	defer db.Close()
 
-	_, err = db.Exec("update public.train set route = $1 where trainid = $2", route, id)
+	idint, err := strconv.Atoi(id)
+	if err != nil {
+		panic(err)
+	}
+	routeint, err := strconv.Atoi(route)
+	if err != nil {
+		panic(err)
+	}
+	_, err = db.Exec("update public.train set route = $1 where trainid = $2", routeint, idint)
 
 	if err != nil {
 		panic(err)
@@ -103,16 +111,36 @@ func UpdateTrain(id int, route int) {
 }
 
 //DeleteTrain is a method
-func DeleteTrain(id int) {
+func DeleteTrain(id string) {
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		panic(err)
 	}
 	defer db.Close()
 
-	_, err = db.Exec("delete from Train where trainid = $1", id)
+	idint, err := strconv.Atoi(id)
+	if err != nil {
+		panic(err)
+	}
+	_, err = db.Exec("delete from trains where id = $1", idint)
 	if err != nil {
 		panic(err)
 	}
 	fmt.Println("Deleted train with id", id)
+}
+
+//GetLastTrain is a method
+func GetLastTrain() {
+	db, err := sql.Open("postgres", connStr)
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
+
+	row := db.QueryRow("select id from trains where trainid = $1")
+	t := data.Train{}
+	err = row.Scan(&t.ID, &t.Route)
+	if err != nil {
+		panic(err)
+	}
 }

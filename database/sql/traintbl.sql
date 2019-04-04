@@ -1,6 +1,6 @@
-CREATE TABLE public."Train"
+CREATE TABLE public.trains
 (
-    "trainID" uuid NOT NULL,
-    route bigint NOT NULL,
-    PRIMARY KEY ("trainID")
+    id serial,
+    route bigint,
+    PRIMARY KEY (id)
 )
