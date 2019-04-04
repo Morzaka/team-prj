@@ -1,39 +1,17 @@
 package train
 
 import (
-	"database/sql"
 	"fmt"
 	"strconv"
+	"team-project/database"
 	"team-project/services/data"
 
 	_ "github.com/lib/pq" // pq lib for using postgres
 )
 
-const (
-	connStr string = "host=localhost port=5432 user=postgres password=1488 dbname=team-project sslmode=disable"
-)
-
-//ConnectToDb is a method
-func ConnectToDb() *sql.DB {
-	db, err := sql.Open("postgres", connStr)
-	if err != nil {
-		panic(err)
-	}
-	return db
-}
-
 //GetAllTrains is a method
 func GetAllTrains() []data.Train {
-	db, err := sql.Open("postgres", connStr)
-	if err != nil {
-		panic(err)
-	}
-	defer db.Close()
-	err = db.Ping()
-	if err != nil {
-		panic(err)
-	}
-	rows, err := db.Query("select * from public.train;")
+	rows, err := database.Db.Query("select * from public.train;")
 	if err != nil {
 		panic(err)
 	}
@@ -41,9 +19,8 @@ func GetAllTrains() []data.Train {
 	trains := []data.Train{}
 	for rows.Next() {
 		t := data.Train{}
-		err := rows.Scan(&t.ID, &t.Route)
+		err := rows.Scan(&t.ID, &t.DepartureCity, &t.ArrivalCity, &t.DepartureTime, &t.DepartureDate, &t.ArrivalTime, &t.ArrivalDate)
 		if err != nil {
-			t.Route = 0
 			trains = append(trains, t)
 			continue
 		}
@@ -54,16 +31,10 @@ func GetAllTrains() []data.Train {
 
 //GetTrain is a method
 func GetTrain(id string) (data.Train, error) {
-	db, err := sql.Open("postgres", connStr)
-	if err != nil {
-		panic(err)
-	}
-	defer db.Close()
-
 	idint, err := strconv.Atoi(id)
-	row := db.QueryRow("select * from Train where trainid = $1", idint)
+	row := database.Db.QueryRow("select * from trains where id = $1", idint)
 	t := data.Train{}
-	err = row.Scan(&t.ID, &t.Route)
+	err = row.Scan(&t.ID, &t.DepartureCity, &t.ArrivalCity, &t.DepartureTime, &t.DepartureDate, &t.ArrivalTime, &t.ArrivalDate)
 	if err != nil {
 		panic(err)
 	}
@@ -72,13 +43,7 @@ func GetTrain(id string) (data.Train, error) {
 
 //AddTrain is a method
 func AddTrain(t data.Train) {
-	db, err := sql.Open("postgres", connStr)
-	if err != nil {
-		panic(err)
-	}
-	defer db.Close()
-
-	_, err = db.Exec("insert into Train (route) values ($1)", t.Route)
+	_, err := database.Db.Exec("insert into trains (departure_city,arrival_city,departure_time,departure_date,arrival_time,arrival_date) values ($1,$2,$3,$4,$5,$6)", t.DepartureCity, t.ArrivalCity, t.DepartureTime, t.DepartureDate, t.ArrivalTime, t.ArrivalDate)
 
 	if err != nil {
 		panic(err)
@@ -86,22 +51,12 @@ func AddTrain(t data.Train) {
 }
 
 //UpdateTrain is a method
-func UpdateTrain(id string, route string) {
-	db, err := sql.Open("postgres", connStr)
-	if err != nil {
-		panic(err)
-	}
-	defer db.Close()
-
+func UpdateTrain(id string, departureCity string, arrivalCity string, departureTime string, departureDate string, arrivalTime string, arrivalDate string) {
 	idint, err := strconv.Atoi(id)
 	if err != nil {
 		panic(err)
 	}
-	routeint, err := strconv.Atoi(route)
-	if err != nil {
-		panic(err)
-	}
-	_, err = db.Exec("update public.train set route = $1 where trainid = $2", routeint, idint)
+	_, err = database.Db.Exec("update public.trains set departure_city = $1 , arrival_city = $2, departure_time = $3, departure_date = $4, arrival_time = $5, arrival_date = $6 where id = $7", departureCity, arrivalCity, departureTime, departureDate, arrivalTime, arrivalDate, idint)
 
 	if err != nil {
 		panic(err)
@@ -112,17 +67,11 @@ func UpdateTrain(id string, route string) {
 
 //DeleteTrain is a method
 func DeleteTrain(id string) {
-	db, err := sql.Open("postgres", connStr)
-	if err != nil {
-		panic(err)
-	}
-	defer db.Close()
-
 	idint, err := strconv.Atoi(id)
 	if err != nil {
 		panic(err)
 	}
-	_, err = db.Exec("delete from trains where id = $1", idint)
+	_, err = database.Db.Exec("delete from trains where id = $1", idint)
 	if err != nil {
 		panic(err)
 	}
@@ -131,15 +80,9 @@ func DeleteTrain(id string) {
 
 //GetLastTrain is a method
 func GetLastTrain() {
-	db, err := sql.Open("postgres", connStr)
-	if err != nil {
-		panic(err)
-	}
-	defer db.Close()
-
-	row := db.QueryRow("select id from trains where trainid = $1")
+	row := database.Db.QueryRow("select * from trains where id = $1")
 	t := data.Train{}
-	err = row.Scan(&t.ID, &t.Route)
+	err := row.Scan(&t.ID, &t.DepartureCity, &t.ArrivalCity, &t.DepartureTime, &t.DepartureDate, &t.ArrivalTime, &t.ArrivalDate)
 	if err != nil {
 		panic(err)
 	}
