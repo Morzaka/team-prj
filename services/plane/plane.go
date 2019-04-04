@@ -3,15 +3,15 @@ package plane
 import (
 	"fmt"
 	"github.com/google/uuid"
-	_ "github.com/lib/pq"
 	"team-project/database"
 	"team-project/services/model"
 )
 
+// Plane struct contains plane data
 type Plane struct {
 	id             uuid.UUID
-	departure_city string
-	arrival_city   string
+	departureCity string
+	arrivalCity   string
 }
 
 // GetAll is a function for getting all row and column from table
@@ -27,7 +27,7 @@ func GetAll() {
 
 	for rows.Next() {
 		p := Plane{}
-		err := rows.Scan(&p.id, &p.departure_city, &p.arrival_city)
+		err := rows.Scan(&p.id, &p.departureCity, &p.arrivalCity)
 		if err != nil {
 			fmt.Println(err)
 			continue
@@ -35,7 +35,7 @@ func GetAll() {
 		planes = append(planes, p)
 	}
 	for _, p := range planes {
-		fmt.Println(p.id, p.departure_city, p.arrival_city)
+		fmt.Println(p.id, p.departureCity, p.arrivalCity)
 	}
 }
 
@@ -44,19 +44,19 @@ func GetID(id uuid.UUID) {
 
 	row := database.Db.QueryRow("select * from Planes where id = $1", id)
 	p := Plane{}
-	err := row.Scan(&p.id, &p.departure_city, &p.arrival_city)
+	err := row.Scan(&p.id, &p.departureCity, &p.arrivalCity)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	fmt.Println(p.id, p.departure_city, p.arrival_city)
+	fmt.Println(p.id, p.departureCity, p.arrivalCity)
 
 }
 
 //Add is a function for adding new row to table
-func Add(departure_city string, arrival_city string) {
+func Add(departureCity string, arrivalCity string) {
 
-	result, err := database.Db.Exec("insert into planes (id,departure_city,arrival_city) values ($1, $2, $3)", model.GenerateID(), departure_city, arrival_city)
+	result, err := database.Db.Exec("insert into planes (id,departure_city,arrival_city) values ($1, $2, $3)", model.GenerateID(), departureCity, arrivalCity)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -67,9 +67,9 @@ func Add(departure_city string, arrival_city string) {
 }
 
 // Update is a function for updating number of seats in train using id
-func Update(arrival_city string, id uuid.UUID) {
+func Update(arrivalCity string, id uuid.UUID) {
 
-	result, err := database.Db.Exec("update Planes set arrival_city = $1 where id = $2", arrival_city, id)
+	result, err := database.Db.Exec("update Planes set arrival_city = $1 where id = $2", arrivalCity, id)
 	if err != nil {
 		fmt.Println(err)
 		return
