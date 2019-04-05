@@ -6,8 +6,8 @@ import (
 	"team-project/database"
 )
 
-//GetStartFunc is a handler function for start page
-func GetStartFunc(w http.ResponseWriter, r *http.Request) {
+//GetStart is a handler function for start page
+func GetStart(w http.ResponseWriter, r *http.Request) {
 	var active = false
 	if len(r.Cookies()) <= 0 {
 		// If the cookie is not set, return an unauthorized status
