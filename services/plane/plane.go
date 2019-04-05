@@ -7,13 +7,6 @@ import (
 	"team-project/services/model"
 )
 
-// Plane struct contains plane data
-type Plane struct {
-	id             uuid.UUID
-	departureCity string
-	arrivalCity   string
-}
-
 // GetAll is a function for getting all row and column from table
 func GetAll() {
 
@@ -53,7 +46,7 @@ func GetID(id uuid.UUID) {
 
 }
 
-//Add is a function for adding new row to table
+// Add is a function for adding new row to table
 func Add(departureCity string, arrivalCity string) {
 
 	result, err := database.Db.Exec("insert into planes (id,departure_city,arrival_city) values ($1, $2, $3)", model.GenerateID(), departureCity, arrivalCity)

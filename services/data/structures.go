@@ -16,3 +16,10 @@ type Signin struct {
 	Login    string `json:"login"`
 	Password string `json:"password"`
 }
+
+// Plane struct contains plane data
+type Plane struct {
+	id            uuid.UUID
+	departureCity string
+	arrivalCity   string
+}
