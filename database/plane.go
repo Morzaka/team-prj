@@ -24,7 +24,7 @@ func GetPlanes() ([]data.Plane, error) {
 	planes := []data.Plane{}
 	for rows.Next() {
 		p := data.Plane{}
-		err := rows.Scan(&p.Id, &p.DepartureCity, &p.ArrivalCity)
+		err := rows.Scan(&p.ID, &p.DepartureCity, &p.ArrivalCity)
 		if err != nil {
 			return []data.Plane{}, err
 		}
@@ -36,14 +36,14 @@ func GetPlanes() ([]data.Plane, error) {
 // GetPlane is a function for getting Plane using id
 func GetPlane(id uuid.UUID) (data.Plane, error) {
 	p := data.Plane{}
-	err := Db.QueryRow(selectPlane, id).Scan(&p.Id, &p.DepartureCity, &p.ArrivalCity)
+	err := Db.QueryRow(selectPlane, id).Scan(&p.ID, &p.DepartureCity, &p.ArrivalCity)
 	if err != nil {
 		return data.Plane{}, err
 	}
 	return p, nil
 }
 
-//Update is a function for updating Plane using id
+// UpdatePlane is a function for updating Plane using id
 func UpdatePlane(plane data.Plane, id uuid.UUID) (data.Plane, error) {
 	_, err := Db.Exec(updatePlane, id, plane.DepartureCity, plane.ArrivalCity)
 	if err != nil {
@@ -54,7 +54,7 @@ func UpdatePlane(plane data.Plane, id uuid.UUID) (data.Plane, error) {
 
 // AddPlane is a function for adding new Plane to table
 func AddPlane(plane data.Plane) (data.Plane, error) {
-	_, err := Db.Exec(insertPlane, plane.Id, plane.DepartureCity, plane.ArrivalCity)
+	_, err := Db.Exec(insertPlane, plane.ID, plane.DepartureCity, plane.ArrivalCity)
 	if err != nil {
 		return data.Plane{}, err
 	}
