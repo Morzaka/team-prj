@@ -28,6 +28,7 @@ func init() {
 //Signin implements signing in
 func Signin(w http.ResponseWriter, r *http.Request) {
 	var user data.Signin
+	time:=time.Now().Add(15 * time.Minute)
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
 		logger.Logger.Errorf("Error, %s", err)
@@ -42,7 +43,7 @@ func Signin(w http.ResponseWriter, r *http.Request) {
 		sessionID := InMemorySession.Init(user.Login)
 		cookie := &http.Cookie{Name: user.Login,
 			Value:   sessionID.String(),
-			Expires: time.Now().Add(1 * time.Minute),
+			Expires: time,
 		}
 		if cookie != nil {
 			//add cookie to redis db
@@ -50,6 +51,7 @@ func Signin(w http.ResponseWriter, r *http.Request) {
 			if err != nil {
 				common.RenderJSON(w, r, http.StatusInternalServerError, "_")
 			}
+			_ = database.Client.ExpireAt(cookie.Name, time)
 		}
 		http.SetCookie(w, cookie)
 		common.RenderJSON(w, r, http.StatusOK, user)
