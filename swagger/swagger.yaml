@@ -1,0 +1,90 @@
+swagger: '2.0'
+info:
+  title: Team project Service API
+  version: 1.0.0
+schemes:
+  - http
+host: localhost:8080
+basePath: /api/v1
+produces:
+  - application/json
+consumes:
+  - application/json
+paths:
+  /hello/{name}:
+    get:
+      summary: Hello message test
+      tags:
+        - HelloMessage
+      parameters:
+        - name: name
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Message is successfully
+          schema:
+            $ref: "#/definitions/HelloMessage"
+        '404':
+          description: Failed
+          schema:
+            $ref: "#/definitions/ErrorMessage"
+  /User:
+    get:
+      summary: Get all users info
+      tags:
+        - get all users
+      responses:
+        '200':
+          description: All users sent
+          schema:
+            $ref: "#/definitions/User"
+        '404':
+          description: Failed to add user
+          schema:
+            $ref: "#/definitions/ErrorMessage"
+    post:
+      summary: Post user to DB
+      tags:
+        - post user
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: The user to create
+          required: true
+          schema:
+            $ref: "#/definitions/User"
+      responses:
+        '201':
+          description: User created
+          schema:
+            $ref: "#/definitions/User"
+        '400':
+          description: Can't add this user or can't parse POST body
+          schema:
+            $ref: "#/definitions/ErrorMessage"
+definitions:
+  HelloMessage:
+    type: object
+    properties:
+      name:
+        type: string
+        description: User name.
+  User:
+    type: object
+    properties:
+      ID:
+        type: string
+        description: The user ID in DB in UUID format.
+      Name:
+        type: string
+        description: User name.
+  ErrorMessage:
+    type: object
+    properties:
+      Message:
+        type: string
+        description: Error message

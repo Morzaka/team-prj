@@ -19,7 +19,6 @@ func TestLoadLog(t *testing.T) {
 	configurations.Config = configurations.Configuration{
 		LogLevel: "error",
 	}
-
 	LogFileName := "project_log_file.log"
 	err := LoadLog(LogFileName)
 	if err != nil {
