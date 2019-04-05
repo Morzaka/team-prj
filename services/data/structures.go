@@ -19,7 +19,8 @@ type Signin struct {
 
 // Plane struct contains plane data
 type Plane struct {
-	id            uuid.UUID
-	departureCity string
-	arrivalCity   string
+	id            uuid.UUID `json:"id"`
+	departureCity string    `json:"departureCity"`
+	arrivalCity   string    `json:"arrivalCity`
+
 }
