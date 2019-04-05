@@ -12,7 +12,7 @@ var Client *redis.Client
 
 //RedisInit initializes a new redis client
 func RedisInit() error {
-	env := os.Getenv("RedisURL")
+	env := os.Getenv("REDIS_URL")
 	u, err := url.Parse(env)
 	password, _ := u.User.Password()
 	Client = redis.NewClient(&redis.Options{
