@@ -23,7 +23,7 @@ func validateForm(tk data.Ticket) error {
 
 //GetAllTickets for GETing information about all tickets
 func GetAllTickets(w http.ResponseWriter, r *http.Request) {
-	tkts, err := database.AllTickets()
+	tkts, err := database.GetAllTickets()
 	if err != nil {
 		http.Error(w, http.StatusText(500), http.StatusInternalServerError)
 		return
@@ -39,7 +39,7 @@ func GetOneTicket(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(400), http.StatusBadRequest)
 	}
 
-	tk, err := database.OneTicket(id)
+	tk, err := database.GetTicket(id)
 	switch {
 	case err == sql.ErrNoRows:
 		http.NotFound(w, r)
@@ -77,7 +77,7 @@ func CreateTicket(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//insert data to DB 'ticket' table
-	err = database.PutTicket(tk)
+	err = database.CreateTicket(tk)
 	switch {
 	case err == sql.ErrNoRows:
 		http.NotFound(w, r)
@@ -117,7 +117,7 @@ func UpdateTicket(w http.ResponseWriter, r *http.Request) {
 		_, err = w.Write([]byte(string("Not Acceptable. Price must be a number.")))
 	}
 
-	err = database.UpdTicket(tk)
+	err = database.UpdateTicket(tk)
 	switch {
 	case err == sql.ErrNoRows:
 		http.NotFound(w, r)
@@ -134,7 +134,7 @@ func DeleteTicket(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, http.StatusText(400), http.StatusBadRequest)
 	}
-	err = database.DelTicket(id)
+	err = database.DeleteTicket(id)
 	if err != nil {
 		logger.Logger.Errorf("Error, %s", err)
 	}
