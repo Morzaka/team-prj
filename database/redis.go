@@ -1,6 +1,7 @@
 package database
 
 import (
+	"net/url"
 	"os"
 
 	"github.com/go-redis/redis"
@@ -11,13 +12,16 @@ var Client *redis.Client
 
 //RedisInit initializes a new redis client
 func RedisInit() error {
+	env := os.Getenv("RedisURL")
+	u, err := url.Parse(env)
+	password, _ := u.User.Password()
 	Client = redis.NewClient(&redis.Options{
-		Addr:     os.Getenv("REDIS_URL"),
-		Password: "", // no password set
-		DB:       0,  // use default DB
+		Addr:     u.Host,
+		Password: password, // no password set
+		DB:       0,        // use default DB
 	})
 
-	_, err := Client.Ping().Result()
+	_, err = Client.Ping().Result()
 	if err != nil {
 		return err
 	}
