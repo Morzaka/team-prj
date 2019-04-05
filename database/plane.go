@@ -2,7 +2,6 @@ package database
 
 import (
 	"github.com/google/uuid"
-	"team-project/database"
 
 	"team-project/services/data"
 )
@@ -17,7 +16,7 @@ var (
 
 func AddPlane(plane data.Plane) (data.Plane, error) {
 	//insert values to the database
-	_, err := Db.Exec(insertPlane, plane.)
+	_, err := Db.Exec(insertPlane, plane.Id, plane.DepartureCity, plane.ArrivalCity)
 	if err != nil {
 		return data.Plane{}, err
 	}
@@ -27,7 +26,7 @@ func AddPlane(plane data.Plane) (data.Plane, error) {
 // DeletePlane is a function for deleting row using id
 func DeletePlane(id uuid.UUID) error {
 
-	_, err := database.Db.Exec(deletePlane, id)
+	_, err := Db.Exec(deletePlane, id)
 	if err != nil {
 		return err
 	}
