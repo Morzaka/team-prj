@@ -4,6 +4,7 @@ import (
 	"github.com/go-zoo/bone"
 	"team-project/services/authorization"
 	"team-project/services/model"
+	"team-project/swagger"
 )
 
 //NewRouter creates a router for URL
@@ -18,5 +19,6 @@ func NewRouter() *bone.Mux {
 	subV1.PostFunc("/logout", authorization.Logout)
 	subV1.DeleteFunc("/user/:id", authorization.DeleteUserPage)
 	subV1.PatchFunc("/user/:id", authorization.UpdateUserPage)
+	subV1.GetFunc("/hello/:name", swagger.GetHello)
 	return router
 }
