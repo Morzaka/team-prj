@@ -7,6 +7,8 @@ import (
 	"github.com/go-redis/redis"
 	//pq lib for using postgres
 	_ "github.com/lib/pq"
+
+	"team-project/configurations"
 )
 
 //Db is a pointer to opened database
