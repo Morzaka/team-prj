@@ -1,9 +1,9 @@
 package database
 
 import (
-	"github.com/go-redis/redis"
+	"os"
 
-	"team-project/configurations"
+	"github.com/go-redis/redis"
 )
 
 //Client  for redis instance
@@ -12,7 +12,7 @@ var Client *redis.Client
 //RedisInit initializes a new redis client
 func RedisInit() error {
 	Client = redis.NewClient(&redis.Options{
-		Addr:     configurations.Config.RedisAddr,
+		Addr:     os.Getenv("REDIS_URL"),
 		Password: "", // no password set
 		DB:       0,  // use default DB
 	})
