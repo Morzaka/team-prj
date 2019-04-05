@@ -1,8 +1,6 @@
 package database
 
 import (
-	"errors"
-
 	"team-project/services/data"
 
 	"github.com/google/uuid"
@@ -74,7 +72,7 @@ func PutTicket(tk data.Ticket) error {
 	_, err := Db.Exec(addOneItem, tk.ID, tk.Place, tk.TicketType, tk.Discount,
 		tk.Price, tk.TotalPrice, tk.Name, tk.Surname)
 	if err != nil {
-		return errors.New("500. Internal Server Error." + err.Error())
+		return err
 	}
 	return nil
 }
@@ -93,7 +91,7 @@ func UpdTicket(tk data.Ticket) error {
 func DelTicket(id uuid.UUID) error {
 	_, err := Db.Exec(deleteItem, id)
 	if err != nil {
-		return errors.New("500. Internal Server Error")
+		return err
 	}
 	return nil
 }
