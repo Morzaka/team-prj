@@ -24,17 +24,15 @@ func TestAddUser(t *testing.T){
 		},
 		Name:    "Yuri",
 		Surname: "Zhykin",
-		Role:    "User"}
+		Role:    "User",
+	}
 	db, mock, err := sqlmock.New()
 	if err != nil {
 		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 	}
 	Db=db
 	defer db.Close()
-	mock.ExpectBegin()
-	mock.ExpectExec("INSERT INTO public.user").WithArgs(user).WillReturnResult(sqlmock.NewResult(user))
-	mock.ExpectCommit()
-
+	mock.ExpectExec("INSERT INTO public.user").WithArgs(user.ID, user.Name, user.Surname, user.Signin.Login, user.Signin.Password, user.Role).WillReturnResult(sqlmock.NewResult(1,1))
 	// now we execute our method
 	if user, err = AddUser(user); err != nil {
 		t.Errorf("error was not expected while adding user: %s", err)
@@ -45,81 +43,37 @@ func TestAddUser(t *testing.T){
 	}
 }
 
-/*
-func MockDatabase() error {
-	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s "+"password=%s dbname=%s sslmode=disable",
-		"localhost", "5432", "postgres", "postgres", "travel_test")
-	db, err := sql.Open("postgres", psqlInfo)
+func TestDeleteUser(t *testing.T){
+	db, mock, err := sqlmock.New()
 	if err != nil {
-		return err
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 	}
-	err = db.Ping()
-	if err != nil {
-		return err
-	}
-	Db = db
-	return nil
-}
-
-func TestAddUser(t *testing.T) {
-	err := MockDatabase()
-	defer Db.Close()
-	if err != nil {
-		fmt.Printf("Error while mocking connection database, %s \n", err)
-		return
-	}
-	s := "08307904-f18e-4fb8-9d18-29cfad38ffaf"
-	id, err := uuid.Parse(s)
+	Db=db
+	defer db.Close()
+	strOK := "08307904-f18e-4fb8-9d18-29cfad38ffaf"
+	idOK, err := uuid.Parse(strOK)
 	if err != nil {
 		fmt.Printf("Error while parsing string to uuid, %s \n", err)
 		return
 	}
-	testData := data.User{
-		ID: id,
-		Signin: data.Signin{
-			Login:    "whythat",
-			Password: "whythat",
-		},
-		Name:    "Yuri",
-		Surname: "Zhykin",
-		Role:    "User",
+	mock.ExpectExec("DELETE").WithArgs(idOK).WillReturnResult(sqlmock.NewResult(0,1))
+	// now we execute our method
+	if err = DeleteUser(idOK); err != nil {
+		t.Errorf("error was not expected while deleting user: %s", err)
 	}
-	_, err = AddUser(testData)
-	if err != nil {
-		t.Errorf("Failed adding user")
+	// we make sure that all expectations were met
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Errorf("there were unfulfilled expectations: %s", err)
 	}
 }
 
-func TestGetUserPassword(t *testing.T) {
-	err := MockDatabase()
-	defer Db.Close()
+func TestUpdateUser(t *testing.T){
+	db, mock, err := sqlmock.New()
 	if err != nil {
-		fmt.Printf("Error while mocking connection database, %s \n", err)
-		return
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 	}
-	testData := []struct {
-		login        string
-		expectedpswd string
-		err          error
-	}{
-		{"romich", "romich", nil},
-		{"whythat", "whythat", nil},
-		{"golang", "", errors.New("sql: no rows in result set")},
-	}
-	for _, testCase := range testData {
-		dbpswd, dberr := GetUserPassword(testCase.login)
-		if testCase.expectedpswd != dbpswd && testCase.err == dberr {
-			t.Errorf("Failed getting password")
-		}
-	}
-}
-
-func TestUpdateUser(t *testing.T) {
-	err := MockDatabase()
-	if err != nil {
-		fmt.Printf("Error while mocking connection database, %s \n", err)
-		return
-	}
+	Db=db
+	defer db.Close()
 	str := "08307904-f18e-4fb8-9d18-29cfad38ffaf"
 	id, err := uuid.Parse(str)
 	if err != nil {
@@ -129,33 +83,46 @@ func TestUpdateUser(t *testing.T) {
 	user := data.User{
 		ID: id,
 		Signin: data.Signin{
-			Login:    "whyso",
-			Password: "whyso",
+			Login:    "whythat",
+			Password: "whythat",
 		},
-		Name:    "Yurko",
-		Surname: "Zhykin",
+		Name:    "Jakob",
+		Surname: "Spalding",
 		Role:    "User",
 	}
-	err = UpdateUser(user, id)
-	if err != nil {
-		t.Errorf("Failed updating user")
+	mock.ExpectExec("UPDATE public.user").WithArgs(id, user.Name, user.Surname, user.Signin.Login, user.Signin.Password, user.Role).WillReturnResult(sqlmock.NewResult(0,1))
+	// now we execute our method
+	if err = UpdateUser(user, id); err != nil {
+		t.Errorf("error was not expected while deleting user: %s", err)
+	}
+	// we make sure that all expectations were met
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Errorf("there were unfulfilled expectations: %s", err)
 	}
 }
 
-func TestDeleteUser(t *testing.T) {
-	err := MockDatabase()
+func TestGetUserPassword(t *testing.T){
+	db, mock, err := sqlmock.New()
 	if err != nil {
-		fmt.Printf("Error while mocking connection database, %s \n", err)
-		return
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 	}
-	strOK := "08307904-f18e-4fb8-9d18-29cfad38ffaf"
-	idOK, err := uuid.Parse(strOK)
-	if err != nil {
-		fmt.Printf("Error while parsing string to uuid, %s \n", err)
-		return
+	Db=db
+	defer db.Close()
+	loginOK:="golang"
+	loginERR:="java"
+	rows:= sqlmock.NewRows([]string{"password"}).AddRow("golang")
+	fmt.Println(rows)
+	mock.ExpectQuery("SELECT").WithArgs(loginOK).WillReturnRows(rows)
+	mock.ExpectQuery("SELECT").WithArgs(loginERR).WillReturnError(fmt.Errorf("no rows found"))
+	if _, err = GetUserPassword(loginOK); err != nil {
+		t.Errorf("error was not expected while getting user: %s", err)
 	}
-	if dberr := DeleteUser(idOK); dberr != nil {
-		t.Errorf("Failed deleting user")
+	if _,err=GetUserPassword(loginERR); err == nil {
+		t.Errorf("error was not expected while getting user: %s", err)
+	}
+	// we make sure that all expectations were met
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Errorf("there were unfulfilled expectations: %s", err)
 	}
 }
-*/
+
