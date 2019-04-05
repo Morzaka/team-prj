@@ -10,6 +10,7 @@ import (
 	"team-project/services/data"
 )
 
+//TestAddUser tests function AddUser
 func TestAddUser(t *testing.T) {
 	s := "08307904-f18e-4fb8-9d18-29cfad38ffaf"
 	id, err := uuid.Parse(s)
@@ -43,6 +44,7 @@ func TestAddUser(t *testing.T) {
 	}
 }
 
+//TestDeleteUser tests function DeleteUser
 func TestDeleteUser(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	if err != nil {
@@ -67,6 +69,7 @@ func TestDeleteUser(t *testing.T) {
 	}
 }
 
+//TestUpdateUser tests function UpdateUser
 func TestUpdateUser(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	if err != nil {
@@ -101,6 +104,7 @@ func TestUpdateUser(t *testing.T) {
 	}
 }
 
+//TestGetUserPassword tests function TestGetUserPassword
 func TestGetUserPassword(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	if err != nil {

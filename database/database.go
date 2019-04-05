@@ -11,8 +11,8 @@ import (
 	"team-project/configurations"
 )
 
-//Db is a pointer to opened database
 var (
+	//Db is a pointer to opened database
 	Db *sql.DB
 	//Client  for redis instance
 	Client *redis.Client
