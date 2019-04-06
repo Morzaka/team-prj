@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-
 	"team-project/configurations"
 	"team-project/database"
 	"team-project/logger"
@@ -37,11 +36,11 @@ func main() {
 		return
 	}
 	defer database.Db.Close()
-	/*err = database.RedisInit()
+	err = database.RedisInit()
 	if err != nil {
 		fmt.Printf("Error while initializing redis client, %s \n", err)
 		return
-	}*/
+	}
 	//Middleware manager
 	middlewareManager := negroni.New()
 	middlewareManager.Use(negroni.NewRecovery())
