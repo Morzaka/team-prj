@@ -29,7 +29,6 @@ func init() {
 //Signin implements signing in
 func Signin(w http.ResponseWriter, r *http.Request) {
 	var user data.Signin
-	time := time.Now().Add(15 * time.Minute)
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
 		logger.Logger.Errorf("Error, %s", err)
@@ -90,6 +89,7 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 	user, err = database.AddUser(user)
 	if err != nil {
 		common.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
+		return
 	}
 	common.RenderJSON(w, r, http.StatusOK, user)
 }
