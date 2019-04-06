@@ -1,8 +1,6 @@
 package data
 
-import (
-	"github.com/google/uuid"
-)
+import "github.com/google/uuid"
 
 //User struct contains user data
 type User struct {
@@ -17,6 +15,13 @@ type User struct {
 type Signin struct {
 	Login    string `json:"login"`
 	Password string `json:"password"`
+}
+
+// Plane struct contains plane data
+type Plane struct {
+	ID            uuid.UUID `json:"id"`
+	DepartureCity string    `json:"departureCity"`
+	ArrivalCity   string    `json:"arrivalCity`
 }
 
 //Ticket datastructure
