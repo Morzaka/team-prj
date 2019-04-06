@@ -16,3 +16,12 @@ type Signin struct {
 	Login    string `json:"login"`
 	Password string `json:"password"`
 }
+
+type Trip struct {
+	Trip_id               uuid.UUID
+	Trip_name             string
+	Trip_ticket_id        uuid.UUID
+	Trip_return_ticket_id uuid.UUID
+	Trip_hotel_id         uuid.UUID
+	Total_trip_price      float32
+}

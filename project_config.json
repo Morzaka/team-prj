@@ -7,7 +7,7 @@
   "PgHost": "localhost",
   "PgPort": "5432",
   "PgUser":"postgres",
-  "PgPassword":"postgres",
-  "PgName":"travel"
+  "PgPassword":"1123581321",
+  "PgName":"project"
 }
 
