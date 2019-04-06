@@ -7,17 +7,17 @@ import (
 )
 
 var (
-	addTrip = `INSERT INTO public.trip (trip_id,trip_name,trip_ticket_id,trip_return_ticket_id,total_trip_price)
+	addTrip = `INSERT INTO public.trip (TripID,TripName,TripTicketId,TripReturnTicketId,TotalTripPrice)
 	VALUES ($1, $2, $3, $4, $5);`
 	selectAllTrips = `SELECT * FROM public.trip;`
-	selectTrip     = `SELECT * FROM public.trip WHERE Trip_id=$1`
-	updateTrip     = `UPDATE public.trip SET trip_name = $2, total_trip_price = $3 WHERE id = $1;`
-	deleteTrip     = `DELETE FROM public.trip WHERE id = $1;`
+	selectTrip     = `SELECT * FROM public.trip WHERE TripID=$1`
+	updateTrip     = `UPDATE public.trip SET TripName = $2, TotalTripPrice = $3 WHERE TripID = $1;`
+	deleteTrip     = `DELETE FROM public.trip WHERE TripID = $1;`
 )
 
 //AddTrip function add new trip into database table
 func AddTrip(trip data.Trip) (data.Trip, error) {
-	_, err := Db.Exec(addTrip, trip.Trip_id, trip.Trip_name, trip.Trip_ticket_id, trip.Trip_return_ticket_id, trip.Total_trip_price)
+	_, err := Db.Exec(addTrip, trip.TripID, trip.TripName, trip.TripTicketId, trip.TripReturnTicketId, trip.TotalTripPrice)
 	if err != nil {
 		return data.Trip{}, err
 	}
@@ -34,7 +34,7 @@ func GetTrips() ([]data.Trip, error) {
 	trips := []data.Trip{}
 	for rows.Next() {
 		p := data.Trip{}
-		err := rows.Scan(&p.Trip_id, &p.Trip_name, &p.Trip_ticket_id, &p.Trip_return_ticket_id, &p.Total_trip_price)
+		err := rows.Scan(&p.TripID, &p.TripName, &p.TripTicketId, &p.TripReturnTicketId, &p.TotalTripPrice)
 		if err != nil {
 			return []data.Trip{}, err
 		}
@@ -45,7 +45,7 @@ func GetTrips() ([]data.Trip, error) {
 
 //UpdateTrip update trip name and total trip price
 func UpdateTrip(trip data.Trip, id uuid.UUID) (data.Trip, error) {
-	_, err := Db.Exec(updateTrip, id, trip.Trip_name, trip.Total_trip_price)
+	_, err := Db.Exec(updateTrip, id, trip.TripName, trip.TotalTripPrice)
 	if err != nil {
 		return data.Trip{}, err
 	}
@@ -64,7 +64,7 @@ func DeleteTrip(id uuid.UUID) error {
 //GetTrip return element which Trip_if equal to id
 func GetTrip(id uuid.UUID) (data.Trip, error) {
 	p := data.Trip{}
-	err := Db.QueryRow(selectTrip, id).Scan(&p.Trip_ticket_id, &p.Trip_name, &p.Trip_ticket_id, &p.Trip_return_ticket_id, &p.Total_trip_price)
+	err := Db.QueryRow(selectTrip, id).Scan(&p.TripTicketId, &p.TripName, &p.TripTicketId, &p.TripReturnTicketId, &p.TotalTripPrice)
 	if err != nil {
 		return data.Trip{}, err
 	}

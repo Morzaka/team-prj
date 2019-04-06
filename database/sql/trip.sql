@@ -1,10 +1,9 @@
 CREATE TABLE public.trip
 (
-  trip_id uuid NOT NULL,
-  trip_name character varying(30) NOT NULL,
-  trip_ticket_id uuid NOT NULL,
-  trip_return_ticket_id uuid,
-  hotel_ticket_id uuid,
-  total_trip_price double precision NOT NULL,
-  CONSTRAINT trip_pkey PRIMARY KEY (trip_id)
+  TripID uuid NOT NULL,
+  TripName character varying(30) NOT NULL,
+  TripTicketId uuid NOT NULL,
+  TripReturnTicketId uuid,
+  TotalTripPrice double precision NOT NULL,
+  CONSTRAINT trip_pkey PRIMARY KEY (TripID)
 )

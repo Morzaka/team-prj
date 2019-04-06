@@ -19,11 +19,11 @@ type Signin struct {
 
 //Trip database structure
 type Trip struct {
-	Trip_id               uuid.UUID `json:"Trip_id"`
-	Trip_name             string    `json:"Trip_name"`
-	Trip_ticket_id        uuid.UUID `json:"Trip_ticket_id"`
-	Trip_return_ticket_id uuid.UUID `json:"Trip_return_ticket_id"`
-	Total_trip_price      float32   `json:"Total_trip_price"`
+	TripID               uuid.UUID `json:"Trip_id"`
+	TripName             string    `json:"Trip_name"`
+	TripTicketId        uuid.UUID `json:"Trip_ticket_id"`
+	TripReturnTicketId uuid.UUID `json:"Trip_return_ticket_id"`
+	TotalTripPrice      float32   `json:"Total_trip_price"`
 }
 
 // Plane struct contains plane data
