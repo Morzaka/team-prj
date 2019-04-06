@@ -21,8 +21,8 @@ type Signin struct {
 type Trip struct {
 	TripID               uuid.UUID `json:"Trip_id"`
 	TripName             string    `json:"Trip_name"`
-	TripTicketId        uuid.UUID `json:"Trip_ticket_id"`
-	TripReturnTicketId uuid.UUID `json:"Trip_return_ticket_id"`
+	TripTicketID        uuid.UUID `json:"Trip_ticket_id"`
+	TripReturnTicketID uuid.UUID `json:"Trip_return_ticket_id"`
 	TotalTripPrice      float32   `json:"Total_trip_price"`
 }
 
