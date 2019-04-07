@@ -17,6 +17,15 @@ type Signin struct {
 	Password string `json:"password"`
 }
 
+//Trip database structure
+type Trip struct {
+	TripID             uuid.UUID `json:"Trip_id"`
+	TripName           string    `json:"Trip_name"`
+	TripTicketID       uuid.UUID `json:"Trip_ticket_id"`
+	TripReturnTicketID uuid.UUID `json:"Trip_return_ticket_id"`
+	TotalTripPrice     float32   `json:"Total_trip_price"`
+}
+
 //Train is Model
 type Train struct {
 	ID            uuid.UUID `json:"id"`
