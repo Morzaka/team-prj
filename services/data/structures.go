@@ -32,7 +32,7 @@ type Train struct {
 type Plane struct {
 	ID            uuid.UUID `json:"id"`
 	DepartureCity string    `json:"departureCity"`
-	ArrivalCity   string    `json:"arrivalCity`
+	ArrivalCity   string    `json:"arrivalCity"`
 }
 
 //Ticket datastructure
