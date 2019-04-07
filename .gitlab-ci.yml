@@ -7,10 +7,12 @@ before_script:
   - apt-get install -y heroku-toolbelt
   - git config user.email "supermaaan@test.com"
   - git config user.name "Super puper"
+  - go get -u github.com/go-swagger/go-swagger/cmd/swagger
 
 stages:
   - vetting
   - tests
+  - validateSwagger
   - deploy
 
 lint:
@@ -25,6 +27,11 @@ unitests:
     - go get -u github.com/gorilla/mux
     - go test ./...
     - go vet
+
+validating:
+  stage: validateSwagger
+  script:
+    - make validate
 
 deploying:
   stage: deploy
