@@ -19,7 +19,6 @@ var (
 
 //PostgresInit connects to postgres database
 func PostgresInit() error {
-	//database connection string
 	db, err := sql.Open("postgres", os.Getenv("DATABASE_URL")) // heroku requires to get connection from env variable
 	if err != nil {
 		return err
@@ -42,7 +41,6 @@ func RedisInit() error {
 		Password: password, // no password set
 		DB:       0,        // use default DB
 	})
-
 	_, err = Client.Ping().Result()
 	if err != nil {
 		return err
