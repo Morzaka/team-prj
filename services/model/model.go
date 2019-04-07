@@ -1,11 +1,7 @@
 package model
 
 import (
-	"encoding/json"
-	"fmt"
 	"net/http"
-
-	"team-project/logger"
 
 	"github.com/go-zoo/bone"
 	"github.com/google/uuid"
@@ -28,18 +24,6 @@ func HashPassword(password string) (string, error) {
 func CheckPasswordHash(password, hash string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	return err == nil
-}
-
-//JSONEncoding encode data to JSON
-func JSONEncoding(w http.ResponseWriter, data interface{}) {
-	dataJSON, err := json.Marshal(data)
-	if err != nil {
-		fmt.Fprintf(w, "Error: %s", err)
-	}
-	_, err = w.Write(dataJSON)
-	if err != nil {
-		logger.Logger.Errorf("Error, %s", err)
-	}
 }
 
 //GetID parse id from request
