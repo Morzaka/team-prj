@@ -1,11 +1,11 @@
 CREATE TABLE public.trains
 (
-    id serial NOT NULL,
+    id uuid DEFAULT uuid_generate_v4() NOT NULL,
     departure_city text NOT NULL,
     arrival_city text NOT NULL,
-    departure_time time without time zone,
-    departure_date date,
-    arrival_time time without time zone,
-    arrival_date date,
+    departure_time text,
+    departure_date text,
+    arrival_time text,
+    arrival_date text,
     PRIMARY KEY (id)
 )

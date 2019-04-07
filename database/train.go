@@ -1,9 +1,8 @@
-package train
+package database
 
 import (
 	"fmt"
 	"strconv"
-	"team-project/database"
 	"team-project/services/data"
 
 	_ "github.com/lib/pq" // pq lib for using postgres
@@ -11,7 +10,7 @@ import (
 
 //GetAllTrains is a method
 func GetAllTrains() []data.Train {
-	rows, err := database.Db.Query("select * from public.train;")
+	rows, err := Db.Query("select * from public.train;")
 	if err != nil {
 		panic(err)
 	}
@@ -32,7 +31,7 @@ func GetAllTrains() []data.Train {
 //GetTrain is a method
 func GetTrain(id string) (data.Train, error) {
 	idint, err := strconv.Atoi(id)
-	row := database.Db.QueryRow("select * from trains where id = $1", idint)
+	row := Db.QueryRow("select * from trains where id = $1", idint)
 	t := data.Train{}
 	err = row.Scan(&t.ID, &t.DepartureCity, &t.ArrivalCity, &t.DepartureTime, &t.DepartureDate, &t.ArrivalTime, &t.ArrivalDate)
 	if err != nil {
@@ -43,7 +42,7 @@ func GetTrain(id string) (data.Train, error) {
 
 //AddTrain is a method
 func AddTrain(t data.Train) {
-	_, err := database.Db.Exec("insert into trains (departure_city,arrival_city,departure_time,departure_date,arrival_time,arrival_date) values ($1,$2,$3,$4,$5,$6)", t.DepartureCity, t.ArrivalCity, t.DepartureTime, t.DepartureDate, t.ArrivalTime, t.ArrivalDate)
+	_, err := Db.Exec("insert into trains (departure_city,arrival_city,departure_time,departure_date,arrival_time,arrival_date) values ($1,$2,$3,$4,$5,$6)", t.DepartureCity, t.ArrivalCity, t.DepartureTime, t.DepartureDate, t.ArrivalTime, t.ArrivalDate)
 
 	if err != nil {
 		panic(err)
@@ -56,7 +55,7 @@ func UpdateTrain(id string, departureCity string, arrivalCity string, departureT
 	if err != nil {
 		panic(err)
 	}
-	_, err = database.Db.Exec("update public.trains set departure_city = $1 , arrival_city = $2, departure_time = $3, departure_date = $4, arrival_time = $5, arrival_date = $6 where id = $7", departureCity, arrivalCity, departureTime, departureDate, arrivalTime, arrivalDate, idint)
+	_, err = Db.Exec("update public.trains set departure_city = $1 , arrival_city = $2, departure_time = $3, departure_date = $4, arrival_time = $5, arrival_date = $6 where id = $7", departureCity, arrivalCity, departureTime, departureDate, arrivalTime, arrivalDate, idint)
 
 	if err != nil {
 		panic(err)
@@ -71,7 +70,7 @@ func DeleteTrain(id string) {
 	if err != nil {
 		panic(err)
 	}
-	_, err = database.Db.Exec("delete from trains where id = $1", idint)
+	_, err = Db.Exec("delete from trains where id = $1", idint)
 	if err != nil {
 		panic(err)
 	}
@@ -80,7 +79,7 @@ func DeleteTrain(id string) {
 
 //GetLastTrain is a method
 func GetLastTrain() {
-	row := database.Db.QueryRow("select * from trains where id = $1")
+	row := Db.QueryRow("select * from trains order by id desc limit 1")
 	t := data.Train{}
 	err := row.Scan(&t.ID, &t.DepartureCity, &t.ArrivalCity, &t.DepartureTime, &t.DepartureDate, &t.ArrivalTime, &t.ArrivalDate)
 	if err != nil {
