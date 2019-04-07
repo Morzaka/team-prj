@@ -20,7 +20,7 @@ func GetTrains(w http.ResponseWriter, r *http.Request) {
 		common.RenderJSON(w, r, 404, emptyResponse)
 		return
 	}
-	common.RenderJSON(w, r, 202, trains)
+	json.NewEncoder(w).Encode(trains)
 }
 
 //GetSingleTrain is a method
