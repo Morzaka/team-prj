@@ -156,3 +156,13 @@ func DeleteUserPage(w http.ResponseWriter, r *http.Request) {
 	}
 	common.RenderJSON(w, r, http.StatusNotFound, "User was deleted successfully!")
 }
+
+//GetAllUsers makes a request to db to get all users
+func GetAllUsers(w http.ResponseWriter, r *http.Request) {
+	users, err := database.GetAllUsers()
+	if err != nil {
+		common.RenderJSON(w, r, http.StatusNoContent, users)
+		return
+	}
+	common.RenderJSON(w, r, http.StatusOK, users)
+}
