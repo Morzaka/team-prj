@@ -10,7 +10,7 @@ import (
 
 //GetAllTrains is a method
 func GetAllTrains() ([]data.Train, error) {
-	rows, err := Db.Query("select * from public.train;")
+	rows, err := Db.Query("select * from public.trains")
 	if err != nil {
 		return nil, err
 	}
