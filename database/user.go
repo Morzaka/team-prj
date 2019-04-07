@@ -8,10 +8,11 @@ import (
 
 var (
 	insertUser = `INSERT INTO public.user (id,name,surname,login, password,role)
-	VALUES ($1, $2, $3, $4, $5, $6) returning id;`
-	selectUser = `SELECT password FROM public.user WHERE login=$1;`
-	updateUser = `UPDATE public.user SET name = $2, surname = $3, login=$4, password=$5, role=$6 WHERE id = $1;`
-	deleteUser = `DELETE FROM public.user WHERE id = $1;`
+	VALUES ($1, $2, $3, $4, $5, $6);`
+	selectUser     = `SELECT password FROM public.user WHERE login=$1;`
+	selectAllUsers = `SELECT * from public.user;`
+	updateUser     = `UPDATE public.user SET name = $2, surname = $3, login=$4, password=$5, role=$6 WHERE id = $1;`
+	deleteUser     = `DELETE FROM public.user WHERE id = $1;`
 )
 
 //AddUser adds info about new user to the database
@@ -53,4 +54,28 @@ func DeleteUser(id uuid.UUID) error {
 		return err
 	}
 	return nil
+}
+
+//GetAllUsers returns slice with all users in db with possible error
+func GetAllUsers() ([]data.User, error) {
+	var users []data.User
+	rows, err := Db.Query(selectAllUsers)
+	if err != nil {
+		return users, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var user data.User
+		err = rows.Scan(&user.ID, &user.Name, &user.Surname, &user.Signin.Login, &user.Signin.Password, &user.Role)
+		if err != nil {
+			return users, err
+		}
+		users = append(users, user)
+	}
+	// get any error encountered during iteration
+	err = rows.Err()
+	if err != nil {
+		return users, err
+	}
+	return users, nil
 }
