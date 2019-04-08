@@ -9,6 +9,7 @@ import (
 
 //RenderJSON render json data to user
 func RenderJSON(w http.ResponseWriter, r *http.Request, status int, response interface{}) {
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	if response == nil {
 		return
@@ -17,7 +18,6 @@ func RenderJSON(w http.ResponseWriter, r *http.Request, status int, response int
 	if err != nil {
 		logger.Logger.Errorf("Error, %s", err)
 	}
-	w.Header().Set("content-type", "application/json")
 	_, err = w.Write(data)
 	if err != nil {
 		logger.Logger.Errorf("Error, %s", err)

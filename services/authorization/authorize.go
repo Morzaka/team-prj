@@ -140,6 +140,7 @@ func UpdateUserPage(w http.ResponseWriter, r *http.Request) {
 		common.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
 		return
 	}
+	user.ID=id
 	common.RenderJSON(w, r, http.StatusOK, user)
 }
 
