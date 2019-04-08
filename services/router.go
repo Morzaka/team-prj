@@ -3,11 +3,11 @@ package services
 import (
 	"team-project/services/authorization"
 	"team-project/services/booking"
-	"team-project/services/model"
+	//	"team-project/services/model"
+	"github.com/go-zoo/bone"
+	"team-project/services/routing"
 	"team-project/services/train"
 	"team-project/swagger"
-
-	"github.com/go-zoo/bone"
 )
 
 //NewRouter creates a router for URL
@@ -16,7 +16,7 @@ func NewRouter() *bone.Mux {
 	subV1 := bone.New()
 	router.SubRoute("/v1", subV1)
 	// GetFunc, PostFunc etc ... takes http.HandlerFunc
-	subV1.GetFunc("/startpage", model.GetStart)
+	//subV1.GetFunc("/startpage", model.GetStart)
 	subV1.PostFunc("/register", authorization.Signup)
 	subV1.PostFunc("/login", authorization.Signin)
 	subV1.PostFunc("/logout", authorization.Logout)
@@ -39,5 +39,6 @@ func NewRouter() *bone.Mux {
 	subV1.PatchFunc("/trains/:id", train.UpdateTrain)
 	subV1.DeleteFunc("/trains/:id", train.DeleteTrain)
 
+	subV1.PostFunc("/routes", routing.FindPath)
 	return router
 }

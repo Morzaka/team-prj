@@ -140,7 +140,7 @@ func UpdateUserPage(w http.ResponseWriter, r *http.Request) {
 		common.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
 		return
 	}
-	user.ID=id
+	user.ID = id
 	common.RenderJSON(w, r, http.StatusOK, user)
 }
 
@@ -166,4 +166,29 @@ func GetAllUsers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	common.RenderJSON(w, r, http.StatusOK, users)
+}
+
+//CheckAccess checks whether user is logged in to give him access to services
+func CheckAccess(w http.ResponseWriter, r *http.Request) bool {
+	var active = false
+	if len(r.Cookies()) <= 0 {
+		// If the cookie is not set, return an unauthorized status
+		w.WriteHeader(http.StatusUnauthorized)
+		return false
+	}
+	id, arr := len(r.Cookies())-1, r.Cookies()
+	cookie := arr[id]
+	sessionToken := cookie.Name
+	response, err := database.Client.LRange(sessionToken, 0, -1).Result()
+	if err != nil {
+		// If there is an error fetching from cache, return an internal server error status
+		w.WriteHeader(http.StatusInternalServerError)
+		return false
+	}
+	for _, v := range response {
+		if v == cookie.Value {
+			active = true
+		}
+	}
+	return active
 }
