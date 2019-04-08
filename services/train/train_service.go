@@ -20,6 +20,7 @@ func GetTrains(w http.ResponseWriter, r *http.Request) {
 		common.RenderJSON(w, r, 404, emptyResponse)
 		return
 	}
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(trains)
 }
 
