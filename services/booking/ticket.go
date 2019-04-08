@@ -125,7 +125,7 @@ func UpdateTicket(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//insert data to DB 'ticket' table
-	err = database.CreateTicket(tk)
+	err = database.UpdateTicket(tk)
 	switch {
 	case err == sql.ErrNoRows:
 		common.RenderJSON(w, r, http.StatusNotFound, emptyResponse)
