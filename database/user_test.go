@@ -18,12 +18,7 @@ func TestAddUser(t *testing.T) {
 	}
 	Db = db
 	defer db.Close()
-	s := "08307904-f18e-4fb8-9d18-29cfad38ffaf"
-	id, err := uuid.Parse(s)
-	if err != nil {
-		fmt.Printf("Error while parsing string to uuid, %s \n", err)
-		return
-	}
+	id:= uuid.Must(uuid.Parse("08307904-f18e-4fb8-9d18-29cfad38ffaf"))
 	user := data.User{ID: id,
 		Signin: data.Signin{
 			Login:    "whythat",
@@ -52,12 +47,7 @@ func TestDeleteUser(t *testing.T) {
 	}
 	Db = db
 	defer db.Close()
-	strOK := "08307904-f18e-4fb8-9d18-29cfad38ffaf"
-	idOK, err := uuid.Parse(strOK)
-	if err != nil {
-		fmt.Printf("Error while parsing string to uuid, %s \n", err)
-		return
-	}
+	idOK:= uuid.Must(uuid.Parse("08307904-f18e-4fb8-9d18-29cfad38ffaf"))
 	mock.ExpectExec("DELETE").WithArgs(idOK).WillReturnResult(sqlmock.NewResult(0, 1))
 	// now we execute our method
 	if err = DeleteUser(idOK); err != nil {
@@ -77,12 +67,7 @@ func TestUpdateUser(t *testing.T) {
 	}
 	Db = db
 	defer db.Close()
-	str := "08307904-f18e-4fb8-9d18-29cfad38ffaf"
-	id, err := uuid.Parse(str)
-	if err != nil {
-		fmt.Printf("Error while parsing string to uuid, %s \n", err)
-		return
-	}
+	id:= uuid.Must(uuid.Parse("08307904-f18e-4fb8-9d18-29cfad38ffaf"))
 	user := data.User{
 		ID: id,
 		Signin: data.Signin{
@@ -137,12 +122,7 @@ func TestGetAllUsers(t *testing.T) {
 	}
 	Db = db
 	defer db.Close()
-	str := "08307904-f18e-4fb8-9d18-29cfad38ffaf"
-	id, err := uuid.Parse(str)
-	if err != nil {
-		fmt.Printf("Error while parsing string to uuid, %s \n", err)
-		return
-	}
+	id:= uuid.Must(uuid.Parse("08307904-f18e-4fb8-9d18-29cfad38ffaf"))
 	rowsOK := sqlmock.NewRows([]string{"id", "name", "surname", "login", "password", "role"}).AddRow(id, "Oksana", "Zhykina", "litleskew", "littleskew", "User")
 	mock.ExpectQuery("SELECT").WillReturnRows(rowsOK)
 	if _, err = GetAllUsers(); err != nil {

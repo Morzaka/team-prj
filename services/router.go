@@ -5,7 +5,6 @@ import (
 	"team-project/services/booking"
 	//	"team-project/services/model"
 	"github.com/go-zoo/bone"
-	"team-project/services/routing"
 	"team-project/services/train"
 	"team-project/swagger"
 )
@@ -39,6 +38,5 @@ func NewRouter() *bone.Mux {
 	subV1.PatchFunc("/trains/:id", train.UpdateTrain)
 	subV1.DeleteFunc("/trains/:id", train.DeleteTrain)
 
-	subV1.PostFunc("/routes", routing.FindPath)
 	return router
 }

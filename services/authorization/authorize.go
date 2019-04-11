@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"time"
+	"fmt"
 
 	"github.com/go-zoo/bone"
 	"github.com/google/uuid"
@@ -17,9 +18,30 @@ import (
 	"team-project/services/model"
 )
 
-//InMemorySession creates new session in memory
-var InMemorySession *session.Session
-var emptyResponse interface{}
+var(
+	//InMemorySession creates new session in memory
+	InMemorySession *session.Session
+	emptyResponse interface{}
+	//SessionID variable
+	SessionID uuid.UUID
+	//AddUser variable for calling database.AddUser() function
+	AddUser=database.AddUser
+	//GenerateID variable for calling model.GenerateID() function
+	GenerateID=model.GenerateID
+	//HashPassword variable for calling function
+	HashPassword=model.HashPassword
+	//RenderJSON variable for calling function
+	RenderJSON=common.RenderJSON
+	//GetUserPassword variable
+	GetUserPassword=database.GetUserPassword
+	//CheckPasswordHash variable
+	CheckPasswordHash=model.CheckPasswordHash
+	//RedisPush variable
+	RedisPush=database.Client.LPush
+	//RedisRem variable
+	RedisRem=database.Client.LRem
+)
+
 
 //init function initializes new session
 func init() {
@@ -33,40 +55,40 @@ func Signin(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		logger.Logger.Errorf("Error, %s", err)
 	}
-	dbpassword, err := database.GetUserPassword(user.Login)
+	dbpassword, err := GetUserPassword(user.Login)
 	if err != nil {
-		common.RenderJSON(w, r, http.StatusUnauthorized, emptyResponse)
+		RenderJSON(w, r, http.StatusUnauthorized, emptyResponse)
 		return
 	}
 	//if entered password matches the password from database than user is registered
-	if model.CheckPasswordHash(user.Password, dbpassword) {
+	if CheckPasswordHash(user.Password, dbpassword) {
 		//if user is registered than write session id for this user to cookie to tack authorized users
-		sessionID := InMemorySession.Init(user.Login)
+		SessionID := InMemorySession.Init(user.Login)
 		cookie := &http.Cookie{Name: user.Login,
-			Value:   sessionID.String(),
+			Value:   SessionID.String(),
 			Expires: time.Now().Add(15 * time.Minute),
 		}
 		if cookie != nil {
 			//add cookie to redis db
-			_, err := database.Client.LPush(cookie.Name, cookie.Value).Result()
+			_, err := RedisPush(cookie.Name, cookie.Value).Result()
 			if err != nil {
-				common.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
+				RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
 				return
 			}
 			//delele this session value from redis in 15 minutes
 			go func() {
 				time.Sleep(15 * time.Minute)
-				_, err := database.Client.LRem(cookie.Name, 0, cookie.Value).Result()
+				_, err := RedisRem(cookie.Name, 0, cookie.Value).Result()
 				if err != nil {
 					logger.Logger.Errorf("Error, %s", err)
 				}
 			}()
 		}
 		http.SetCookie(w, cookie)
-		common.RenderJSON(w, r, http.StatusOK, user)
+		RenderJSON(w, r, http.StatusOK, user)
 		//else if passwords don't match then render status unauthorized
 	} else {
-		common.RenderJSON(w, r, http.StatusUnauthorized, emptyResponse)
+		RenderJSON(w, r, http.StatusUnauthorized, emptyResponse)
 		return
 	}
 }
@@ -74,24 +96,24 @@ func Signin(w http.ResponseWriter, r *http.Request) {
 //Signup function implements user's registration
 func Signup(w http.ResponseWriter, r *http.Request) {
 	var user data.User
-	user.ID = model.GenerateID()
+	user.ID = GenerateID()
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
 		logger.Logger.Errorf("Error, %s", err)
 	}
 	// get entered values from the registration form
-	password, err := model.HashPassword(user.Signin.Password)
+	password, err := HashPassword(user.Signin.Password)
 	if err != nil {
 		logger.Logger.Errorf("Error, %s", err)
 	}
 	user.Signin.Password = password
 	//add user to database and get his id
-	user, err = database.AddUser(user)
+	user, err = AddUser(user)
 	if err != nil {
-		common.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
+		RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
 		return
 	}
-	common.RenderJSON(w, r, http.StatusOK, user)
+	RenderJSON(w, r, http.StatusOK, user)
 }
 
 //Logout implements logging out - deletes cookie from db

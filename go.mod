@@ -1,7 +1,5 @@
 module team-project
 
-go 1.12
-
 require (
 	github.com/DATA-DOG/go-sqlmock v1.3.3
 	github.com/go-redis/redis v6.15.2+incompatible
@@ -10,8 +8,6 @@ require (
 	github.com/lib/pq v1.0.0
 	github.com/mattn/go-colorable v0.1.1 // indirect
 	github.com/mgutz/ansi v0.0.0-20170206155736-9520e82c474b // indirect
-	github.com/onsi/ginkgo v1.8.0 // indirect
-	github.com/onsi/gomega v1.5.0 // indirect
 	github.com/sirupsen/logrus v1.4.1
 	github.com/thoas/go-funk v0.0.0-20190407194523-c43409e2d5de
 	github.com/urfave/negroni v1.0.0
