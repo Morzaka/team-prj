@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"time"
+	"fmt"
 
 	"github.com/go-zoo/bone"
 	"github.com/google/uuid"
@@ -24,6 +25,7 @@ var emptyResponse interface{}
 //init function initializes new session
 func init() {
 	InMemorySession = session.NewSession()
+	fmt.Println(InMemorySession)
 }
 
 //Signin implements signing in
