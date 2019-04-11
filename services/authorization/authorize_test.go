@@ -8,13 +8,14 @@ import(
 	"bytes"
 
 	"github.com/google/uuid"
-	"github.com/go-redis/redis"
+	//"github.com/go-redis/redis"
 	
 	"team-project/services/data"
 	"team-project/database"
 	"team-project/services/model"
 	"team-project/services/common"
 )
+/*
 //TestSignin tests function Signin
 func TestSignin(t *testing.T){
 	user:=data.Signin{Login:"golang", Password:"golang"}
@@ -50,9 +51,9 @@ func TestSignin(t *testing.T){
 		RedisPush=database.Client.LPush
 		RedisRem=database.Client.LRem
 	}()
-	http.HandlerFunc(Signup).ServeHTTP(w, r)
+	http.HandlerFunc(Signin).ServeHTTP(w, r)
 }
-
+*/
 
 
 func TestSignup(t *testing.T){	

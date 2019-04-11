@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"time"
-	"fmt"
 
 	"github.com/go-zoo/bone"
 	"github.com/google/uuid"
@@ -50,6 +49,7 @@ func init() {
 
 //Signin implements signing in
 func Signin(w http.ResponseWriter, r *http.Request) {
+	InMemorySession = session.NewSession()
 	var user data.Signin
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
