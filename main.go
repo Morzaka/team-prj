@@ -11,7 +11,7 @@ import (
 	"team-project/logger"
 	"team-project/services"
 
-	"github.com/urfave/negroni"
+//	"github.com/urfave/negroni"
 )
 
 func main() {
@@ -43,12 +43,12 @@ func main() {
 		return
 	}
 	//Middleware manager
-	middlewareManager := negroni.New()
-	middlewareManager.Use(negroni.NewRecovery())
-	middlewareManager.UseHandler(services.NewRouter())
+	// middlewareManager := negroni.New()
+	// middlewareManager.Use(negroni.NewRecovery())
+	// middlewareManager.UseHandler(services.NewRouter())
 	fmt.Println("Starting HTTP listener...")
 	//Starting server
-	err = http.ListenAndServe("localhost:8080", middlewareManager)
+	err = http.ListenAndServe("localhost:8080", services.NewRouter())
 	if err != nil {
 		logger.Logger.Errorf("Error, %s", err)
 	}

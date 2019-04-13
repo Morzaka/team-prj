@@ -6,8 +6,8 @@ import (
 	//"os"
 	"fmt"
 
-	"team-project/configurations"
 	"github.com/go-redis/redis"
+	"team-project/configurations"
 	//pq lib for using postgres
 	_ "github.com/lib/pq"
 )
@@ -43,9 +43,9 @@ func RedisInit() error {
 	u, err := url.Parse(env)
 	password, _ := u.User.Password()*/
 	Client = redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",//u.Host,
-		Password: "",//password, // no password set
-		DB:       0,        // use default DB
+		Addr:     "localhost:6379", //u.Host,
+		Password: "",               //password, // no password set
+		DB:       0,                // use default DB
 	})
 	_, err := Client.Ping().Result()
 	if err != nil {

@@ -2,11 +2,11 @@ package authorization
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"time"
 
-	"github.com/go-zoo/bone"
 	"github.com/google/uuid"
 
 	"team-project/database"
@@ -17,30 +17,33 @@ import (
 	"team-project/services/model"
 )
 
-var(
+var (
 	//InMemorySession creates new session in memory
 	InMemorySession *session.Session
-	emptyResponse interface{}
-	//SessionID variable
-	SessionID uuid.UUID
-	//AddUser variable for calling database.AddUser() function
-	AddUser=database.AddUser
-	//GenerateID variable for calling model.GenerateID() function
-	GenerateID=model.GenerateID
-	//HashPassword variable for calling function
-	HashPassword=model.HashPassword
-	//RenderJSON variable for calling function
-	RenderJSON=common.RenderJSON
-	//GetUserPassword variable
-	GetUserPassword=database.GetUserPassword
-	//CheckPasswordHash variable
-	CheckPasswordHash=model.CheckPasswordHash
-	//RedisPush variable
-	RedisPush=database.Client.LPush
-	//RedisRem variable
-	RedisRem=database.Client.LRem
+	emptyResponse   interface{}
+	//SessionInit variable holds the value of InMemorySession.Init function
+	SessionInit = InMemorySession.Init
+	//AddUser variable holds the value of database.AddUser function
+	AddUser = database.AddUser
+	//UpdateUser variable holds the value of database.UpdateUser function
+	UpdateUser = database.UpdateUser
+	//DeleteUser variable holds the value of Database.DeleteUser function
+	DeleteUser = database.DeleteUser
+	//GetAllUsers variable holds the value of database.GetAllUsers function
+	GetAllUsers = database.GetAllUsers
+	//GenerateID variable holds the value of model.GenerateID function
+	GenerateID = model.GenerateID
+	//HashPassword variable holds the value of model.HashPassword function
+	HashPassword = model.HashPassword
+	//RenderJSON variable holds the value of common.RenderJSON function
+	RenderJSON = common.RenderJSON
+	//GetUserPassword variable holds the value of database.GetUserPassword function
+	GetUserPassword = database.GetUserPassword
+	//CheckPasswordHash variable holds the value ofmodel.CheckPasswordHash function
+	CheckPasswordHash = model.CheckPasswordHash
+	//RedisClient holds the value of redis client
+	RedisClient = database.Client
 )
-
 
 //init function initializes new session
 func init() {
@@ -49,13 +52,12 @@ func init() {
 
 //Signin implements signing in
 func Signin(w http.ResponseWriter, r *http.Request) {
-	InMemorySession = session.NewSession()
 	var user data.Signin
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
 		logger.Logger.Errorf("Error, %s", err)
 	}
-	dbpassword, err := GetUserPassword(user.Login)
+	dbpassword, err := database.GetUserPassword(user.Login)
 	if err != nil {
 		RenderJSON(w, r, http.StatusUnauthorized, emptyResponse)
 		return
@@ -63,24 +65,26 @@ func Signin(w http.ResponseWriter, r *http.Request) {
 	//if entered password matches the password from database than user is registered
 	if CheckPasswordHash(user.Password, dbpassword) {
 		//if user is registered than write session id for this user to cookie to tack authorized users
-		SessionID := InMemorySession.Init(user.Login)
+		sessionID := SessionInit(user.Login)
 		cookie := &http.Cookie{Name: user.Login,
-			Value:   SessionID.String(),
+			Value:   sessionID.String(),
 			Expires: time.Now().Add(15 * time.Minute),
 		}
 		if cookie != nil {
 			//add cookie to redis db
-			_, err := RedisPush(cookie.Name, cookie.Value).Result()
+			_, err := database.Client.LPush(cookie.Name, cookie.Value).Result()
 			if err != nil {
+				fmt.Println(cookie)
 				RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
 				return
 			}
 			//delele this session value from redis in 15 minutes
 			go func() {
 				time.Sleep(15 * time.Minute)
-				_, err := RedisRem(cookie.Name, 0, cookie.Value).Result()
+				_, err := database.Client.LRem(cookie.Name, 0, cookie.Value).Result()
 				if err != nil {
-					logger.Logger.Errorf("Error, %s", err)
+					RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
+					return
 				}
 			}()
 		}
@@ -121,9 +125,9 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 	id, arr := len(r.Cookies())-1, r.Cookies()
 	cookie := arr[id]
 	sessionToken := cookie.Name
-	_, err := database.Client.LRem(sessionToken, 0, cookie.Value).Result()
+	_, err := RedisClient.LRem(sessionToken, 0, cookie.Value).Result()
 	if err != nil {
-		common.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
+		RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
 		return
 	}
 	cookie = &http.Cookie{
@@ -131,13 +135,13 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 		MaxAge: -1,
 	}
 	http.SetCookie(w, cookie)
-	common.RenderJSON(w, r, http.StatusNoContent, emptyResponse)
+	RenderJSON(w, r, http.StatusNoContent, emptyResponse)
 }
 
 //UpdateUserPage deletes user
 func UpdateUserPage(w http.ResponseWriter, r *http.Request) {
 	var user data.User
-	id, err := uuid.Parse(bone.GetValue(r, "id"))
+	id, err := uuid.Parse(r.URL.Query().Get("id"))
 	if err != nil {
 		logger.Logger.Errorf("Error, %s", err)
 	}
@@ -151,43 +155,43 @@ func UpdateUserPage(w http.ResponseWriter, r *http.Request) {
 		logger.Logger.Errorf("Error, %s", err)
 	}
 	// get entered values from the registration form
-	password, err := model.HashPassword(user.Signin.Password)
+	password, err := HashPassword(user.Signin.Password)
 	if err != nil {
 		logger.Logger.Errorf("Error, %s", err)
 	}
 	user.Signin.Password = password
 	//add user to database and get his id
-	err = database.UpdateUser(user, id)
+	err = UpdateUser(user, id)
 	if err != nil {
-		common.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
+		RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
 		return
 	}
 	user.ID = id
-	common.RenderJSON(w, r, http.StatusOK, user)
+	RenderJSON(w, r, http.StatusOK, user)
 }
 
 //DeleteUserPage deletes user's page
 func DeleteUserPage(w http.ResponseWriter, r *http.Request) {
-	id, err := uuid.Parse(bone.GetValue(r, "id"))
+	id, err := uuid.Parse(r.URL.Query().Get("id"))
 	if err != nil {
 		logger.Logger.Errorf("Error, %s", err)
 	}
-	err = database.DeleteUser(id)
+	err = DeleteUser(id)
 	if err != nil {
-		common.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
+		RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
 		return
 	}
-	common.RenderJSON(w, r, http.StatusNotFound, "User was deleted successfully!")
+	RenderJSON(w, r, http.StatusNotFound, "User was deleted successfully!")
 }
 
-//GetAllUsers makes a request to db to get all users
-func GetAllUsers(w http.ResponseWriter, r *http.Request) {
-	users, err := database.GetAllUsers()
+//ListAllUsers makes a request to db to get all users
+func ListAllUsers(w http.ResponseWriter, r *http.Request) {
+	users, err := GetAllUsers()
 	if err != nil {
-		common.RenderJSON(w, r, http.StatusNoContent, users)
+		RenderJSON(w, r, http.StatusNoContent, users)
 		return
 	}
-	common.RenderJSON(w, r, http.StatusOK, users)
+	RenderJSON(w, r, http.StatusOK, users)
 }
 
 //CheckAccess checks whether user is logged in to give him access to services
@@ -201,7 +205,7 @@ func CheckAccess(w http.ResponseWriter, r *http.Request) bool {
 	id, arr := len(r.Cookies())-1, r.Cookies()
 	cookie := arr[id]
 	sessionToken := cookie.Name
-	response, err := database.Client.LRange(sessionToken, 0, -1).Result()
+	response, err := RedisClient.LRange(sessionToken, 0, -1).Result()
 	if err != nil {
 		// If there is an error fetching from cache, return an internal server error status
 		w.WriteHeader(http.StatusInternalServerError)

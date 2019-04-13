@@ -1,216 +1,312 @@
 package authorization
 
 import (
+	"bytes"
 	"encoding/json"
+	"errors"
 	"io/ioutil"
+	"log"
 	"net/http"
-	"time"
+	"net/http/httptest"
+	"testing"
 
-	"github.com/go-zoo/bone"
+	"github.com/alicebob/miniredis"
+	"github.com/go-redis/redis"
 	"github.com/google/uuid"
 
 	"team-project/database"
-	"team-project/logger"
-	"team-project/services/authorization/session"
 	"team-project/services/common"
 	"team-project/services/data"
 	"team-project/services/model"
 )
 
-var(
-	//InMemorySession creates new session in memory
-	InMemorySession *session.Session
-	emptyResponse interface{}
-	//SessionID variable
-	SessionID uuid.UUID
-	//AddUser variable for calling database.AddUser() function
-	AddUser=database.AddUser
-	//GenerateID variable for calling model.GenerateID() function
-	GenerateID=model.GenerateID
-	//HashPassword variable for calling function
-	HashPassword=model.HashPassword
-	//RenderJSON variable for calling function
-	RenderJSON=common.RenderJSON
-	//GetUserPassword variable
-	GetUserPassword=database.GetUserPassword
-	//CheckPasswordHash variable
-	CheckPasswordHash=model.CheckPasswordHash
-	//RedisPush variable
-	RedisPush=database.Client.LPush
-	//RedisRem variable
-	RedisRem=database.Client.LRem
-)
-
-
-//init function initializes new session
-func init() {
-	InMemorySession = session.NewSession()
+// mockRedis returns client connected to fake Redis server
+func mockRedis() *redis.Client {
+	mr, err := miniredis.Run()
+	if err != nil {
+		log.Fatal(err)
+	}
+	client := redis.NewClient(&redis.Options{
+		Addr: mr.Addr(),
+	})
+	return client
 }
 
-//Signin implements signing in
-func Signin(w http.ResponseWriter, r *http.Request) {
-	InMemorySession = session.NewSession()
-	var user data.Signin
-	err := json.NewDecoder(r.Body).Decode(&user)
+//TestSignin tests function Signin
+func TestSignin(t *testing.T) {
+	user := data.Signin{Login: "golang", Password: "golang"}
+	id := uuid.Must(uuid.Parse("08307904-f18e-4fb8-9d18-29cfad38ffaf"))
+	jsonBody, err := json.Marshal(user)
 	if err != nil {
-		logger.Logger.Errorf("Error, %s", err)
+		t.Fatal(err)
 	}
-	dbpassword, err := GetUserPassword(user.Login)
+	r, err := http.NewRequest("POST", "/api/v1/login", bytes.NewBuffer(jsonBody))
 	if err != nil {
-		RenderJSON(w, r, http.StatusUnauthorized, emptyResponse)
-		return
+		t.Fatal(err)
 	}
-	//if entered password matches the password from database than user is registered
-	if CheckPasswordHash(user.Password, dbpassword) {
-		//if user is registered than write session id for this user to cookie to tack authorized users
-		SessionID := InMemorySession.Init(user.Login)
-		cookie := &http.Cookie{Name: user.Login,
-			Value:   SessionID.String(),
-			Expires: time.Now().Add(15 * time.Minute),
+	w := httptest.NewRecorder()
+	// set back original functions at the end of test
+	defer func() {
+		RenderJSON = common.RenderJSON
+		GetUserPassword = database.GetUserPassword
+		CheckPasswordHash = model.CheckPasswordHash
+		RedisClient = database.Client
+	}()
+	for i := 0; i < 3; i++ {
+		//mock original functions
+		RedisClient = mockRedis()
+		SessionInit = func(string) uuid.UUID {
+			return id
 		}
-		if cookie != nil {
-			//add cookie to redis db
-			_, err := RedisPush(cookie.Name, cookie.Value).Result()
-			if err != nil {
-				RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
-				return
+		RenderJSON = func(w http.ResponseWriter, r *http.Request, status int, response interface{}) {}
+		switch i {
+		//case when there was no error getting password from db to compare with the password entered
+		case 0:
+			GetUserPassword = func(login string) (string, error) {
+				return login, nil
 			}
-			//delele this session value from redis in 15 minutes
-			go func() {
-				time.Sleep(15 * time.Minute)
-				_, err := RedisRem(cookie.Name, 0, cookie.Value).Result()
-				if err != nil {
-					logger.Logger.Errorf("Error, %s", err)
-				}
-			}()
+			CheckPasswordHash = func(password, hash string) bool {
+				return true
+			}
+			http.HandlerFunc(Signin).ServeHTTP(w, r)
+		//case when there was an error getting password from db to compare with the password entered
+		case 1:
+			r.Body = ioutil.NopCloser(bytes.NewBuffer(jsonBody))
+			GetUserPassword = func(login string) (string, error) {
+				return login, errors.New("Error")
+			}
+			http.HandlerFunc(Signin).ServeHTTP(w, r)
+		//case when password from db and password entered do not match
+		case 2:
+			r.Body = ioutil.NopCloser(bytes.NewBuffer(jsonBody))
+			GetUserPassword = func(login string) (string, error) {
+				return login, nil
+			}
+			CheckPasswordHash = func(password, hash string) bool {
+				return false
+			}
+			http.HandlerFunc(Signin).ServeHTTP(w, r)
 		}
-		http.SetCookie(w, cookie)
-		RenderJSON(w, r, http.StatusOK, user)
-		//else if passwords don't match then render status unauthorized
-	} else {
-		RenderJSON(w, r, http.StatusUnauthorized, emptyResponse)
-		return
 	}
 }
 
-//Signup function implements user's registration
-func Signup(w http.ResponseWriter, r *http.Request) {
-	var user data.User
-	user.ID = GenerateID()
-	err := json.NewDecoder(r.Body).Decode(&user)
+//TestSignup tests function Signup
+func TestSignup(t *testing.T) {
+	user := data.User{Signin: data.Signin{Login: "oks", Password: "oks"}, Name: "Oksana", Surname: "Zhykina", Role: "User"}
+	jsonBody, err := json.Marshal(user)
 	if err != nil {
-		logger.Logger.Errorf("Error, %s", err)
+		t.Fatal(err)
 	}
-	// get entered values from the registration form
-	password, err := HashPassword(user.Signin.Password)
+	r, err := http.NewRequest("POST", "/api/v1/register", bytes.NewBuffer(jsonBody))
 	if err != nil {
-		logger.Logger.Errorf("Error, %s", err)
+		t.Fatal(err)
 	}
-	user.Signin.Password = password
-	//add user to database and get his id
-	user, err = AddUser(user)
-	if err != nil {
-		RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
-		return
+	w := httptest.NewRecorder()
+	defer func() {
+		AddUser = database.AddUser
+		HashPassword = model.HashPassword
+		GenerateID = model.GenerateID
+		RenderJSON = common.RenderJSON
+	}()
+	for i := 0; i < 2; i++ {
+		HashPassword = func(password string) (string, error) {
+			return "$2a$14$MA.GufeWJj7IryAoAgd8BeuRphle78ubdgqaPFPpjG9GzbxEk7kKu", nil
+		}
+		GenerateID = func() uuid.UUID {
+			return uuid.New()
+		}
+		RenderJSON = func(w http.ResponseWriter, r *http.Request, status int, response interface{}) {}
+		switch i {
+		//case when there was no error while adding user to db
+		case 0:
+			AddUser = func(user data.User) (data.User, error) {
+				return user, nil
+			}
+			http.HandlerFunc(Signup).ServeHTTP(w, r)
+		//case when there was an error adding user to db
+		case 1:
+			//renew request body after being read in case 0
+			r.Body = ioutil.NopCloser(bytes.NewBuffer(jsonBody))
+			AddUser = func(user data.User) (data.User, error) {
+				return user, errors.New("Error")
+			}
+			http.HandlerFunc(Signup).ServeHTTP(w, r)
+		}
 	}
-	RenderJSON(w, r, http.StatusOK, user)
 }
 
-//Logout implements logging out - deletes cookie from db
-func Logout(w http.ResponseWriter, r *http.Request) {
-	id, arr := len(r.Cookies())-1, r.Cookies()
-	cookie := arr[id]
-	sessionToken := cookie.Name
-	_, err := database.Client.LRem(sessionToken, 0, cookie.Value).Result()
+//TestLogout tests Logout function
+func TestLogout(t *testing.T) {
+	r, err := http.NewRequest("POST", "/api/v1/logout", nil)
 	if err != nil {
-		common.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
-		return
+		t.Fatal(err)
 	}
-	cookie = &http.Cookie{
-		Name:   sessionToken,
-		MaxAge: -1,
+	w := httptest.NewRecorder()
+	cookie := &http.Cookie{Name: "Cookie",
+		Value: "expected",
 	}
 	http.SetCookie(w, cookie)
-	common.RenderJSON(w, r, http.StatusNoContent, emptyResponse)
+	// Copy the Cookie over to a new Request
+	r = &http.Request{Header: http.Header{"Cookie": w.HeaderMap["Set-Cookie"]}}
+	RedisClient = mockRedis()
+	_, err = RedisClient.LPush(cookie.Name, cookie.Value).Result()
+	if err != nil {
+		t.Fatal(err)
+	}
+	RenderJSON = func(w http.ResponseWriter, r *http.Request, status int, response interface{}) {}
+	defer func() {
+		RedisClient = database.Client
+		RenderJSON = common.RenderJSON
+	}()
+	http.HandlerFunc(Logout).ServeHTTP(w, r)
+	//check whether cookie was deleted successfully
+	if cookie, err := r.Cookie(cookie.Name); err != nil {
+		if cookie.MaxAge >= 0 {
+			t.Error("Users hasn't logged out successfully")
+		}
+		t.Fatal(err)
+	}
 }
 
-//UpdateUserPage deletes user
-func UpdateUserPage(w http.ResponseWriter, r *http.Request) {
-	var user data.User
-	id, err := uuid.Parse(bone.GetValue(r, "id"))
+//TestUpdateUserPage tests UpdateUserPage function
+func TestUpdateUserPage(t *testing.T) {
+	user := data.User{Signin: data.Signin{Login: "oks", Password: "oks"}, Name: "Oksana", Surname: "Zhykina", Role: "User"}
+	jsonBody, err := json.Marshal(user)
 	if err != nil {
-		logger.Logger.Errorf("Error, %s", err)
+		t.Fatal(err)
 	}
-	data, err := ioutil.ReadAll(r.Body)
-	defer r.Body.Close()
+	r, err := http.NewRequest("PATCH", "/api/v1/user/:id=", bytes.NewBuffer(jsonBody))
 	if err != nil {
-		logger.Logger.Errorf("Error, %s", err)
+		t.Fatal(err)
 	}
-	err = json.Unmarshal(data, &user)
-	if err != nil {
-		logger.Logger.Errorf("Error, %s", err)
-	}
-	// get entered values from the registration form
-	password, err := model.HashPassword(user.Signin.Password)
-	if err != nil {
-		logger.Logger.Errorf("Error, %s", err)
-	}
-	user.Signin.Password = password
-	//add user to database and get his id
-	err = database.UpdateUser(user, id)
-	if err != nil {
-		common.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
-		return
-	}
-	user.ID = id
-	common.RenderJSON(w, r, http.StatusOK, user)
-}
-
-//DeleteUserPage deletes user's page
-func DeleteUserPage(w http.ResponseWriter, r *http.Request) {
-	id, err := uuid.Parse(bone.GetValue(r, "id"))
-	if err != nil {
-		logger.Logger.Errorf("Error, %s", err)
-	}
-	err = database.DeleteUser(id)
-	if err != nil {
-		common.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
-		return
-	}
-	common.RenderJSON(w, r, http.StatusNotFound, "User was deleted successfully!")
-}
-
-//GetAllUsers makes a request to db to get all users
-func GetAllUsers(w http.ResponseWriter, r *http.Request) {
-	users, err := database.GetAllUsers()
-	if err != nil {
-		common.RenderJSON(w, r, http.StatusNoContent, users)
-		return
-	}
-	common.RenderJSON(w, r, http.StatusOK, users)
-}
-
-//CheckAccess checks whether user is logged in to give him access to services
-func CheckAccess(w http.ResponseWriter, r *http.Request) bool {
-	var active = false
-	if len(r.Cookies()) <= 0 {
-		// If the cookie is not set, return an unauthorized status
-		w.WriteHeader(http.StatusUnauthorized)
-		return false
-	}
-	id, arr := len(r.Cookies())-1, r.Cookies()
-	cookie := arr[id]
-	sessionToken := cookie.Name
-	response, err := database.Client.LRange(sessionToken, 0, -1).Result()
-	if err != nil {
-		// If there is an error fetching from cache, return an internal server error status
-		w.WriteHeader(http.StatusInternalServerError)
-		return false
-	}
-	for _, v := range response {
-		if v == cookie.Value {
-			active = true
+	q := r.URL.Query()
+	q.Add("id", "61c364d9-591a-4879-a9fb-79ae67945d38")
+	r.URL.RawQuery = q.Encode()
+	w := httptest.NewRecorder()
+	defer func() {
+		UpdateUser = database.UpdateUser
+		HashPassword = model.HashPassword
+		RenderJSON = common.RenderJSON
+	}()
+	for i := 0; i < 2; i++ {
+		HashPassword = func(pswd string) (string, error) {
+			return "$2a$14$MA.GufeWJj7IryAoAgd8BeuRphle78ubdgqaPFPpjG9GzbxEk7kKu", nil
+		}
+		RenderJSON = func(w http.ResponseWriter, r *http.Request, status int, response interface{}) {}
+		switch i {
+		//case when there was no error while updating user in db
+		case 0:
+			UpdateUser = func(user data.User, id uuid.UUID) error {
+				return nil
+			}
+			http.HandlerFunc(UpdateUserPage).ServeHTTP(w, r)
+		//case when there was an error while updating user in db
+		case 1:
+			r.Body = ioutil.NopCloser(bytes.NewBuffer(jsonBody))
+			UpdateUser = func(user data.User, id uuid.UUID) error {
+				return errors.New("Error")
+			}
+			http.HandlerFunc(UpdateUserPage).ServeHTTP(w, r)
 		}
 	}
-	return active
+}
+
+//TestDeleteUser tests DeleteUser function
+func TestDeleteUser(t *testing.T) {
+	r, err := http.NewRequest("DELETE", "/api/v1/user/:id=", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	q := r.URL.Query()
+	q.Add("id", "61c364d9-591a-4879-a9fb-79ae67945d38")
+	r.URL.RawQuery = q.Encode()
+	w := httptest.NewRecorder()
+	defer func() {
+		DeleteUser = database.DeleteUser
+		RenderJSON = common.RenderJSON
+	}()
+	for i := 0; i < 2; i++ {
+		RenderJSON = func(w http.ResponseWriter, r *http.Request, status int, response interface{}) {}
+		switch i {
+		//case when there was no error while deleting user from db
+		case 0:
+			DeleteUser = func(id uuid.UUID) error {
+				return nil
+			}
+			http.HandlerFunc(DeleteUserPage).ServeHTTP(w, r)
+		//case when there was an error while deleting user from db
+		case 1:
+			DeleteUser = func(id uuid.UUID) error {
+				return errors.New("Error")
+			}
+			http.HandlerFunc(DeleteUserPage).ServeHTTP(w, r)
+		}
+	}
+}
+
+//TestListAllUsers tests ListAllUsers function
+func TestListAllUsers(t *testing.T) {
+	r, err := http.NewRequest("GET", "/api/v1/users", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	w := httptest.NewRecorder()
+	defer func() {
+		GetAllUsers = database.GetAllUsers
+		RenderJSON = common.RenderJSON
+	}()
+	for i := 0; i < 2; i++ {
+		RenderJSON = func(w http.ResponseWriter, r *http.Request, status int, response interface{}) {}
+		switch i {
+		//case when there was no error while getting all users from db
+		case 0:
+			GetAllUsers = func() ([]data.User, error) {
+				return []data.User{}, nil
+			}
+			http.HandlerFunc(ListAllUsers).ServeHTTP(w, r)
+		//case when there was an error while getting all users from db
+		case 1:
+			GetAllUsers = func() ([]data.User, error) {
+				return []data.User{}, errors.New("Error")
+			}
+			http.HandlerFunc(ListAllUsers).ServeHTTP(w, r)
+		}
+	}
+}
+
+//TestCheckAccess tests CheckAccess function
+func TestCheckAccess(t *testing.T) {
+	r, err := http.NewRequest("GET", "/api/v1/trains", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	w := httptest.NewRecorder()
+	for i := 0; i < 2; i++ {
+		switch i {
+		//case when user was not logged in, thus there was no cookie in request
+		case 0:
+			if CheckAccess(w, r) != false {
+				t.Error("Function should return false with no cookies in request")
+			}
+		//case when user was logged in, thus there was cookie in request
+		case 1:
+			cookie := &http.Cookie{Name: "Cookie",
+				Value: "expected",
+			}
+			http.SetCookie(w, cookie)
+			// Copy the Cookie over to a new Request
+			r = &http.Request{Header: http.Header{"Cookie": w.HeaderMap["Set-Cookie"]}}
+			defer func() {
+				RedisClient = database.Client
+			}()
+			RedisClient = mockRedis()
+			_, err = RedisClient.LPush(cookie.Name, cookie.Value).Result()
+			if err != nil {
+				t.Fatal(err)
+			}
+			if CheckAccess(w, r) != true {
+				t.Error("Function doesn't work properly")
+			}
+		}
+	}
 }

@@ -27,7 +27,7 @@ func CheckPasswordHash(password, hash string) bool {
 
 //GetID parse id from request
 func GetID(r *http.Request) (uuid.UUID, error) {
-	value:=r.URL.Query().Get("id")
+	value := r.URL.Query().Get("id")
 	id, err := uuid.Parse(value)
 	if err != nil {
 		return id, err
