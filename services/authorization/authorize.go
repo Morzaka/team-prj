@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	//"github.com/go-redis/redis"
 
 	"team-project/database"
 	"team-project/logger"
@@ -77,7 +76,7 @@ func Signin(w http.ResponseWriter, r *http.Request) {
 		//add cookie to redis db
 		_, err := RedisClient.LPush(cookie.Name, cookie.Value).Result()
 		if err != nil {
-			common.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
+			RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
 			return
 		}
 		//delele this session value from redis in 15 minutes
@@ -85,15 +84,15 @@ func Signin(w http.ResponseWriter, r *http.Request) {
 			time.Sleep(15 * time.Minute)
 			_, err := RedisClient.LRem(cookie.Name, 0, cookie.Value).Result()
 			if err != nil {
-				common.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
+				RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
 				return
 			}
 		}()
 		http.SetCookie(w, cookie)
-		common.RenderJSON(w, r, http.StatusOK, user)
+		RenderJSON(w, r, http.StatusOK, user)
 		//else if passwords don't match then render status unauthorized
 	} else {
-		common.RenderJSON(w, r, http.StatusUnauthorized, emptyResponse)
+		RenderJSON(w, r, http.StatusUnauthorized, emptyResponse)
 		return
 	}
 }
