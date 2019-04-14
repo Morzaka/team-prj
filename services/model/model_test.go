@@ -1,6 +1,7 @@
 package model
 
 import (
+	"fmt"
 	"net/http"
 	"reflect"
 	"testing"
@@ -47,13 +48,14 @@ func TestCheckPasswordHash(t *testing.T) {
 
 //TestGetID tests function GetID
 func TestGetID(t *testing.T) {
-	rOK, err := http.NewRequest("GET", "/api/v1/:id=", nil)
+	rOK, err := http.NewRequest("GET", "/api/v1", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 	q := rOK.URL.Query()
 	q.Add("id", "61c364d9-591a-4879-a9fb-79ae67945d38")
 	rOK.URL.RawQuery = q.Encode()
+	fmt.Println(rOK.URL.String())
 	_, err = GetID(rOK)
 	if err != nil {
 		t.Fatal(err)

@@ -1,10 +1,11 @@
 package model
 
 import (
-	"net/http"
-
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
+	"log"
+	"net/http"
+	"net/url"
 )
 
 //GenerateID generates unique id
@@ -27,8 +28,11 @@ func CheckPasswordHash(password, hash string) bool {
 
 //GetID parse id from request
 func GetID(r *http.Request) (uuid.UUID, error) {
-	value := r.URL.Query().Get("id")
-	id, err := uuid.Parse(value)
+	u, err := url.Parse(r.URL.String())
+	if err != nil {
+		log.Fatal(err)
+	}
+	id, err := uuid.Parse(u.Query().Get("id"))
 	if err != nil {
 		return id, err
 	}

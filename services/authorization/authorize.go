@@ -2,12 +2,13 @@ package authorization
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"time"
 
 	"github.com/google/uuid"
+	//"github.com/go-redis/redis"
 
 	"team-project/database"
 	"team-project/logger"
@@ -21,8 +22,8 @@ var (
 	//InMemorySession creates new session in memory
 	InMemorySession *session.Session
 	emptyResponse   interface{}
-	//SessionInit variable holds the value of InMemorySession.Init function
-	SessionInit = InMemorySession.Init
+	//SessionID variable holds the value of InMemorySession.Init function
+	SessionID uuid.UUID
 	//AddUser variable holds the value of database.AddUser function
 	AddUser = database.AddUser
 	//UpdateUser variable holds the value of database.UpdateUser function
@@ -52,47 +53,47 @@ func init() {
 
 //Signin implements signing in
 func Signin(w http.ResponseWriter, r *http.Request) {
+	if RedisClient == nil {
+		RedisClient = database.Client
+	}
 	var user data.Signin
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
 		logger.Logger.Errorf("Error, %s", err)
 	}
-	dbpassword, err := database.GetUserPassword(user.Login)
+	dbpassword, err := GetUserPassword(user.Login)
 	if err != nil {
-		RenderJSON(w, r, http.StatusUnauthorized, emptyResponse)
+		common.RenderJSON(w, r, http.StatusUnauthorized, emptyResponse)
 		return
 	}
 	//if entered password matches the password from database than user is registered
 	if CheckPasswordHash(user.Password, dbpassword) {
 		//if user is registered than write session id for this user to cookie to tack authorized users
-		sessionID := SessionInit(user.Login)
+		SessionID := InMemorySession.Init(user.Login)
 		cookie := &http.Cookie{Name: user.Login,
-			Value:   sessionID.String(),
+			Value:   SessionID.String(),
 			Expires: time.Now().Add(15 * time.Minute),
 		}
-		if cookie != nil {
-			//add cookie to redis db
-			_, err := database.Client.LPush(cookie.Name, cookie.Value).Result()
+		//add cookie to redis db
+		_, err := RedisClient.LPush(cookie.Name, cookie.Value).Result()
+		if err != nil {
+			common.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
+			return
+		}
+		//delele this session value from redis in 15 minutes
+		go func() {
+			time.Sleep(15 * time.Minute)
+			_, err := RedisClient.LRem(cookie.Name, 0, cookie.Value).Result()
 			if err != nil {
-				fmt.Println(cookie)
-				RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
+				common.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
 				return
 			}
-			//delele this session value from redis in 15 minutes
-			go func() {
-				time.Sleep(15 * time.Minute)
-				_, err := database.Client.LRem(cookie.Name, 0, cookie.Value).Result()
-				if err != nil {
-					RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
-					return
-				}
-			}()
-		}
+		}()
 		http.SetCookie(w, cookie)
-		RenderJSON(w, r, http.StatusOK, user)
+		common.RenderJSON(w, r, http.StatusOK, user)
 		//else if passwords don't match then render status unauthorized
 	} else {
-		RenderJSON(w, r, http.StatusUnauthorized, emptyResponse)
+		common.RenderJSON(w, r, http.StatusUnauthorized, emptyResponse)
 		return
 	}
 }
@@ -141,7 +142,12 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 //UpdateUserPage deletes user
 func UpdateUserPage(w http.ResponseWriter, r *http.Request) {
 	var user data.User
-	id, err := uuid.Parse(r.URL.Query().Get("id"))
+	u, err := url.Parse(r.URL.String())
+	if err != nil {
+		RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
+		return
+	}
+	id, err := uuid.Parse(u.Query().Get("id"))
 	if err != nil {
 		logger.Logger.Errorf("Error, %s", err)
 	}
@@ -172,7 +178,12 @@ func UpdateUserPage(w http.ResponseWriter, r *http.Request) {
 
 //DeleteUserPage deletes user's page
 func DeleteUserPage(w http.ResponseWriter, r *http.Request) {
-	id, err := uuid.Parse(r.URL.Query().Get("id"))
+	u, err := url.Parse(r.URL.String())
+	if err != nil {
+		RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
+		return
+	}
+	id, err := uuid.Parse(u.Query().Get("id"))
 	if err != nil {
 		logger.Logger.Errorf("Error, %s", err)
 	}

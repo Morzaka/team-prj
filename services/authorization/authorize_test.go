@@ -52,12 +52,10 @@ func TestSignin(t *testing.T) {
 		CheckPasswordHash = model.CheckPasswordHash
 		RedisClient = database.Client
 	}()
-	for i := 0; i < 3; i++ {
+	for i := 0; i < 4; i++ {
 		//mock original functions
 		RedisClient = mockRedis()
-		SessionInit = func(string) uuid.UUID {
-			return id
-		}
+		SessionID = id
 		RenderJSON = func(w http.ResponseWriter, r *http.Request, status int, response interface{}) {}
 		switch i {
 		//case when there was no error getting password from db to compare with the password entered
@@ -85,6 +83,17 @@ func TestSignin(t *testing.T) {
 			CheckPasswordHash = func(password, hash string) bool {
 				return false
 			}
+			http.HandlerFunc(Signin).ServeHTTP(w, r)
+		//case when error with redis db occured and user couldn't log in
+		case 3:
+			r.Body = ioutil.NopCloser(bytes.NewBuffer(jsonBody))
+			GetUserPassword = func(login string) (string, error) {
+				return login, nil
+			}
+			CheckPasswordHash = func(password, hash string) bool {
+				return true
+			}
+			RedisClient.Close()
 			http.HandlerFunc(Signin).ServeHTTP(w, r)
 		}
 	}
@@ -148,23 +157,30 @@ func TestLogout(t *testing.T) {
 	http.SetCookie(w, cookie)
 	// Copy the Cookie over to a new Request
 	r = &http.Request{Header: http.Header{"Cookie": w.HeaderMap["Set-Cookie"]}}
-	RedisClient = mockRedis()
-	_, err = RedisClient.LPush(cookie.Name, cookie.Value).Result()
-	if err != nil {
-		t.Fatal(err)
-	}
-	RenderJSON = func(w http.ResponseWriter, r *http.Request, status int, response interface{}) {}
-	defer func() {
-		RedisClient = database.Client
-		RenderJSON = common.RenderJSON
-	}()
-	http.HandlerFunc(Logout).ServeHTTP(w, r)
-	//check whether cookie was deleted successfully
-	if cookie, err := r.Cookie(cookie.Name); err != nil {
-		if cookie.MaxAge >= 0 {
-			t.Error("Users hasn't logged out successfully")
+	for i := 0; i < 2; i++ {
+		RenderJSON = func(w http.ResponseWriter, r *http.Request, status int, response interface{}) {}
+		switch i {
+		//case when there was no error while accessing redis db, cookie was deleted
+		case 0:
+			RedisClient = mockRedis()
+			_, err = RedisClient.LPush(cookie.Name, cookie.Value).Result()
+			if err != nil {
+				t.Fatal(err)
+			}
+			http.HandlerFunc(Logout).ServeHTTP(w, r)
+			//check whether cookie was deleted successfully
+			if cookie, err := r.Cookie(cookie.Name); err != nil {
+				if cookie.MaxAge >= 0 {
+					t.Error("Users hasn't logged out successfully")
+				}
+				t.Fatal(err)
+			}
+		//case when there was an error while accessing redis db
+		case 1:
+			RedisClient = mockRedis()
+			RedisClient.Close()
+			http.HandlerFunc(Logout).ServeHTTP(w, r)
 		}
-		t.Fatal(err)
 	}
 }
 
@@ -175,7 +191,7 @@ func TestUpdateUserPage(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	r, err := http.NewRequest("PATCH", "/api/v1/user/:id=", bytes.NewBuffer(jsonBody))
+	r, err := http.NewRequest("PATCH", "/api/v1/user", bytes.NewBuffer(jsonBody))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -213,7 +229,7 @@ func TestUpdateUserPage(t *testing.T) {
 
 //TestDeleteUser tests DeleteUser function
 func TestDeleteUser(t *testing.T) {
-	r, err := http.NewRequest("DELETE", "/api/v1/user/:id=", nil)
+	r, err := http.NewRequest("DELETE", "/api/v1/user", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -281,7 +297,7 @@ func TestCheckAccess(t *testing.T) {
 		t.Fatal(err)
 	}
 	w := httptest.NewRecorder()
-	for i := 0; i < 2; i++ {
+	for i := 0; i < 3; i++ {
 		switch i {
 		//case when user was not logged in, thus there was no cookie in request
 		case 0:
@@ -305,6 +321,16 @@ func TestCheckAccess(t *testing.T) {
 				t.Fatal(err)
 			}
 			if CheckAccess(w, r) != true {
+				t.Error("Function doesn't work properly")
+			}
+		//case when there was an error while accessing redis db
+		case 2:
+			defer func() {
+				RedisClient = database.Client
+			}()
+			RedisClient = mockRedis()
+			RedisClient.Close()
+			if CheckAccess(w, r) != false {
 				t.Error("Function doesn't work properly")
 			}
 		}

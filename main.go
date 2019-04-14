@@ -4,19 +4,19 @@ import (
 	"flag"
 	"fmt"
 	"net/http"
-	//	"os"
+	"os"
 
 	"team-project/configurations"
 	"team-project/database"
 	"team-project/logger"
 	"team-project/services"
 
-//	"github.com/urfave/negroni"
+	"github.com/urfave/negroni"
 )
 
 func main() {
 	//Flags for LoadLog and LoadConfig functions
-	//port := os.Getenv("PORT")
+	port := os.Getenv("PORT")
 	configFile := flag.String("config", "./project_config.json", "Configuration file in JSON-format")
 	logFile := flag.String("logFile", "project_log_file.log", "Logging out file .log")
 	flag.Parse()
@@ -43,12 +43,12 @@ func main() {
 		return
 	}
 	//Middleware manager
-	// middlewareManager := negroni.New()
-	// middlewareManager.Use(negroni.NewRecovery())
-	// middlewareManager.UseHandler(services.NewRouter())
+	middlewareManager := negroni.New()
+	middlewareManager.Use(negroni.NewRecovery())
+	middlewareManager.UseHandler(services.NewRouter())
 	fmt.Println("Starting HTTP listener...")
 	//Starting server
-	err = http.ListenAndServe("localhost:8080", services.NewRouter())
+	err = http.ListenAndServe(":"+port, middlewareManager)
 	if err != nil {
 		logger.Logger.Errorf("Error, %s", err)
 	}
