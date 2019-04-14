@@ -21,6 +21,8 @@ var (
 	//InMemorySession creates new session in memory
 	InMemorySession *session.Session
 	emptyResponse   interface{}
+	//LoggedIn variable holds value of CheckAccess function
+	LoggedIn = CheckAccess
 	//SessionID variable holds the value of InMemorySession.Init function
 	SessionID uuid.UUID
 	//AddUser variable holds the value of database.AddUser function
@@ -39,6 +41,8 @@ var (
 	RenderJSON = common.RenderJSON
 	//GetUserPassword variable holds the value of database.GetUserPassword function
 	GetUserPassword = database.GetUserPassword
+	//GetUserRole variable holds the value of database.GetUserRole function
+	GetUserRole = database.GetUserRole
 	//CheckPasswordHash variable holds the value ofmodel.CheckPasswordHash function
 	CheckPasswordHash = model.CheckPasswordHash
 	//RedisClient holds the value of redis client
@@ -227,4 +231,23 @@ func CheckAccess(w http.ResponseWriter, r *http.Request) bool {
 		}
 	}
 	return active
+}
+
+//CheckAdmin function checks where user is admin to give him special access to some services
+func CheckAdmin(w http.ResponseWriter, r *http.Request) bool {
+	in := LoggedIn(w, r)
+	if in {
+		id, arr := len(r.Cookies())-1, r.Cookies()
+		cookie := arr[id]
+		role, err := GetUserRole(cookie.Name)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return false
+		}
+		if role != "Admin" {
+			return false
+		}
+		return true
+	}
+	return false
 }

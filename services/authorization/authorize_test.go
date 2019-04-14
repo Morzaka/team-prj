@@ -336,3 +336,66 @@ func TestCheckAccess(t *testing.T) {
 		}
 	}
 }
+
+//TestCheckAdmin tests function CheckAdmin
+func TestCheckAdmin(t *testing.T) {
+	r, err := http.NewRequest("GET", "/api/v1/trains", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	w := httptest.NewRecorder()
+	defer func() {
+		GetUserRole = database.GetUserRole
+		LoggedIn = CheckAccess
+	}()
+	for i := 0; i < 4; i++ {
+		cookie := &http.Cookie{Name: "Cookie",
+			Value: "expected",
+		}
+		http.SetCookie(w, cookie)
+		r = &http.Request{Header: http.Header{"Cookie": w.HeaderMap["Set-Cookie"]}}
+		switch i {
+		//case where user wasn't logged in at all
+		case 0:
+			LoggedIn = func(http.ResponseWriter, *http.Request) bool {
+				return false
+			}
+			if CheckAdmin(w, r) != false {
+				t.Error("Function doesn't work properly")
+			}
+		//case when user was logged in with role Admin
+		case 1:
+			LoggedIn = func(http.ResponseWriter, *http.Request) bool {
+				return true
+			}
+			GetUserRole = func(string) (string, error) {
+				return "Admin", nil
+			}
+			if CheckAdmin(w, r) != true {
+				t.Error("Function doesn't work properly")
+			}
+		//case when user was logged in with role User
+		case 2:
+			LoggedIn = func(http.ResponseWriter, *http.Request) bool {
+				return true
+			}
+			GetUserRole = func(string) (string, error) {
+				return "User", nil
+			}
+			if CheckAdmin(w, r) != false {
+				t.Error("Function doesn't work properly")
+			}
+		//case when there was error while getting user role from db
+		case 3:
+			LoggedIn = func(http.ResponseWriter, *http.Request) bool {
+				return true
+			}
+			GetUserRole = func(string) (string, error) {
+				return "", errors.New("Error")
+			}
+			if CheckAdmin(w, r) != false {
+				t.Error("Function doesn't work properly")
+			}
+		}
+	}
+}

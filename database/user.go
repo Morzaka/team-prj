@@ -9,10 +9,11 @@ import (
 var (
 	insertUser = `INSERT INTO public.user (id,name,surname,login, password,role)
 	VALUES ($1, $2, $3, $4, $5, $6);`
-	selectUser     = `SELECT password FROM public.user WHERE login=$1;`
-	selectAllUsers = `SELECT * from public.user;`
-	updateUser     = `UPDATE public.user SET name = $2, surname = $3, login=$4, password=$5, role=$6 WHERE id = $1;`
-	deleteUser     = `DELETE FROM public.user WHERE id = $1;`
+	selectUserPassword = `SELECT password FROM public.user WHERE login=$1;`
+	selectUserRole     = `SELECT role FROM public.user WHERE login=$1;`
+	selectAllUsers     = `SELECT * from public.user;`
+	updateUser         = `UPDATE public.user SET name = $2, surname = $3, login=$4, password=$5, role=$6 WHERE id = $1;`
+	deleteUser         = `DELETE FROM public.user WHERE id = $1;`
 )
 
 //AddUser adds info about new user to the database
@@ -29,13 +30,23 @@ func AddUser(user data.User) (data.User, error) {
 func GetUserPassword(login string) (string, error) {
 	var password string
 	//get user's password for given login
-	err := Db.QueryRow(selectUser, login).Scan(&password)
+	err := Db.QueryRow(selectUserPassword, login).Scan(&password)
 	//if there's no matches for login return empty value
 	if err != nil {
 		return "", err
 	}
 	//else return password
 	return password, nil
+}
+
+//GetUserRole get's user's role and returns it with nil error, otherwise returns error
+func GetUserRole(login string) (string, error) {
+	var role string
+	err := Db.QueryRow(selectUserRole, login).Scan(&role)
+	if err != nil {
+		return "", err
+	}
+	return role, nil
 }
 
 //UpdateUser updates user's personal information

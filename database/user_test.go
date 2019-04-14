@@ -47,10 +47,10 @@ func TestDeleteUser(t *testing.T) {
 	}
 	Db = db
 	defer db.Close()
-	idOK := uuid.Must(uuid.Parse("08307904-f18e-4fb8-9d18-29cfad38ffaf"))
-	mock.ExpectExec("DELETE").WithArgs(idOK).WillReturnResult(sqlmock.NewResult(0, 1))
+	id := uuid.Must(uuid.Parse("08307904-f18e-4fb8-9d18-29cfad38ffaf"))
+	mock.ExpectExec("DELETE").WithArgs(id).WillReturnResult(sqlmock.NewResult(0, 1))
 	// now we execute our method
-	if err = DeleteUser(idOK); err != nil {
+	if err = DeleteUser(id); err != nil {
 		t.Errorf("error was not expected while deleting user: %s", err)
 	}
 	// we make sure that all expectations were met
@@ -114,6 +114,31 @@ func TestGetUserPassword(t *testing.T) {
 	}
 }
 
+//TestGetUserRole tests function TestGetUserRole
+func TestGetUserRole(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+	}
+	Db = db
+	defer db.Close()
+	loginOK := "oksana"
+	loginERR := "yuri"
+	rows := sqlmock.NewRows([]string{"role"}).AddRow("Admin")
+	mock.ExpectQuery("SELECT").WithArgs(loginOK).WillReturnRows(rows)
+	mock.ExpectQuery("SELECT").WithArgs(loginERR).WillReturnError(fmt.Errorf("no rows found"))
+	if _, err = GetUserRole(loginOK); err != nil {
+		t.Errorf("error was not expected while getting user: %s", err)
+	}
+	if _, err = GetUserRole(loginERR); err == nil {
+		t.Errorf("error was not expected while getting user: %s", err)
+	}
+	// we make sure that all expectations were met
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Errorf("there were unfulfilled expectations: %s", err)
+	}
+}
+
 //TestGetAllUsers tests function GetAllUsers
 func TestGetAllUsers(t *testing.T) {
 	db, mock, err := sqlmock.New()
@@ -123,8 +148,8 @@ func TestGetAllUsers(t *testing.T) {
 	Db = db
 	defer db.Close()
 	id := uuid.Must(uuid.Parse("08307904-f18e-4fb8-9d18-29cfad38ffaf"))
-	rowsOK := sqlmock.NewRows([]string{"id", "name", "surname", "login", "password", "role"}).AddRow(id, "Oksana", "Zhykina", "litleskew", "littleskew", "User")
-	mock.ExpectQuery("SELECT").WillReturnRows(rowsOK)
+	rows := sqlmock.NewRows([]string{"id", "name", "surname", "login", "password", "role"}).AddRow(id, "Oksana", "Zhykina", "litleskew", "littleskew", "User")
+	mock.ExpectQuery("SELECT").WillReturnRows(rows)
 	if _, err = GetAllUsers(); err != nil {
 		t.Errorf("error was not expected while getting user: %s", err)
 	}
