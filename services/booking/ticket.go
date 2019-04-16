@@ -15,8 +15,8 @@ import (
 var emptyResponse interface{}
 
 func validateForm(tk data.Ticket) error {
-	if tk.Place == 0 || tk.TicketType == "" || tk.
-		Discount == "" || tk.Price == 0 || tk.TotalPrice == 0 || tk.
+	if tk.Place <= 0 || tk.TicketType == "" || tk.
+		Discount == "" || tk.Price <= 0 || tk.TotalPrice <= 0 || tk.
 		Name == "" || tk.Surname == "" {
 		return errors.New("all fields must be complete")
 	}
