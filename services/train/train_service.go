@@ -2,7 +2,9 @@ package train
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
+	"regexp"
 	"team-project/database"
 	"team-project/services/common"
 	"team-project/services/data"
@@ -13,6 +15,35 @@ import (
 
 var emptyResponse interface{}
 
+func validateIfEmpty(t data.Train) error {
+	if t.DepartureCity == "" || t.ArrivalCity == "" || t.DepartureTime == "" || t.DepartureDate == "" || t.ArrivalTime == "" || t.ArrivalDate == "" {
+		return errors.New("Some incoming data is empty =(")
+	}
+	return nil
+}
+
+func nameIsValid(str string) bool {
+	var validName = regexp.MustCompile(`^[a-zA-Z]+(?:[\s-][a-zA-Z]+)*$`)
+	return validName.MatchString(str)
+}
+
+func timeIsValid(str string) bool {
+	var validName = regexp.MustCompile(`^(2[0-3]|[01]?[0-9]):([0-5]?[0-9])$`)
+	return validName.MatchString(str)
+}
+
+func dateIsValid(str string) bool {
+	var validName = regexp.MustCompile(`^\s*(3[01]|[12][0-9]|0?[1-9])\.(1[012]|0?[1-9])\.((?:19|20)\d{2})\s*$`)
+	return validName.MatchString(str)
+}
+
+func validate(t data.Train) error {
+	if nameIsValid(t.ArrivalCity) == false || nameIsValid(t.DepartureCity) == false || dateIsValid(t.DepartureDate) == false || dateIsValid(t.ArrivalDate) == false || timeIsValid(t.ArrivalTime) == false || timeIsValid(t.DepartureTime) == false {
+		return errors.New("Some data is invalid")
+	}
+	return nil
+}
+
 //GetTrains is a method
 func GetTrains(w http.ResponseWriter, r *http.Request) {
 	trains, err := database.GetAllTrains()
@@ -20,8 +51,19 @@ func GetTrains(w http.ResponseWriter, r *http.Request) {
 		common.RenderJSON(w, r, 404, emptyResponse)
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(trains)
+
+	for _, train := range trains {
+		if err = validateIfEmpty(train); err != nil {
+			common.RenderJSON(w, r, 404, emptyResponse)
+			return
+		}
+		if err = validate(train); err != nil {
+			common.RenderJSON(w, r, 404, emptyResponse)
+			return
+		}
+	}
+
+	common.RenderJSON(w, r, 202, trains)
 }
 
 //GetSingleTrain is a method
@@ -32,6 +74,14 @@ func GetSingleTrain(w http.ResponseWriter, r *http.Request) {
 		common.RenderJSON(w, r, 404, emptyResponse)
 		return
 	}
+	if err = validateIfEmpty(train); err != nil {
+		common.RenderJSON(w, r, 404, emptyResponse)
+		return
+	}
+	if err = validate(train); err != nil {
+		common.RenderJSON(w, r, 404, emptyResponse)
+		return
+	}
 	common.RenderJSON(w, r, 202, train)
 }
 
@@ -39,6 +89,14 @@ func GetSingleTrain(w http.ResponseWriter, r *http.Request) {
 func CreateTrain(w http.ResponseWriter, r *http.Request) {
 	t := data.Train{}
 	json.NewDecoder(r.Body).Decode(&t)
+	if err := validateIfEmpty(t); err != nil {
+		common.RenderJSON(w, r, 404, emptyResponse)
+		return
+	}
+	if err := validate(t); err != nil {
+		common.RenderJSON(w, r, 404, emptyResponse)
+		return
+	}
 	err := database.AddTrain(t)
 	if err != nil {
 		common.RenderJSON(w, r, 404, emptyResponse)
@@ -56,6 +114,14 @@ func UpdateTrain(w http.ResponseWriter, r *http.Request) {
 	}
 	t := data.Train{}
 	json.NewDecoder(r.Body).Decode(&t)
+	if err = validateIfEmpty(t); err != nil {
+		common.RenderJSON(w, r, 404, emptyResponse)
+		return
+	}
+	if err = validate(t); err != nil {
+		common.RenderJSON(w, r, 404, emptyResponse)
+		return
+	}
 	t.ID = id
 	err = database.UpdateTrain(t.ID, t.DepartureCity, t.ArrivalCity, t.DepartureDate, t.DepartureTime, t.ArrivalTime, t.ArrivalDate)
 	if err != nil {
