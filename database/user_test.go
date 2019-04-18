@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"testing"
 
+	"team-project/services/data"
+
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/google/uuid"
-
-	"team-project/services/data"
 )
+
+var userTest *IUser
 
 //TestAddUser tests function AddUser
 func TestAddUser(t *testing.T) {
@@ -30,7 +32,7 @@ func TestAddUser(t *testing.T) {
 	}
 	mock.ExpectExec("INSERT INTO public.user").WithArgs(user.ID, user.Name, user.Surname, user.Signin.Login, user.Signin.Password, user.Role).WillReturnResult(sqlmock.NewResult(1, 1))
 	// now we execute our method
-	if user, err = AddUser(user); err != nil {
+	if user, err = userTest.AddUser(user); err != nil {
 		t.Errorf("error was not expected while adding user: %s", err)
 	}
 	// we make sure that all expectations were met
@@ -50,7 +52,7 @@ func TestDeleteUser(t *testing.T) {
 	id := uuid.Must(uuid.Parse("08307904-f18e-4fb8-9d18-29cfad38ffaf"))
 	mock.ExpectExec("DELETE").WithArgs(id).WillReturnResult(sqlmock.NewResult(0, 1))
 	// now we execute our method
-	if err = DeleteUser(id); err != nil {
+	if err = userTest.DeleteUser(id); err != nil {
 		t.Errorf("error was not expected while deleting user: %s", err)
 	}
 	// we make sure that all expectations were met
@@ -80,7 +82,7 @@ func TestUpdateUser(t *testing.T) {
 	}
 	mock.ExpectExec("UPDATE public.user").WithArgs(id, user.Name, user.Surname, user.Signin.Login, user.Signin.Password, user.Role).WillReturnResult(sqlmock.NewResult(0, 1))
 	// now we execute our method
-	if err = UpdateUser(user, id); err != nil {
+	if err = userTest.UpdateUser(user, id); err != nil {
 		t.Errorf("error was not expected while deleting user: %s", err)
 	}
 	// we make sure that all expectations were met
@@ -102,10 +104,10 @@ func TestGetUserPassword(t *testing.T) {
 	rows := sqlmock.NewRows([]string{"password"}).AddRow("golang")
 	mock.ExpectQuery("SELECT").WithArgs(loginOK).WillReturnRows(rows)
 	mock.ExpectQuery("SELECT").WithArgs(loginERR).WillReturnError(fmt.Errorf("no rows found"))
-	if _, err = GetUserPassword(loginOK); err != nil {
+	if _, err = userTest.GetUserPassword(loginOK); err != nil {
 		t.Errorf("error was not expected while getting user: %s", err)
 	}
-	if _, err = GetUserPassword(loginERR); err == nil {
+	if _, err = userTest.GetUserPassword(loginERR); err == nil {
 		t.Errorf("error was not expected while getting user: %s", err)
 	}
 	// we make sure that all expectations were met
@@ -127,10 +129,10 @@ func TestGetUserRole(t *testing.T) {
 	rows := sqlmock.NewRows([]string{"role"}).AddRow("Admin")
 	mock.ExpectQuery("SELECT").WithArgs(loginOK).WillReturnRows(rows)
 	mock.ExpectQuery("SELECT").WithArgs(loginERR).WillReturnError(fmt.Errorf("no rows found"))
-	if _, err = GetUserRole(loginOK); err != nil {
+	if _, err = userTest.GetUserRole(loginOK); err != nil {
 		t.Errorf("error was not expected while getting user: %s", err)
 	}
-	if _, err = GetUserRole(loginERR); err == nil {
+	if _, err = userTest.GetUserRole(loginERR); err == nil {
 		t.Errorf("error was not expected while getting user: %s", err)
 	}
 	// we make sure that all expectations were met
@@ -150,7 +152,7 @@ func TestGetAllUsers(t *testing.T) {
 	id := uuid.Must(uuid.Parse("08307904-f18e-4fb8-9d18-29cfad38ffaf"))
 	rows := sqlmock.NewRows([]string{"id", "name", "surname", "login", "password", "role"}).AddRow(id, "Oksana", "Zhykina", "litleskew", "littleskew", "User")
 	mock.ExpectQuery("SELECT").WillReturnRows(rows)
-	if _, err = GetAllUsers(); err != nil {
+	if _, err = userTest.GetAllUsers(); err != nil {
 		t.Errorf("error was not expected while getting user: %s", err)
 	}
 	// we make sure that all expectations were met

@@ -13,101 +13,102 @@ import (
 	"github.com/go-zoo/bone"
 )
 
-var emptyResponse interface{}
+var (
+	//ModelVar is an interface to call methods from model package
+	ModelVar model.Model = &model.IModel{}
+	//CommonVar is an interface to call methods from common package
+	CommonVar     common.Common = &common.ICommon{}
+	emptyResponse interface{}
+)
 
 //GetTrains is a method
 func GetTrains(w http.ResponseWriter, r *http.Request) {
-	if authorization.CheckAdmin(w, r) {
-		trains, err := database.GetAllTrains()
-		if err != nil {
-			common.RenderJSON(w, r, http.StatusNotFound, emptyResponse)
-			return
-		}
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(trains)
-	} else {
-		common.RenderJSON(w, r, http.StatusForbidden, emptyResponse)
+	if !authorization.CheckAdmin(w, r) {
+		CommonVar.RenderJSON(w, r, http.StatusForbidden, emptyResponse)
 		return
 	}
+	trains, err := database.GetAllTrains()
+	if err != nil {
+		CommonVar.RenderJSON(w, r, http.StatusNotFound, emptyResponse)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(trains)
 }
 
 //GetSingleTrain is a method
 func GetSingleTrain(w http.ResponseWriter, r *http.Request) {
-	if authorization.CheckAdmin(w, r) {
-		params := bone.GetAllValues(r)
-		train, err := database.GetTrain(params["id"])
-		if err != nil {
-			common.RenderJSON(w, r, http.StatusNotFound, emptyResponse)
-			return
-		}
-		common.RenderJSON(w, r, http.StatusOK, train)
-	} else {
-		common.RenderJSON(w, r, http.StatusForbidden, emptyResponse)
+	if !authorization.CheckAdmin(w, r) {
+		CommonVar.RenderJSON(w, r, http.StatusForbidden, emptyResponse)
 		return
 	}
+	params := bone.GetAllValues(r)
+	train, err := database.GetTrain(params["id"])
+	if err != nil {
+		CommonVar.RenderJSON(w, r, http.StatusNotFound, emptyResponse)
+		return
+	}
+	CommonVar.RenderJSON(w, r, http.StatusOK, train)
 }
 
 //CreateTrain is a method
 func CreateTrain(w http.ResponseWriter, r *http.Request) {
-	if authorization.CheckAdmin(w, r) {
-		t := data.Train{}
-		json.NewDecoder(r.Body).Decode(&t)
-		err := database.AddTrain(t)
-		if err != nil {
-			common.RenderJSON(w, r, http.StatusNotFound, emptyResponse)
-			return
-		}
-		common.RenderJSON(w, r, http.StatusOK, t)
-	} else {
-		common.RenderJSON(w, r, http.StatusForbidden, emptyResponse)
+	if !authorization.CheckAdmin(w, r) {
+		CommonVar.RenderJSON(w, r, http.StatusForbidden, emptyResponse)
 		return
 	}
+	t := data.Train{}
+	json.NewDecoder(r.Body).Decode(&t)
+	err := database.AddTrain(t)
+	if err != nil {
+		CommonVar.RenderJSON(w, r, http.StatusNotFound, emptyResponse)
+		return
+	}
+	CommonVar.RenderJSON(w, r, http.StatusOK, t)
 }
 
 //UpdateTrain is a method
 func UpdateTrain(w http.ResponseWriter, r *http.Request) {
-	if authorization.CheckAdmin(w, r) {
-		id, err := model.GetID(r)
-		if err != nil {
-			common.RenderJSON(w, r, http.StatusNotFound, emptyResponse)
-			return
-		}
-		t := data.Train{}
-		json.NewDecoder(r.Body).Decode(&t)
-		t.ID = id
-		err = database.UpdateTrain(t.ID, t.DepartureCity, t.ArrivalCity, t.DepartureDate, t.DepartureTime, t.ArrivalTime, t.ArrivalDate)
-		if err != nil {
-			common.RenderJSON(w, r, http.StatusNotFound, emptyResponse)
-			return
-		}
-		train, err := database.GetTrain(t.ID.String())
-		if err != nil {
-			common.RenderJSON(w, r, http.StatusNotFound, emptyResponse)
-			return
-		}
-		common.RenderJSON(w, r, http.StatusOK, train)
-	} else {
-		common.RenderJSON(w, r, http.StatusForbidden, emptyResponse)
+	if !authorization.CheckAdmin(w, r) {
+		CommonVar.RenderJSON(w, r, http.StatusForbidden, emptyResponse)
 		return
 	}
+	id, err := ModelVar.GetID(r)
+	if err != nil {
+		CommonVar.RenderJSON(w, r, http.StatusNotFound, emptyResponse)
+		return
+	}
+	t := data.Train{}
+	json.NewDecoder(r.Body).Decode(&t)
+	t.ID = id
+	err = database.UpdateTrain(t.ID, t.DepartureCity, t.ArrivalCity, t.DepartureDate, t.DepartureTime, t.ArrivalTime, t.ArrivalDate)
+	if err != nil {
+		CommonVar.RenderJSON(w, r, http.StatusNotFound, emptyResponse)
+		return
+	}
+	train, err := database.GetTrain(t.ID.String())
+	if err != nil {
+		CommonVar.RenderJSON(w, r, http.StatusNotFound, emptyResponse)
+		return
+	}
+	CommonVar.RenderJSON(w, r, http.StatusOK, train)
 }
 
 //DeleteTrain is a method
 func DeleteTrain(w http.ResponseWriter, r *http.Request) {
-	if authorization.CheckAdmin(w, r) {
-		id, err := model.GetID(r)
-		if err != nil {
-			common.RenderJSON(w, r, http.StatusNotFound, emptyResponse)
-			return
-		}
-		err = database.DeleteTrain(id)
-		if err != nil {
-			common.RenderJSON(w, r, http.StatusNotFound, emptyResponse)
-			return
-		}
-		common.RenderJSON(w, r, http.StatusOK, emptyResponse)
-	} else {
-		common.RenderJSON(w, r, http.StatusForbidden, emptyResponse)
+	if !authorization.CheckAdmin(w, r) {
+		CommonVar.RenderJSON(w, r, http.StatusForbidden, emptyResponse)
 		return
 	}
+	id, err := ModelVar.GetID(r)
+	if err != nil {
+		CommonVar.RenderJSON(w, r, http.StatusNotFound, emptyResponse)
+		return
+	}
+	err = database.DeleteTrain(id)
+	if err != nil {
+		CommonVar.RenderJSON(w, r, http.StatusNotFound, emptyResponse)
+		return
+	}
+	CommonVar.RenderJSON(w, r, http.StatusOK, emptyResponse)
 }

@@ -17,6 +17,12 @@ type Signin struct {
 	Password string `json:"password"`
 }
 
+//Comment structure
+type Comment struct {
+	User    string   `json:"user"`
+	Comment []string `json:"comment"`
+}
+
 //Trip database structure
 type Trip struct {
 	TripID             uuid.UUID `json:"Trip_id"`

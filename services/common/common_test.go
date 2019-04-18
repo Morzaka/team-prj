@@ -8,6 +8,8 @@ import (
 	"team-project/services/data"
 )
 
+var commonTest *ICommon
+
 //TestRenderJSON tests function RenderJSON
 func TestRenderJSON(t *testing.T) {
 	r, err := http.NewRequest("POST", "/api/v1", nil)
@@ -25,7 +27,7 @@ func TestRenderJSON(t *testing.T) {
 		{http.StatusOK, data.Signin{Login: "Golang", Password: "Golang"}, http.StatusOK},
 	}
 	for _, testCase := range testData {
-		RenderJSON(w, r, testCase.status, testCase.response)
+		commonTest.RenderJSON(w, r, testCase.status, testCase.response)
 		if testCase.response == nil && w.Body.Len() != 0 {
 			t.Error("ResponseRecorder body should be empty")
 		}

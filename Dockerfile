@@ -1,6 +1,6 @@
 ######## First stage: build the executable #######
 # Accept the Go version for the image to be set as a build argument.
-# Default to Go 1.11
+# Default to Go 1.12.2
 ARG GO_VERSION=1.12.2
 
 # Build the executable.
