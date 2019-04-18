@@ -25,6 +25,10 @@ type IUser struct {
 	UserMethods UserCRUD
 }
 
+// Users is an instance presented IUser
+var Users UserCRUD = &IUser{}
+
+// database.UserCRUD = &database.IUser{}
 var (
 	insertUser = `INSERT INTO public.user (id,name,surname,login, password,role)
 	VALUES ($1, $2, $3, $4, $5, $6);`

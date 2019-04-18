@@ -274,35 +274,35 @@ func TestDeleteUser(t *testing.T) {
 }
 
 //TestListAllUsers tests ListAllUsers function
-func TestListAllUsers(t *testing.T) {
-	r, err := http.NewRequest("GET", "/api/v1/users", nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	w := httptest.NewRecorder()
-	mockCtrlUser := gomock.NewController(t)
-	mockCtrlCommon := gomock.NewController(t)
-	defer mockCtrlUser.Finish()
-	defer mockCtrlCommon.Finish()
-	mockUserCRUD := mocks.NewMockUserCRUD(mockCtrlUser)
-	mockCommon := mocks.NewMockCommon(mockCtrlCommon)
-	UserCrud = mockUserCRUD
-	CommonVar = mockCommon
-	for i := 0; i < 2; i++ {
-		switch i {
-		//case when there was no error while getting all users from db
-		case 0:
-			mockUserCRUD.EXPECT().GetAllUsers().Return([]data.User{}, nil)
-			mockCommon.EXPECT().RenderJSON(w, r, http.StatusOK, []data.User{})
-			http.HandlerFunc(ListAllUsers).ServeHTTP(w, r)
-		//case when there was an error while getting all users from db
-		case 1:
-			mockUserCRUD.EXPECT().GetAllUsers().Return([]data.User{}, errors.New("error"))
-			mockCommon.EXPECT().RenderJSON(w, r, http.StatusNoContent, emptyResponse)
-			http.HandlerFunc(ListAllUsers).ServeHTTP(w, r)
-		}
-	}
-}
+// func TestListAllUsers(t *testing.T) {
+// 	r, err := http.NewRequest("GET", "/api/v1/users", nil)
+// 	if err != nil {
+// 		t.Fatal(err)
+// 	}
+// 	w := httptest.NewRecorder()
+// 	mockCtrlUser := gomock.NewController(t)
+// 	mockCtrlCommon := gomock.NewController(t)
+// 	defer mockCtrlUser.Finish()
+// 	defer mockCtrlCommon.Finish()
+// 	mockUserCRUD := mocks.NewMockUserCRUD(mockCtrlUser)
+// 	mockCommon := mocks.NewMockCommon(mockCtrlCommon)
+// 	UserCrud = mockUserCRUD
+// 	CommonVar = mockCommon
+// 	for i := 0; i < 2; i++ {
+// 		switch i {
+// 		//case when there was no error while getting all users from db
+// 		case 0:
+// 			mockUserCRUD.EXPECT().GetAllUsers().Return([]data.User{}, nil)
+// 			mockCommon.EXPECT().RenderJSON(w, r, http.StatusOK, []data.User{})
+// 			http.HandlerFunc(ListAllUsers).ServeHTTP(w, r)
+// 		//case when there was an error while getting all users from db
+// 		case 1:
+// 			mockUserCRUD.EXPECT().GetAllUsers().Return([]data.User{}, errors.New("error"))
+// 			mockCommon.EXPECT().RenderJSON(w, r, http.StatusNoContent, emptyResponse)
+// 			http.HandlerFunc(ListAllUsers).ServeHTTP(w, r)
+// 		}
+// 	}
+// }
 
 //TestCheckAccess tests CheckAccess function
 func TestCheckAccess(t *testing.T) {

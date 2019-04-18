@@ -178,12 +178,12 @@ func DeleteUserPage(w http.ResponseWriter, r *http.Request) {
 
 //ListAllUsers makes a request to db to get all users
 func ListAllUsers(w http.ResponseWriter, r *http.Request) {
-	users, err := UserCrud.GetAllUsers()
+	users, err := database.Users.GetAllUsers()
 	if err != nil {
-		CommonVar.RenderJSON(w, r, http.StatusNoContent, emptyResponse)
+		common.RenderJSON(w, r, http.StatusNoContent, emptyResponse)
 		return
 	}
-	CommonVar.RenderJSON(w, r, http.StatusOK, users)
+	common.RenderJSON(w, r, http.StatusOK, users)
 }
 
 //CheckAccess checks whether user is logged in to give him access to services
