@@ -6,6 +6,24 @@ import (
 	"github.com/google/uuid"
 )
 
+//TicketRepository for mocking
+type TicketRepository interface {
+	AllTickets() (data.Tickets, error)
+	GetTicket(id uuid.UUID) (data.Ticket, error)
+	CreateTicket(tk data.Ticket) error
+	UpdateTicket(tk data.Ticket) error
+	DeleteTicket(id uuid.UUID) error
+}
+
+//IUser structure contains interface TicketRepository
+type ticketRepository struct {
+	ticketRepo TicketRepository
+}
+
+// Users is an instance presented IUser
+var TicketRepo TicketRepository = &ticketRepository{}
+
+
 var (
 	getAllItems = "SELECT id, train_id, plane_id, user_id, place, " +
 		"ticket_type," +
@@ -24,7 +42,7 @@ var (
 )
 
 //GetAllTickets sends a query for all tickets
-func GetAllTickets() (data.Tickets, error) {
+func (*ticketRepository) AllTickets() (data.Tickets, error) {
 	//rows, err := configurations.DB.Query("SELECT * FROM tickets")
 	rows, err := Db.Query(getAllItems)
 	if err != nil {
@@ -52,7 +70,7 @@ func GetAllTickets() (data.Tickets, error) {
 }
 
 //GetTicket sends a query for one ticket
-func GetTicket(id uuid.UUID) (data.Ticket, error) {
+func (*ticketRepository) GetTicket(id uuid.UUID) (data.Ticket, error) {
 	tk := data.Ticket{}
 	row := Db.QueryRow(getOneItem, id)
 
@@ -68,7 +86,7 @@ func GetTicket(id uuid.UUID) (data.Ticket, error) {
 }
 
 //CreateTicket sends a query for creating new one ticket
-func CreateTicket(tk data.Ticket) error {
+func (*ticketRepository) CreateTicket(tk data.Ticket) error {
 	_, err := Db.Exec(addOneItem, tk.ID, tk.Place, tk.TicketType, tk.Discount,
 		tk.Price, tk.TotalPrice, tk.Name, tk.Surname)
 	if err != nil {
@@ -78,7 +96,7 @@ func CreateTicket(tk data.Ticket) error {
 }
 
 //UpdateTicket sends a query for updating one ticket by ID
-func UpdateTicket(tk data.Ticket) error {
+func (*ticketRepository) UpdateTicket(tk data.Ticket) error {
 	_, err := Db.Exec(updateItem, tk.ID, tk.Place, tk.TicketType, tk.Discount,
 		tk.Price, tk.TotalPrice, tk.Name, tk.Surname)
 	if err != nil {
@@ -88,7 +106,7 @@ func UpdateTicket(tk data.Ticket) error {
 }
 
 //DeleteTicket sends a query for deleting one ticket by ID
-func DeleteTicket(id uuid.UUID) error {
+func (*ticketRepository) DeleteTicket(id uuid.UUID) error {
 	_, err := Db.Exec(deleteItem, id)
 	if err != nil {
 		return err

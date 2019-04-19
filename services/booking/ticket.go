@@ -1,7 +1,6 @@
 package booking
 
 import (
-	"database/sql"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -25,12 +24,8 @@ func validateForm(tk data.Ticket) error {
 
 //GetAllTickets for GETing information about all tickets
 func GetAllTickets(w http.ResponseWriter, r *http.Request) {
-	tkts, err := database.GetAllTickets()
-	switch {
-	case err == sql.ErrNoRows:
-		common.RenderJSON(w, r, http.StatusNoContent, emptyResponse)
-		return
-	case err != nil:
+	tkts, err := database.TicketRepo.AllTickets()
+	if err != nil {
 		common.RenderJSON(w, r, http.StatusInternalServerError, tkts)
 		return
 	}
@@ -45,12 +40,8 @@ func GetOneTicket(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tk, err := database.GetTicket(id)
-	switch {
-	case err == sql.ErrNoRows:
-		common.RenderJSON(w, r, http.StatusNotFound, emptyResponse)
-		return
-	case err != nil:
+	tk, err := database.TicketRepo.GetTicket(id)
+	if err != nil {
 		common.RenderJSON(w, r, http.StatusInternalServerError, tk)
 		return
 	}
@@ -82,12 +73,8 @@ func CreateTicket(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//insert data to DB 'ticket' table
-	err = database.CreateTicket(tk)
-	switch {
-	case err == sql.ErrNoRows:
-		common.RenderJSON(w, r, http.StatusNotFound, emptyResponse)
-		return
-	case err != nil:
+	err = database.TicketRepo.CreateTicket(tk)
+	if err != nil {
 		common.RenderJSON(w, r, http.StatusInternalServerError, tk)
 		return
 	}
@@ -125,12 +112,8 @@ func UpdateTicket(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//insert data to DB 'ticket' table
-	err = database.UpdateTicket(tk)
-	switch {
-	case err == sql.ErrNoRows:
-		common.RenderJSON(w, r, http.StatusNotFound, emptyResponse)
-		return
-	case err != nil:
+	err = database.TicketRepo.UpdateTicket(tk)
+	if err != nil {
 		common.RenderJSON(w, r, http.StatusInternalServerError, tk)
 		return
 	}
@@ -144,12 +127,8 @@ func DeleteTicket(w http.ResponseWriter, r *http.Request) {
 		common.RenderJSON(w, r, http.StatusBadRequest, emptyResponse)
 		return
 	}
-	err = database.DeleteTicket(id)
-	switch {
-	case err == sql.ErrNoRows:
-		common.RenderJSON(w, r, http.StatusNotFound, emptyResponse)
-		return
-	case err != nil:
+	err = database.TicketRepo.DeleteTicket(id)
+	if err != nil {
 		common.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
 		return
 	}

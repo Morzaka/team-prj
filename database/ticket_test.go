@@ -69,7 +69,7 @@ func TestGetAllTickets(t *testing.T) {
 
 	rows := sqlmock.NewRows(columns).AddRow(rowItems...)
 	mock.ExpectQuery("SELECT").WillReturnRows(rows)
-	if _, err := GetAllTickets(); err != nil {
+	if _, err := AllTickets(); err != nil {
 		t.Errorf("error was not expected while getting tickets: %s", err)
 	}
 }
@@ -94,6 +94,10 @@ func TestGetTicket(t *testing.T) {
 	}
 	if _, err := GetTicket(errID); err == nil {
 		t.Errorf("error was not expected while getting user: %s", err)
+	}
+
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Errorf("there were unfulfilled expectations: %s", err)
 	}
 }
 
