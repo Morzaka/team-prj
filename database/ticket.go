@@ -8,7 +8,7 @@ import (
 
 //TicketRepository for mocking
 type TicketRepository interface {
-	AllTickets() (data.Tickets, error)
+	AllTickets() ([]data.Ticket, error)
 	GetTicket(id uuid.UUID) (data.Ticket, error)
 	CreateTicket(tk data.Ticket) error
 	UpdateTicket(tk data.Ticket) error
@@ -42,7 +42,7 @@ var (
 )
 
 //GetAllTickets sends a query for all tickets
-func (*ticketRepository) AllTickets() (data.Tickets, error) {
+func (*ticketRepository) AllTickets() ([]data.Ticket, error) {
 	//rows, err := configurations.DB.Query("SELECT * FROM tickets")
 	rows, err := Db.Query(getAllItems)
 	if err != nil {
@@ -50,7 +50,7 @@ func (*ticketRepository) AllTickets() (data.Tickets, error) {
 	}
 	defer rows.Close()
 
-	tkts := make(data.Tickets, 0)
+	tkts := make([]data.Ticket, 0)
 	for rows.Next() {
 		tk := data.Ticket{}
 		err := rows.Scan(&tk.ID, &tk.TrainID, &tk.PlaneID, &tk.UserID,

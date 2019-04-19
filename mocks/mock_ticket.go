@@ -35,10 +35,10 @@ func (m *MockTicketRepository) EXPECT() *MockTicketRepositoryMockRecorder {
 }
 
 // AllTickets mocks base method
-func (m *MockTicketRepository) AllTickets() (data.Tickets, error) {
+func (m *MockTicketRepository) AllTickets() ([]data.Ticket, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "AllTickets")
-	ret0, _ := ret[0].(data.Tickets)
+	ret0, _ := ret[0].([]data.Ticket)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

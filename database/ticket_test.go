@@ -69,7 +69,7 @@ func TestGetAllTickets(t *testing.T) {
 
 	rows := sqlmock.NewRows(columns).AddRow(rowItems...)
 	mock.ExpectQuery("SELECT").WillReturnRows(rows)
-	if _, err := AllTickets(); err != nil {
+	if _, err := TicketRepo.AllTickets(); err != nil {
 		t.Errorf("error was not expected while getting tickets: %s", err)
 	}
 }
@@ -89,10 +89,10 @@ func TestGetTicket(t *testing.T) {
 	mock.ExpectQuery("SELECT").WithArgs(okID).WillReturnRows(rows)
 	mock.ExpectQuery("SELECT").WithArgs(errID).WillReturnError(fmt.Errorf(
 		"no rows found"))
-	if _, err := GetTicket(okID); err != nil {
+	if _, err := TicketRepo.GetTicket(okID); err != nil {
 		t.Errorf("error was not expected while getting user: %s", err)
 	}
-	if _, err := GetTicket(errID); err == nil {
+	if _, err := TicketRepo.GetTicket(errID); err == nil {
 		t.Errorf("error was not expected while getting user: %s", err)
 	}
 
@@ -113,7 +113,7 @@ func TestCreateTicket(t *testing.T) {
 		WillReturnResult(
 			sqlmock.NewResult(1, 8))
 	//execute method that is being tested
-	if err := CreateTicket(newTestData); err != nil {
+	if err := TicketRepo.CreateTicket(newTestData); err != nil {
 		t.Errorf("error was not expected while adding ticket: %s", err)
 	}
 }
@@ -138,7 +138,7 @@ func TestUpdateTicket(t *testing.T) {
 		ticket.TicketType, ticket.Discount, ticket.Price, ticket.TotalPrice,
 		ticket.Name, ticket.Surname).WillReturnResult(sqlmock.NewResult(0, 8))
 	// now we execute our method
-	if err := UpdateTicket(ticket); err != nil {
+	if err := TicketRepo.UpdateTicket(ticket); err != nil {
 		t.Errorf("error was not expected while deleting user: %s", err)
 	}
 }
@@ -151,7 +151,7 @@ func TestDeleteTicket(t *testing.T) {
 	mock.ExpectExec("DELETE").WithArgs(testID).WillReturnResult(sqlmock.
 		NewResult(0, 8))
 	// now we execute our method
-	if err := DeleteTicket(testID); err != nil {
+	if err := TicketRepo.DeleteTicket(testID); err != nil {
 		t.Errorf("error was not expected while deleting user: %s", err)
 	}
 }
