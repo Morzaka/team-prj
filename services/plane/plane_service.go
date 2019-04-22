@@ -40,9 +40,9 @@ func GetPlane(w http.ResponseWriter, r *http.Request) {
 // CreatePlane is a method
 func CreatePlane(w http.ResponseWriter, r *http.Request) {
 	p := data.Plane{}
+	p.ID = model.GenerateID()
 	json.NewDecoder(r.Body).Decode(&p)
-	//p.ID = model.GenerateID()
-	_ ,err := database.AddPlane(p)
+	_, err := database.AddPlane(p)
 	if err != nil {
 		common.RenderJSON(w, r, 404, emptyResponse)
 		return
@@ -60,7 +60,7 @@ func UpdatePlane(w http.ResponseWriter, r *http.Request) {
 	p := data.Plane{}
 	json.NewDecoder(r.Body).Decode(&p)
 	p.ID = id
-	_ , err = database.UpdatePlane(p, p.ID)
+	_, err = database.UpdatePlane(p, p.ID)
 	if err != nil {
 		common.RenderJSON(w, r, 404, emptyResponse)
 		return
@@ -87,4 +87,3 @@ func DeletePlane(w http.ResponseWriter, r *http.Request) {
 	}
 	common.RenderJSON(w, r, 202, emptyResponse)
 }
-
