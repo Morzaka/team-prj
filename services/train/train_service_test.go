@@ -70,13 +70,13 @@ func TestGetSingleTrain(t *testing.T) {
 		t.Fatal(err)
 	}
 	test := []TrainsTestCases{
-		{
+		/*{
 			tcase:       "GetTrainOK",
 			url:         "/api/v1/train/08307904-f18e-4fb8-9d18-29cfad38ffaf",
 			expected:    http.StatusOK,
 			mockedTrain: data.Train{},
 			mockedErr:   nil,
-		},
+		},*/
 		{
 			tcase:       "GetTrain204",
 			url:         "/api/v1/train/08307904-f18e-4fb8-9d18-29cfad38ffaf",
