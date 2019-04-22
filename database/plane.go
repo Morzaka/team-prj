@@ -7,11 +7,11 @@ import (
 )
 
 var (
-	selectPlanes = `SELECT * FROM public.planes;`
-	selectPlane  = `SELECT * FROM public.planes WHERE id=$1;`
-	insertPlane  = `INSERT INTO public.planes (id, departure_City, arrival_City) VALUES ($1, $2, $3)`
-	updatePlane  = `UPDATE public.planes SET departure_City = $2, arrival_City = $3 WHERE id = $1;`
-	deletePlane  = `DELETE FROM public.planes WHERE id = $1;`
+	selectPlanes = `SELECT * FROM public.plane;`
+	selectPlane  = `SELECT * FROM public.plane WHERE id=$1;`
+	insertPlane  = `INSERT INTO public.plane (id, departure_City, arrival_City) VALUES ($1, $2, $3)`
+	updatePlane  = `UPDATE public.plane SET departure_City = $2, arrival_City = $3 WHERE id = $1;`
+	deletePlane  = `DELETE FROM public.plane WHERE id = $1;`
 )
 
 // GetPlanes is a function for getting all Planes from table
@@ -55,7 +55,7 @@ func UpdatePlane(plane data.Plane, id uuid.UUID) (data.Plane, error) {
 
 // AddPlane is a function for adding new Plane to table
 func AddPlane(plane data.Plane) (data.Plane, error) {
-	_, err := Db.Exec(insertPlane,plane.ID,plane.DepartureCity,plane.ArrivalCity)
+	_, err := Db.Exec(insertPlane, plane.ID, plane.DepartureCity, plane.ArrivalCity)
 	if err != nil {
 		return data.Plane{}, err
 	}
