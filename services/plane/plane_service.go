@@ -11,7 +11,7 @@ import (
 
 var emptyResponse interface{}
 
-// GetPlanes is a method
+// GetPlanes get all planes from database
 func GetPlanes(w http.ResponseWriter, r *http.Request) {
 	planes, err := database.GetPlanes()
 	if err != nil {
@@ -22,7 +22,7 @@ func GetPlanes(w http.ResponseWriter, r *http.Request) {
 	common.RenderJSON(w, r, http.StatusOK, planes)
 }
 
-// GetPlane is a method
+// GetPlane get plane from database by id
 func GetPlane(w http.ResponseWriter, r *http.Request) {
 	id, err := model.GetID(r)
 	if err != nil {
@@ -37,7 +37,7 @@ func GetPlane(w http.ResponseWriter, r *http.Request) {
 	common.RenderJSON(w, r, 202, plane)
 }
 
-// CreatePlane is a method
+// CreatePlane create new plane to database
 func CreatePlane(w http.ResponseWriter, r *http.Request) {
 	p := data.Plane{}
 	p.ID = model.GenerateID()
@@ -50,7 +50,7 @@ func CreatePlane(w http.ResponseWriter, r *http.Request) {
 	common.RenderJSON(w, r, 202, p)
 }
 
-// UpdatePlane is a method
+// UpdatePlane update plane in database by id
 func UpdatePlane(w http.ResponseWriter, r *http.Request) {
 	id, err := model.GetID(r)
 	if err != nil {
@@ -73,7 +73,7 @@ func UpdatePlane(w http.ResponseWriter, r *http.Request) {
 	common.RenderJSON(w, r, 202, plane)
 }
 
-// DeletePlane is a method
+// DeletePlane delete plane from database by id
 func DeletePlane(w http.ResponseWriter, r *http.Request) {
 	id, err := model.GetID(r)
 	if err != nil {
