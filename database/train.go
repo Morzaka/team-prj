@@ -8,8 +8,8 @@ import (
 	_ "github.com/lib/pq" // pq lib for using postgres
 )
 
-// ITrain is an interface for tests mock
-type ITrain interface {
+// TrainCrud is an interface for tests mock
+type TrainCrud interface {
 	GetAllTrains() ([]data.Train, error)
 	GetTrain(string) (data.Train, error)
 	AddTrain(data.Train) error
@@ -17,8 +17,16 @@ type ITrain interface {
 	DeleteTrain(uuid.UUID) error
 }
 
+//ITrain is a struct
+type ITrain struct {
+	TrainMethods TrainCrud
+}
+
+//Trains is a variable implemented from ITrain
+var Trains TrainCrud = &ITrain{}
+
 //GetAllTrains is a method which Gets Trains from table trains
-func GetAllTrains() ([]data.Train, error) {
+func (*ITrain) GetAllTrains() ([]data.Train, error) {
 	rows, err := Db.Query("select * from public.trains")
 	if err != nil {
 		return nil, err
@@ -38,7 +46,7 @@ func GetAllTrains() ([]data.Train, error) {
 }
 
 //GetTrain is a method which Gets Train from table trains
-func GetTrain(id string) (data.Train, error) {
+func (*ITrain) GetTrain(id string) (data.Train, error) {
 	idint, err := uuid.Parse(id)
 	if err != nil {
 		return data.Train{}, err
@@ -53,7 +61,7 @@ func GetTrain(id string) (data.Train, error) {
 }
 
 //AddTrain is a method which Adds Train to table trains
-func AddTrain(t data.Train) error {
+func (*ITrain) AddTrain(t data.Train) error {
 	_, err := Db.Exec("insert into trains (departure_city,arrival_city,departure_time,departure_date,arrival_time,arrival_date) values ($1,$2,$3,$4,$5,$6)", t.DepartureCity, t.ArrivalCity, t.DepartureTime, t.DepartureDate, t.ArrivalTime, t.ArrivalDate)
 
 	if err != nil {
@@ -64,7 +72,7 @@ func AddTrain(t data.Train) error {
 }
 
 //UpdateTrain is a method which Updates Train in table trains
-func UpdateTrain(id uuid.UUID, departureCity string, arrivalCity string, departureTime string, departureDate string, arrivalTime string, arrivalDate string) error {
+func (*ITrain) UpdateTrain(id uuid.UUID, departureCity string, arrivalCity string, departureTime string, departureDate string, arrivalTime string, arrivalDate string) error {
 	_, err := Db.Exec("update public.trains set departure_city = $1 , arrival_city = $2, departure_time = $3, departure_date = $4, arrival_time = $5, arrival_date = $6 where id = $7", departureCity, arrivalCity, departureTime, departureDate, arrivalTime, arrivalDate, id)
 
 	if err != nil {
@@ -74,7 +82,7 @@ func UpdateTrain(id uuid.UUID, departureCity string, arrivalCity string, departu
 }
 
 //DeleteTrain is a method which Deletes Train from table trains
-func DeleteTrain(id uuid.UUID) error {
+func (*ITrain) DeleteTrain(id uuid.UUID) error {
 	_, err := Db.Exec("delete from trains where id = $1", id)
 	if err != nil {
 		return err

@@ -22,7 +22,7 @@ func TestGetAllTrains(t *testing.T) {
 	}
 	rowOK := sqlmock.NewRows([]string{"id", "departure_city", "arrival_city", "departure_time", "departure_date", "arrival_time", "arrival_date"}).AddRow(id, "Lviv", "Kiev", "13:40", "22.04.2019", "18:40", "22.04.2019")
 	mock.ExpectQuery("select").WillReturnRows(rowOK)
-	if _, err = GetAllTrains(); err != nil {
+	if _, err = Trains.GetAllTrains(); err != nil {
 		t.Error("error was occured while getting train in tests ", err)
 	}
 	if err := mock.ExpectationsWereMet(); err != nil {
@@ -46,7 +46,7 @@ func TestAddTrain(t *testing.T) {
 		ArrivalDate:   "24.04.2019",
 	}
 	mock.ExpectExec("insert into trains").WithArgs(train.DepartureCity, train.ArrivalCity, train.DepartureTime, train.DepartureDate, train.ArrivalTime, train.ArrivalDate).WillReturnResult(sqlmock.NewResult(1, 1))
-	if err := AddTrain(train); err != nil {
+	if err := Trains.AddTrain(train); err != nil {
 		t.Error("An error occured while adding train in tests ", err)
 	}
 	if err := mock.ExpectationsWereMet(); err != nil {
@@ -68,7 +68,7 @@ func TestGetTrain(t *testing.T) {
 	}
 	rowOK := sqlmock.NewRows([]string{"id", "departure_city", "arrival_city", "departure_time", "departure_date", "arrival_time", "arrival_date"}).AddRow(id, "Lviv", "Kiev", "13:40", "22.04.2019", "18:40", "22.04.2019")
 	mock.ExpectQuery("select").WillReturnRows(rowOK)
-	if _, err = GetTrain(s); err != nil {
+	if _, err = Trains.GetTrain(s); err != nil {
 		t.Error("error was occured while getting train in tests ", err)
 	}
 	if err := mock.ExpectationsWereMet(); err != nil {
@@ -89,7 +89,7 @@ func TestDeleteTrain(t *testing.T) {
 		t.Fatal(err)
 	}
 	mock.ExpectExec("delete").WithArgs(id).WillReturnResult(sqlmock.NewResult(0, 1))
-	if err := DeleteTrain(id); err != nil {
+	if err := Trains.DeleteTrain(id); err != nil {
 		t.Error("error was occured while deleting train in tests ", err)
 	}
 	if err := mock.ExpectationsWereMet(); err != nil {

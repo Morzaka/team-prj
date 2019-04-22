@@ -46,13 +46,13 @@ func validate(t data.Train) error {
 
 //GetTrains is a method
 func GetTrains(w http.ResponseWriter, r *http.Request) {
-	trains, err := database.GetAllTrains()
+	trains, err := database.Trains.GetAllTrains()
 	if err != nil {
-		common.RenderJSON(w, r, 404, emptyResponse)
+		common.RenderJSON(w, r, http.StatusNoContent, emptyResponse)
 		return
 	}
 
-	for _, train := range trains {
+	/*for _, train := range trains {
 		if err = validateIfEmpty(train); err != nil {
 			common.RenderJSON(w, r, 404, emptyResponse)
 			return
@@ -61,28 +61,28 @@ func GetTrains(w http.ResponseWriter, r *http.Request) {
 			common.RenderJSON(w, r, 404, emptyResponse)
 			return
 		}
-	}
+	}*/
 
-	common.RenderJSON(w, r, 202, trains)
+	common.RenderJSON(w, r, http.StatusOK, trains)
 }
 
 //GetSingleTrain is a method
 func GetSingleTrain(w http.ResponseWriter, r *http.Request) {
 	params := bone.GetAllValues(r)
-	train, err := database.GetTrain(params["id"])
+	train, err := database.Trains.GetTrain(params["id"])
 	if err != nil {
-		common.RenderJSON(w, r, 404, emptyResponse)
+		common.RenderJSON(w, r, http.StatusNoContent, emptyResponse)
 		return
 	}
 	if err = validateIfEmpty(train); err != nil {
-		common.RenderJSON(w, r, 404, emptyResponse)
+		common.RenderJSON(w, r, http.StatusNoContent, emptyResponse)
 		return
 	}
 	if err = validate(train); err != nil {
-		common.RenderJSON(w, r, 404, emptyResponse)
+		common.RenderJSON(w, r, http.StatusNoContent, emptyResponse)
 		return
 	}
-	common.RenderJSON(w, r, 202, train)
+	common.RenderJSON(w, r, http.StatusOK, train)
 }
 
 //CreateTrain is a method
@@ -90,19 +90,19 @@ func CreateTrain(w http.ResponseWriter, r *http.Request) {
 	t := data.Train{}
 	json.NewDecoder(r.Body).Decode(&t)
 	if err := validateIfEmpty(t); err != nil {
-		common.RenderJSON(w, r, 404, emptyResponse)
+		common.RenderJSON(w, r, http.StatusNoContent, emptyResponse)
 		return
 	}
 	if err := validate(t); err != nil {
-		common.RenderJSON(w, r, 404, emptyResponse)
+		common.RenderJSON(w, r, http.StatusNoContent, emptyResponse)
 		return
 	}
-	err := database.AddTrain(t)
+	err := database.Trains.AddTrain(t)
 	if err != nil {
-		common.RenderJSON(w, r, 404, emptyResponse)
+		common.RenderJSON(w, r, http.StatusNoContent, emptyResponse)
 		return
 	}
-	common.RenderJSON(w, r, 202, t)
+	common.RenderJSON(w, r, http.StatusOK, t)
 }
 
 //UpdateTrain is a method
@@ -123,12 +123,12 @@ func UpdateTrain(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	t.ID = id
-	err = database.UpdateTrain(t.ID, t.DepartureCity, t.ArrivalCity, t.DepartureDate, t.DepartureTime, t.ArrivalTime, t.ArrivalDate)
+	err = database.Trains.UpdateTrain(t.ID, t.DepartureCity, t.ArrivalCity, t.DepartureDate, t.DepartureTime, t.ArrivalTime, t.ArrivalDate)
 	if err != nil {
 		common.RenderJSON(w, r, 404, emptyResponse)
 		return
 	}
-	train, err := database.GetTrain(t.ID.String())
+	train, err := database.Trains.GetTrain(t.ID.String())
 	if err != nil {
 		common.RenderJSON(w, r, 404, emptyResponse)
 		return
@@ -143,7 +143,7 @@ func DeleteTrain(w http.ResponseWriter, r *http.Request) {
 		common.RenderJSON(w, r, 404, emptyResponse)
 		return
 	}
-	err = database.DeleteTrain(id)
+	err = database.Trains.DeleteTrain(id)
 	if err != nil {
 		common.RenderJSON(w, r, 404, emptyResponse)
 		return
