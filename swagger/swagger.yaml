@@ -30,56 +30,119 @@ paths:
           description: Failed
           schema:
             $ref: "#/definitions/ErrorMessage"
-  /User:
+  /planes:
     get:
-      summary: Get all users info
+      summary: Get all planes from Database
       tags:
-        - get all users
+         - get
       responses:
-        '200':
-          description: All users sent
-          schema:
-            $ref: "#/definitions/User"
-        '404':
-          description: Failed to add user
-          schema:
-            $ref: "#/definitions/ErrorMessage"
+         '200':
+           description: Planes get successfully
+           schema:
+             $ref: "#/definitions/Plane"
+         '404':
+           description: Can't find plane with such id
+  /plane:
     post:
-      summary: Post user to DB
+      summary: Create plane to Database
       tags:
-        - post user
+        - create
       consumes:
         - application/json
       parameters:
         - in: body
           name: body
-          description: The user to create
+          description: The plane to create
           required: true
           schema:
-            $ref: "#/definitions/User"
+            $ref: "#/definitions/Plane"
       responses:
         '201':
-          description: User created
+          description: Plane create successfully
           schema:
-            $ref: "#/definitions/User"
+            $ref: "#/definitions/Plane"
         '400':
-          description: Can't add this user or can't parse POST body
+          description: Can't create plane
           schema:
             $ref: "#/definitions/ErrorMessage"
+  /plane/{id}:
+    get:
+      summary: Get plane from Database
+      tags:
+        - get
+      consumes:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        '201':
+          description: Plane get successfully
+          schema:
+            $ref: "#/definitions/Plane"
+        '400':
+          description: Can't get plane
+          schema:
+            $ref: "#/definitions/ErrorMessage"
+    delete:
+      summary: Delete plane from DB
+      tags:
+         - delete
+      consumes:
+         - application/json
+      parameters:
+         - name: id
+           in: path
+           required: true
+           type: string
+      responses:
+         '201':
+           description: Plane delete successfully
+           schema:
+             $ref: "#/definitions/Plane"
+         '400':
+           description: Can't delete plane
+           schema:
+             $ref: "#/definitions/ErrorMessage"
+    patch:
+      summary: Update plane from Database
+      tags:
+         - update
+      consumes:
+         - application/json
+      parameters:
+         - name: id
+           in: path
+           required: true
+           type: string
+      responses:
+         '201':
+           description: Plane update successfully
+           schema:
+             $ref: "#/definitions/Plane"
+         '400':
+           description: Can't update plane
+           schema:
+             $ref: "#/definitions/ErrorMessage"
 definitions:
+  Plane:
+    type: object
+    properties:
+      id:
+        type: string
+        description: The plane ID in DB in UUID format.
+      DepartureCity:
+        type: string
+        description: Plane departure city.
+      ArrivalCity:
+        type: string
+        description: Plane arrival city.
   HelloMessage:
     type: object
     properties:
       name:
-        type: string
-        description: User name.
-  User:
-    type: object
-    properties:
-      ID:
-        type: string
-        description: The user ID in DB in UUID format.
-      Name:
         type: string
         description: User name.
   ErrorMessage:
