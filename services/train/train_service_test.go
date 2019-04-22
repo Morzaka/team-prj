@@ -30,14 +30,14 @@ func TestGetTrains(t *testing.T) {
 	tests := []TrainsTestCases{
 		{
 			tcase:        "GetTrains200",
-			url:          "api/v1/trains",
+			url:          "/api/v1/trains",
 			expected:     http.StatusOK,
 			mockedTrains: []data.Train{},
 			mockedErr:    nil,
 		},
 		{
 			tcase:        "GetTrains204",
-			url:          "api/v1/trains",
+			url:          "/api/v1/trains",
 			expected:     http.StatusNoContent,
 			mockedTrains: []data.Train{},
 			mockedErr:    errors.New("db error"),
@@ -72,14 +72,14 @@ func TestGetSingleTrain(t *testing.T) {
 	test := []TrainsTestCases{
 		{
 			tcase:       "GetTrainOK",
-			url:         "api/v1/train/08307904-f18e-4fb8-9d18-29cfad38ffaf",
+			url:         "/api/v1/train/08307904-f18e-4fb8-9d18-29cfad38ffaf",
 			expected:    http.StatusOK,
 			mockedTrain: data.Train{},
 			mockedErr:   nil,
 		},
 		{
-			tcase:       "GetTrainOK",
-			url:         "api/v1/train/08307904-f18e-4fb8-9d18-29cfad38ffaf",
+			tcase:       "GetTrain204",
+			url:         "/api/v1/train/08307904-f18e-4fb8-9d18-29cfad38ffaf",
 			expected:    http.StatusNoContent,
 			mockedTrain: data.Train{},
 			mockedErr:   errors.New("db error , no data found"),
@@ -90,9 +90,10 @@ func TestGetSingleTrain(t *testing.T) {
 	for _, tc := range test {
 		t.Run(tc.tcase, func(t *testing.T) {
 			trainMock := database.NewMockTrainCrud(mockCtrl)
-			trainMock.EXPECT().GetTrain(id).Return(data.Train{
+			trainMock.EXPECT().GetTrain(s).Return(data.Train{
 				ID: id,
 			}, tc.mockedErr)
+			database.Trains = trainMock
 			rec := httptest.NewRecorder()
 			req, err := http.NewRequest("GET", tc.url, nil)
 			if err != nil {
@@ -110,14 +111,14 @@ func TestCreateTrain(t *testing.T) {
 	test := []TrainsTestCases{
 		{
 			tcase:       "GetTrainOK",
-			url:         "api/v1/train",
+			url:         "/api/v1/train",
 			expected:    http.StatusOK,
 			mockedTrain: data.Train{},
 			mockedErr:   nil,
 		},
 		{
 			tcase:       "GetTrainOK",
-			url:         "api/v1/train",
+			url:         "/api/v1/train",
 			expected:    http.StatusNoContent,
 			mockedTrain: data.Train{},
 			mockedErr:   errors.New("failed to create"),
@@ -134,7 +135,8 @@ func TestCreateTrain(t *testing.T) {
 				t.Fatal(err)
 			}
 			json.NewDecoder(req.Body).Decode(&train)
-			trainMock.EXPECT().AddTrain(t).Return(tc.mockedErr)
+			trainMock.EXPECT().AddTrain(train).Return(tc.mockedErr)
+			database.Trains = trainMock
 			rec := httptest.NewRecorder()
 			router.ServeHTTP(rec, req)
 			if rec.Code != tc.expected {
