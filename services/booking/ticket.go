@@ -9,14 +9,12 @@ import (
 	"team-project/database"
 	"team-project/services/common"
 	"team-project/services/data"
-	"team-project/services/model"
+
+	"github.com/go-zoo/bone"
+	"github.com/google/uuid"
 )
 
 var (
-	//ModelVar is an interface to call methods from model package
-	ModelVar model.Model = &model.IModel{}
-	//CommonVar is an interface to call methods from common package
-	CommonVar     common.Common = &common.ICommon{}
 	emptyResponse interface{}
 )
 
@@ -34,56 +32,51 @@ func GetAllTickets(w http.ResponseWriter, r *http.Request) {
 	tkts, err := database.GetAllTickets()
 	switch {
 	case err == sql.ErrNoRows:
-		CommonVar.RenderJSON(w, r, http.StatusNoContent, emptyResponse)
+		common.RenderJSON(w, r, http.StatusNoContent, emptyResponse)
 		return
 	case err != nil:
-		CommonVar.RenderJSON(w, r, http.StatusInternalServerError, tkts)
+		common.RenderJSON(w, r, http.StatusInternalServerError, tkts)
 		return
 	}
-	CommonVar.RenderJSON(w, r, http.StatusOK, tkts)
+	common.RenderJSON(w, r, http.StatusOK, tkts)
 }
 
 //GetOneTicket for GETing information about one tickets
 func GetOneTicket(w http.ResponseWriter, r *http.Request) {
-	id, err := ModelVar.GetID(r)
-	if err != nil {
-		CommonVar.RenderJSON(w, r, http.StatusBadRequest, emptyResponse)
-		return
-	}
-
+	id := uuid.Must(uuid.Parse(bone.GetValue(r, "id")))
 	tk, err := database.GetTicket(id)
 	switch {
 	case err == sql.ErrNoRows:
-		CommonVar.RenderJSON(w, r, http.StatusNotFound, emptyResponse)
+		common.RenderJSON(w, r, http.StatusNotFound, emptyResponse)
 		return
 	case err != nil:
-		CommonVar.RenderJSON(w, r, http.StatusInternalServerError, tk)
+		common.RenderJSON(w, r, http.StatusInternalServerError, tk)
 		return
 	}
-	CommonVar.RenderJSON(w, r, http.StatusOK, tk)
+	common.RenderJSON(w, r, http.StatusOK, tk)
 }
 
 //CreateTicket (POST) for creating one tickets & add to DB
 func CreateTicket(w http.ResponseWriter, r *http.Request) {
 	// get values from client (json format)
 	tk := data.Ticket{}
-	tk.ID = ModelVar.GenerateID()
+	tk.ID = uuid.New()
 	err := json.NewDecoder(r.Body).Decode(&tk)
 	if err != nil {
-		CommonVar.RenderJSON(w, r, http.StatusBadRequest, tk)
+		common.RenderJSON(w, r, http.StatusBadRequest, tk)
 		return
 	}
 
 	// validate form values
 	err = validateForm(tk)
 	if err != nil {
-		CommonVar.RenderJSON(w, r, http.StatusNotAcceptable, err.Error())
+		common.RenderJSON(w, r, http.StatusNotAcceptable, err.Error())
 		return
 	}
 
 	//validate real number values
 	if tk.Price != float32(tk.Price) || tk.TotalPrice != float32(tk.TotalPrice) {
-		CommonVar.RenderJSON(w, r, http.StatusNotAcceptable, "Not Acceptable. Price must be a number.")
+		common.RenderJSON(w, r, http.StatusNotAcceptable, "Not Acceptable. Price must be a number.")
 		return
 	}
 
@@ -91,27 +84,23 @@ func CreateTicket(w http.ResponseWriter, r *http.Request) {
 	err = database.CreateTicket(tk)
 	switch {
 	case err == sql.ErrNoRows:
-		CommonVar.RenderJSON(w, r, http.StatusNotFound, emptyResponse)
+		common.RenderJSON(w, r, http.StatusNotFound, emptyResponse)
 		return
 	case err != nil:
-		CommonVar.RenderJSON(w, r, http.StatusInternalServerError, tk)
+		common.RenderJSON(w, r, http.StatusInternalServerError, tk)
 		return
 	}
-	CommonVar.RenderJSON(w, r, http.StatusOK, tk)
+	common.RenderJSON(w, r, http.StatusOK, tk)
 }
 
 //UpdateTicket (PATCH) for updating one tickets in DB
 func UpdateTicket(w http.ResponseWriter, r *http.Request) {
 	// get values from client (json format)
-	id, err := ModelVar.GetID(r)
-	if err != nil {
-		CommonVar.RenderJSON(w, r, http.StatusBadRequest, emptyResponse)
-		return
-	}
+	id := uuid.Must(uuid.Parse(bone.GetValue(r, "id")))
 	tk := data.Ticket{}
-	err = json.NewDecoder(r.Body).Decode(&tk)
+	err := json.NewDecoder(r.Body).Decode(&tk)
 	if err != nil {
-		CommonVar.RenderJSON(w, r, http.StatusBadRequest, tk)
+		common.RenderJSON(w, r, http.StatusBadRequest, tk)
 		return
 	}
 
@@ -120,13 +109,13 @@ func UpdateTicket(w http.ResponseWriter, r *http.Request) {
 	// validate form values
 	err = validateForm(tk)
 	if err != nil {
-		CommonVar.RenderJSON(w, r, http.StatusNotAcceptable, err.Error())
+		common.RenderJSON(w, r, http.StatusNotAcceptable, err.Error())
 		return
 	}
 
 	//validate real number values
 	if tk.Price != float32(tk.Price) || tk.TotalPrice != float32(tk.TotalPrice) {
-		CommonVar.RenderJSON(w, r, http.StatusNotAcceptable, "Not Acceptable. Price must be a number.")
+		common.RenderJSON(w, r, http.StatusNotAcceptable, "Not Acceptable. Price must be a number.")
 		return
 	}
 
@@ -134,31 +123,27 @@ func UpdateTicket(w http.ResponseWriter, r *http.Request) {
 	err = database.UpdateTicket(tk)
 	switch {
 	case err == sql.ErrNoRows:
-		CommonVar.RenderJSON(w, r, http.StatusNotFound, emptyResponse)
+		common.RenderJSON(w, r, http.StatusNotFound, emptyResponse)
 		return
 	case err != nil:
-		CommonVar.RenderJSON(w, r, http.StatusInternalServerError, tk)
+		common.RenderJSON(w, r, http.StatusInternalServerError, tk)
 		return
 	}
-	CommonVar.RenderJSON(w, r, http.StatusOK, tk)
+	common.RenderJSON(w, r, http.StatusOK, tk)
 }
 
 //DeleteTicket (DELETE) for deleting one tickets in DB by id
 func DeleteTicket(w http.ResponseWriter, r *http.Request) {
-	id, err := ModelVar.GetID(r)
-	if err != nil {
-		CommonVar.RenderJSON(w, r, http.StatusBadRequest, emptyResponse)
-		return
-	}
-	err = database.DeleteTicket(id)
+	id := uuid.Must(uuid.Parse(bone.GetValue(r, "id")))
+	err := database.DeleteTicket(id)
 	switch {
 	case err == sql.ErrNoRows:
-		CommonVar.RenderJSON(w, r, http.StatusNotFound, emptyResponse)
+		common.RenderJSON(w, r, http.StatusNotFound, emptyResponse)
 		return
 	case err != nil:
-		CommonVar.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
+		common.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
 		return
 	}
-	CommonVar.RenderJSON(w, r, http.StatusNotFound,
+	common.RenderJSON(w, r, http.StatusNotFound,
 		"Ticket was deleted successfully.")
 }
