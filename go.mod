@@ -13,6 +13,7 @@ require (
 	github.com/onsi/ginkgo v1.8.0 // indirect
 	github.com/onsi/gomega v1.5.0 // indirect
 	github.com/sirupsen/logrus v1.4.1
+	github.com/thoas/go-funk v0.4.0
 	github.com/urfave/negroni v1.0.0
 	github.com/x-cray/logrus-prefixed-formatter v0.5.2
 	golang.org/x/crypto v0.0.0-20190404164418-38d8ce5564a5

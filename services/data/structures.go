@@ -44,6 +44,19 @@ type Plane struct {
 	ArrivalCity   string    `json:"arrivalCity"`
 }
 
+//Routes contains result of algorithm
+type Routes struct {
+	RouteID  string      `json:"route"`
+	Stations Stations `json:"stations"`
+}
+
+//Stations contains departure and arrival stations
+type Stations struct {
+	StartRoute string `json:"start"`
+	EndRoute   string `json:"end"`
+}
+
+
 //Ticket datastructure
 type Ticket struct {
 	ID         uuid.UUID `json:"id"`

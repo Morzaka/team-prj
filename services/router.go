@@ -5,6 +5,7 @@ import (
 	"team-project/services/booking"
 	"team-project/services/model"
 	"team-project/services/plane"
+	"team-project/services/routing"
 	"team-project/services/train"
 	"team-project/swagger"
 
@@ -47,5 +48,7 @@ func NewRouter() *bone.Mux {
 	subV1.PatchFunc("/plane/:id", plane.UpdatePlane)
 	subV1.DeleteFunc("/plane/:id", plane.DeletePlane)
 
+	//Get Routes
+	subV1.PostFunc("/routes", routing.FindPath)
 	return router
 }
