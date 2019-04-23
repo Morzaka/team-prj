@@ -8,9 +8,9 @@ import (
 
 var (
 	selectPlanes = `SELECT * FROM public.plane;`
-	selectPlane  = `SELECT * FROM public.plane WHERE login=$1;`
-	insertPlane  = `INSERT INTO public.plane (id,departureCity,arrivalCity) VALUES ($1, $2, $3)`
-	updatePlane  = `UPDATE public.plane SET departureCity = $2, arrivalCity = $3 WHERE id = $1;`
+	selectPlane  = `SELECT * FROM public.plane WHERE id=$1;`
+	insertPlane  = `INSERT INTO public.plane (id, departure_City, arrival_City) VALUES ($1, $2, $3)`
+	updatePlane  = `UPDATE public.plane SET departure_City = $2, arrival_City = $3 WHERE id = $1;`
 	deletePlane  = `DELETE FROM public.plane WHERE id = $1;`
 )
 
@@ -36,9 +36,10 @@ func GetPlanes() ([]data.Plane, error) {
 // GetPlane is a function for getting Plane using id
 func GetPlane(id uuid.UUID) (data.Plane, error) {
 	p := data.Plane{}
-	err := Db.QueryRow(selectPlane, id).Scan(&p.ID, &p.DepartureCity, &p.ArrivalCity)
+	row := Db.QueryRow(selectPlane, id)
+	err := row.Scan(&p.ID, &p.DepartureCity, &p.ArrivalCity)
 	if err != nil {
-		return data.Plane{}, err
+		return p, err
 	}
 	return p, nil
 }
