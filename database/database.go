@@ -39,7 +39,7 @@ func RedisInit() error {
 	Client = redis.NewClient(&redis.Options{
 		Addr:     u.Host,
 		Password: password,
-		DB:       0,             // use default DB
+		DB:       0, // use default DB
 	})
 	_, err = Client.Ping().Result()
 	if err != nil {
