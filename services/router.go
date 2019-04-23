@@ -27,10 +27,10 @@ func NewRouter() *bone.Mux {
 
 	// Tickets routs
 	subV1.GetFunc("/tickets", booking.GetAllTickets)
-	subV1.GetFunc("/ticket", booking.GetOneTicket)
+	subV1.GetFunc("/ticket/:id", booking.GetOneTicket)
 	subV1.PostFunc("/ticket", booking.CreateTicket)
-	subV1.PatchFunc("/ticket", booking.UpdateTicket)
-	subV1.DeleteFunc("/ticket", booking.DeleteTicket)
+	subV1.PatchFunc("/ticket/:id", booking.UpdateTicket)
+	subV1.DeleteFunc("/ticket/:id", booking.DeleteTicket)
 
 	// Train routes
 	subV1.GetFunc("/trains", train.GetTrains)
