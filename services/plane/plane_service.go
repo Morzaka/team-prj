@@ -2,11 +2,12 @@ package plane
 
 import (
 	"encoding/json"
+	"github.com/go-zoo/bone"
+	"github.com/google/uuid"
 	"net/http"
 	"team-project/database"
 	"team-project/services/common"
 	"team-project/services/data"
-	"team-project/services/model"
 )
 
 var emptyResponse interface{}
@@ -24,11 +25,7 @@ func GetPlanes(w http.ResponseWriter, r *http.Request) {
 
 // GetPlane get plane from database by id
 func GetPlane(w http.ResponseWriter, r *http.Request) {
-	id, err := model.GetID(r)
-	if err != nil {
-		common.RenderJSON(w, r, 400, emptyResponse)
-		return
-	}
+	id := uuid.Must(uuid.Parse(bone.GetValue(r, "id")))
 	plane, err := database.GetPlane(id)
 	if err != nil {
 		common.RenderJSON(w, r, 404, emptyResponse)
@@ -40,7 +37,7 @@ func GetPlane(w http.ResponseWriter, r *http.Request) {
 // CreatePlane create new plane to database
 func CreatePlane(w http.ResponseWriter, r *http.Request) {
 	p := data.Plane{}
-	p.ID = model.GenerateID()
+	p.ID = uuid.New()
 	json.NewDecoder(r.Body).Decode(&p)
 	_, err := database.AddPlane(p)
 	if err != nil {
@@ -52,15 +49,11 @@ func CreatePlane(w http.ResponseWriter, r *http.Request) {
 
 // UpdatePlane update plane in database by id
 func UpdatePlane(w http.ResponseWriter, r *http.Request) {
-	id, err := model.GetID(r)
-	if err != nil {
-		common.RenderJSON(w, r, 404, emptyResponse)
-		return
-	}
+	id := uuid.Must(uuid.Parse(bone.GetValue(r, "id")))
 	p := data.Plane{}
 	json.NewDecoder(r.Body).Decode(&p)
 	p.ID = id
-	_, err = database.UpdatePlane(p, p.ID)
+	_, err := database.UpdatePlane(p, p.ID)
 	if err != nil {
 		common.RenderJSON(w, r, 404, emptyResponse)
 		return
@@ -75,12 +68,8 @@ func UpdatePlane(w http.ResponseWriter, r *http.Request) {
 
 // DeletePlane delete plane from database by id
 func DeletePlane(w http.ResponseWriter, r *http.Request) {
-	id, err := model.GetID(r)
-	if err != nil {
-		common.RenderJSON(w, r, 404, emptyResponse)
-		return
-	}
-	err = database.DeletePlane(id)
+	id := uuid.Must(uuid.Parse(bone.GetValue(r, "id")))
+	err := database.DeletePlane(id)
 	if err != nil {
 		common.RenderJSON(w, r, 404, emptyResponse)
 		return
