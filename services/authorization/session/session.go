@@ -2,8 +2,6 @@ package session
 
 import (
 	"github.com/google/uuid"
-
-	"team-project/services/model"
 )
 
 type sessionData struct {
@@ -24,7 +22,7 @@ func NewSession() *Session {
 
 //Init method  initialize the session
 func (obj *Session) Init(username string) uuid.UUID {
-	sessionID := model.GenerateID()
+	sessionID := uuid.New()
 	data := &sessionData{username}
 	obj.Data[sessionID] = data
 	return sessionID

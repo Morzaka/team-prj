@@ -2,13 +2,12 @@ package train
 
 import (
 	"encoding/json"
+	"github.com/go-zoo/bone"
+	"github.com/google/uuid"
 	"net/http"
 	"team-project/database"
 	"team-project/services/common"
 	"team-project/services/data"
-	"team-project/services/model"
-
-	"github.com/go-zoo/bone"
 )
 
 var emptyResponse interface{}
@@ -49,15 +48,12 @@ func CreateTrain(w http.ResponseWriter, r *http.Request) {
 
 //UpdateTrain is a method
 func UpdateTrain(w http.ResponseWriter, r *http.Request) {
-	id, err := model.GetID(r)
-	if err != nil {
-		common.RenderJSON(w, r, 404, emptyResponse)
-		return
-	}
+	id := uuid.Must(uuid.Parse(bone.GetValue(r, "id")))
 	t := data.Train{}
 	json.NewDecoder(r.Body).Decode(&t)
 	t.ID = id
-	err = database.UpdateTrain(t.ID, t.DepartureCity, t.ArrivalCity, t.DepartureDate, t.DepartureTime, t.ArrivalTime, t.ArrivalDate)
+	err := database.UpdateTrain(t.ID, t.DepartureCity, t.ArrivalCity,
+		t.DepartureDate, t.DepartureTime, t.ArrivalTime, t.ArrivalDate)
 	if err != nil {
 		common.RenderJSON(w, r, 404, emptyResponse)
 		return
@@ -72,12 +68,8 @@ func UpdateTrain(w http.ResponseWriter, r *http.Request) {
 
 //DeleteTrain is a method
 func DeleteTrain(w http.ResponseWriter, r *http.Request) {
-	id, err := model.GetID(r)
-	if err != nil {
-		common.RenderJSON(w, r, 404, emptyResponse)
-		return
-	}
-	err = database.DeleteTrain(id)
+	id := uuid.Must(uuid.Parse(bone.GetValue(r, "id")))
+	err := database.DeleteTrain(id)
 	if err != nil {
 		common.RenderJSON(w, r, 404, emptyResponse)
 		return

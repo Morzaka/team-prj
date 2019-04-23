@@ -74,7 +74,7 @@ func Signin(w http.ResponseWriter, r *http.Request) {
 //Signup function implements user's registration
 func Signup(w http.ResponseWriter, r *http.Request) {
 	var user data.User
-	user.ID = model.GenerateID()
+	user.ID = uuid.New()
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
 		logger.Logger.Errorf("Error, %s", err)
