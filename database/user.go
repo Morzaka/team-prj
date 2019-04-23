@@ -1,22 +1,20 @@
 package database
 
 import (
-	"fmt"
-
 	"team-project/services/data"
 
 	"github.com/google/uuid"
 )
 
-//go:generate mockgen -destination=../mocks/mock_userCRUD.go -package=mocks team-project/database UserCRUD
+//go:generate mockgen -destination=./mock_userCRUD.go -package=database team-project/database UserCRUD
 
 //UserCRUD for mocking
 type UserCRUD interface {
 	AddUser(user data.User) (data.User, error)
 	GetUserPassword(login string) (string, error)
 	GetUserRole(login string) (string, error)
-	UpdateUser(user data.User, id uuid.UUID) error
-	DeleteUser(id uuid.UUID) error
+	UpdateUser(user data.User, id uuid.UUID) (int64, error)
+	DeleteUser(id uuid.UUID) (int64, error)
 	GetAllUsers() ([]data.User, error)
 }
 
@@ -24,6 +22,9 @@ type UserCRUD interface {
 type IUser struct {
 	UserMethods UserCRUD
 }
+
+// Users is an instance presented IUser
+var Users UserCRUD = &IUser{}
 
 var (
 	insertUser = `INSERT INTO public.user (id,name,surname,login, password,role)
@@ -38,7 +39,7 @@ var (
 //AddUser adds info about new user to the database
 func (*IUser) AddUser(user data.User) (data.User, error) {
 	//insert values to the database
-	_, err := Db.Exec(insertUser, user.ID, user.Name, user.Surname, user.Signin.Login, user.Signin.Password, user.Role)
+	_, err := Db.Exec(insertUser, user.ID, user.Name, user.Surname, user.Login, user.Password, user.Role)
 	if err != nil {
 		return data.User{}, err
 	}
@@ -52,7 +53,7 @@ func (*IUser) GetUserPassword(login string) (string, error) {
 	err := Db.QueryRow(selectUserPassword, login).Scan(&password)
 	//if there's no matches for login return empty value
 	if err != nil {
-		return "", err
+		return password, err
 	}
 	//else return password
 	return password, nil
@@ -69,26 +70,35 @@ func (*IUser) GetUserRole(login string) (string, error) {
 }
 
 //UpdateUser updates user's personal information
-func (*IUser) UpdateUser(user data.User, id uuid.UUID) error {
-	_, err := Db.Exec(updateUser, id, user.Name, user.Surname, user.Signin.Login, user.Signin.Password, user.Role)
+func (*IUser) UpdateUser(user data.User, id uuid.UUID) (int64, error) {
+	var count int64
+	res, err := Db.Exec(updateUser, id, user.Name, user.Surname, user.Login, user.Password, user.Role)
 	if err != nil {
-		return err
+		return count, err
 	}
-	return nil
+	count, err = res.RowsAffected()
+	if err != nil {
+		return count, err
+	}
+	return count, nil
 }
 
 //DeleteUser deletes user's page from db
-func (*IUser) DeleteUser(id uuid.UUID) error {
-	_, err := Db.Exec(deleteUser, id)
+func (*IUser) DeleteUser(id uuid.UUID) (int64, error) {
+	var count int64
+	res, err := Db.Exec(deleteUser, id)
 	if err != nil {
-		return err
+		return count, err
 	}
-	return nil
+	count, err = res.RowsAffected()
+	if err != nil {
+		return count, err
+	}
+	return count, nil
 }
 
 //GetAllUsers returns slice with all users in db with possible error
 func (*IUser) GetAllUsers() ([]data.User, error) {
-	fmt.Println("All users")
 	var users []data.User
 	rows, err := Db.Query(selectAllUsers)
 	if err != nil {
@@ -97,7 +107,7 @@ func (*IUser) GetAllUsers() ([]data.User, error) {
 	defer rows.Close()
 	for rows.Next() {
 		var user data.User
-		err = rows.Scan(&user.ID, &user.Name, &user.Surname, &user.Signin.Login, &user.Signin.Password, &user.Role)
+		err = rows.Scan(&user.ID, &user.Name, &user.Surname, &user.Login, &user.Password, &user.Role)
 		if err != nil {
 			return users, err
 		}
