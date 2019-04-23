@@ -1,21 +1,10 @@
 package model
 
 import (
-	"net/http"
-	"reflect"
 	"testing"
 )
 
 var modelTest *IModel
-
-//TestGenerateID tests function GenerateID
-func TestGenerateID(t *testing.T) {
-	uuidType := "uuid.UUID"
-	value := modelTest.GenerateID()
-	if reflect.TypeOf(value).String() != uuidType {
-		t.Error("Returned value is not uuid type")
-	}
-}
 
 //TestHashPassword tests function HashPassword
 func TestHashPassword(t *testing.T) {
@@ -44,25 +33,5 @@ func TestCheckPasswordHash(t *testing.T) {
 		if compare != testCase.expected {
 			t.Errorf("Expected comparing result %t, got %t", testCase.expected, compare)
 		}
-	}
-}
-
-//TestGetID tests function GetID
-func TestGetID(t *testing.T) {
-	rOK, err := http.NewRequest("GET", "/api/v1", nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	q := rOK.URL.Query()
-	q.Add("id", "61c364d9-591a-4879-a9fb-79ae67945d38")
-	rOK.URL.RawQuery = q.Encode()
-	_, err = modelTest.GetID(rOK)
-	if err != nil {
-		t.Fatal(err)
-	}
-	rErr, err := http.NewRequest("GET", "/api/v1", nil)
-	_, err = modelTest.GetID(rErr)
-	if err == nil {
-		t.Fatal(err)
 	}
 }
