@@ -3,6 +3,7 @@ package booking
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 
 	"team-project/database"
@@ -35,6 +36,7 @@ func GetAllTickets(w http.ResponseWriter, r *http.Request) {
 //GetOneTicket for GETing information about one tickets
 func GetOneTicket(w http.ResponseWriter, r *http.Request) {
 	id, err := model.GetID(r)
+	fmt.Println(id)
 	if err != nil {
 		common.RenderJSON(w, r, http.StatusBadRequest, emptyResponse)
 		return
@@ -83,7 +85,7 @@ func CreateTicket(w http.ResponseWriter, r *http.Request) {
 
 //UpdateTicket (PATCH) for updating one tickets in DB
 func UpdateTicket(w http.ResponseWriter, r *http.Request) {
-	// get values from client (json format)
+	// get ID value from client (json format)
 	id, err := model.GetID(r)
 	if err != nil {
 		common.RenderJSON(w, r, http.StatusBadRequest, emptyResponse)

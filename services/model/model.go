@@ -2,8 +2,8 @@ package model
 
 import (
 	"net/http"
+	"net/url"
 
-	"github.com/go-zoo/bone"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -28,7 +28,11 @@ func CheckPasswordHash(password, hash string) bool {
 
 //GetID parse id from request
 func GetID(r *http.Request) (uuid.UUID, error) {
-	id, err := uuid.Parse(bone.GetValue(r, "id"))
+	u, err := url.Parse(r.URL.String())
+	if err != nil {
+		return uuid.Must(uuid.Parse("")), err
+	}
+	id, err := uuid.Parse(u.Query().Get("id"))
 	if err != nil {
 		return id, err
 	}

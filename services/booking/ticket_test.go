@@ -120,15 +120,14 @@ func TestGetAllTickets(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			ticketsMock := database.NewMockTicketRepository(mockCtrl)
+			ticketMock := database.NewMockTicketRepository(mockCtrl)
 
-			ticketsMock.EXPECT().AllTickets().Return(tc.mockedTickets, tc.mockedError)
+			ticketMock.EXPECT().AllTickets().Return(tc.mockedTickets, tc.mockedError)
 
-			database.TicketRepo = ticketsMock
+			database.TicketRepo = ticketMock
 
 			rw := httptest.NewRecorder()
 			req, _ := http.NewRequest(http.MethodGet, tc.url, nil)
-
 			//router.ServeHTTP(rw, req)
 			http.HandlerFunc(GetAllTickets).ServeHTTP(rw, req)
 
@@ -139,4 +138,58 @@ func TestGetAllTickets(t *testing.T) {
 	}
 }
 
+type ListTicketTestCase struct {
+	name          string
+	id            uuid.UUID
+	url           string
+	want          int
+	mockedTickets data.Ticket
+	mockedError   error
+}
 
+func TestGetOneTicket(t *testing.T) {
+	tests := []ListTicketTestCase{
+		{
+			name:          "Get_Ticket_200",
+			id:            uuid.Must(uuid.Parse("fcb33af4-40a3-4c82-afb1-218731052309")),
+			url:           "/api/v1/ticket?id=fcb33af4-40a3-4c82-afb1" +
+				"-218731052309",
+			want:          http.StatusOK,
+			mockedTickets: testData,
+			mockedError:   nil,
+		},
+		{
+			name:          "Get_Tickets_500",
+			id:            uuid.Must(uuid.Parse("0e3763c6-a7ed-4532-afd7-420c5a480000")),
+			url:           "/api/v1/ticket?id=0e3763c6-a7ed-4532-afd7" +
+				"-420c5a480000",
+			want:          http.StatusInternalServerError,
+			mockedTickets: data.Ticket{},
+			mockedError:   errors.New("db error"),
+		},
+	}
+
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			ticketMock := database.NewMockTicketRepository(mockCtrl)
+
+			ticketMock.EXPECT().GetTicket(tc.id).Return(tc.mockedTickets,
+				tc.mockedError)
+
+			database.TicketRepo = ticketMock
+
+			rw := httptest.NewRecorder()
+			req, _ := http.NewRequest(http.MethodGet, tc.url, nil)
+
+			//router.ServeHTTP(rw, req)
+			http.HandlerFunc(GetOneTicket).ServeHTTP(rw, req)
+
+			if rw.Code != tc.want {
+				t.Errorf("Expected: %d , got %d", tc.want, rw.Code)
+			}
+		})
+	}
+}
