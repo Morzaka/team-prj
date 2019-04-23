@@ -4,21 +4,36 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	"team-project/database"
-	"team-project/mocks"
 	"team-project/services/data"
+	"team-project/services/model"
 
 	"github.com/alicebob/miniredis"
 	"github.com/go-redis/redis"
+	"github.com/go-zoo/bone"
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
+	_ "github.com/google/uuid"
 )
+
+//testRouter returns router
+func testRouter() *bone.Mux {
+	router := bone.New().Prefix("/api")
+	subV1 := bone.New()
+	router.SubRoute("/v1", subV1)
+	subV1.PostFunc("/register", Signup)
+	subV1.PostFunc("/login", Signin)
+	subV1.PostFunc("/logout", Logout)
+	subV1.DeleteFunc("/user/:id", DeleteUserPage)
+	subV1.PatchFunc("/user/:id", UpdateUserPage)
+	subV1.GetFunc("/users", ListAllUsers)
+	return router
+}
 
 // mockRedis returns client connected to fake Redis server
 func mockRedis() *redis.Client {
@@ -32,384 +47,422 @@ func mockRedis() *redis.Client {
 	return client
 }
 
-//TestSignin tests Signin function
-func TestSignin(t *testing.T) {
-	id := uuid.Must(uuid.Parse("08307904-f18e-4fb8-9d18-29cfad38ffaf"))
-	user := data.Signin{Login: "golang", Password: "golang"}
-	jsonBody, err := json.Marshal(user)
-	if err != nil {
-		t.Fatal(err)
-	}
-	r, err := http.NewRequest("POST", "/api/v1/login", bytes.NewBuffer(jsonBody))
-	if err != nil {
-		t.Fatal(err)
-	}
-	w := httptest.NewRecorder()
-	mockCtrlUser := gomock.NewController(t)
-	mockCtrlModel := gomock.NewController(t)
-	mockCtrlCommon := gomock.NewController(t)
-	defer mockCtrlUser.Finish()
-	defer mockCtrlModel.Finish()
-	defer mockCtrlCommon.Finish()
-	mockUserCRUD := mocks.NewMockUserCRUD(mockCtrlUser)
-	mockModel := mocks.NewMockModel(mockCtrlModel)
-	mockCommon := mocks.NewMockCommon(mockCtrlCommon)
-	UserCrud = mockUserCRUD
-	CommonVar = mockCommon
-	ModelVar = mockModel
-	defer func() {
-		RedisClient = database.Client
-	}()
-	for i := 0; i < 4; i++ {
-		RedisClient = mockRedis()
-		switch i {
-		//case when there was no error getting password from db to compare with the password entered
-		case 0:
-			mockModel.EXPECT().GenerateID().Return(id)
-			mockUserCRUD.EXPECT().GetUserPassword(user.Login).Return(user.Password, nil)
-			mockModel.EXPECT().CheckPasswordHash(user.Password, user.Password).Return(true)
-			mockCommon.EXPECT().RenderJSON(w, r, http.StatusOK, user)
-			http.HandlerFunc(Signin).ServeHTTP(w, r)
-		//case when there was an error getting password from db to compare with the password entered
-		case 1:
+//TestCase contains data for testing
+type TestCase struct {
+	name                string
+	url                 string
+	statusWant          int
+	mockedUserList      []data.User
+	mockedUser          data.User
+	mockedError         error
+	mockedRole          string
+	mockedAffected      int64
+	mockedLogicalResult bool
+	cookieSet           bool
+	openRedis           bool
+	resultWant          bool
+	loggedIn            bool
+}
 
-			r.Body = ioutil.NopCloser(bytes.NewBuffer(jsonBody))
-			mockUserCRUD.EXPECT().GetUserPassword(user.Login).Return(user.Password, errors.New("Errors"))
-			mockCommon.EXPECT().RenderJSON(w, r, http.StatusUnauthorized, emptyResponse)
-			http.HandlerFunc(Signin).ServeHTTP(w, r)
-		//case when password from db and password entered do not match
-		case 2:
-			r.Body = ioutil.NopCloser(bytes.NewBuffer(jsonBody))
-			mockUserCRUD.EXPECT().GetUserPassword(user.Login).Return(user.Password, nil)
-			mockModel.EXPECT().CheckPasswordHash(user.Password, user.Password).Return(false)
-			mockCommon.EXPECT().RenderJSON(w, r, http.StatusUnauthorized, emptyResponse)
-			http.HandlerFunc(Signin).ServeHTTP(w, r)
-		//case when error with redis db occured and user couldn't log in
-		case 3:
-			r.Body = ioutil.NopCloser(bytes.NewBuffer(jsonBody))
-			mockUserCRUD.EXPECT().GetUserPassword(user.Login).Return(user.Password, nil)
-			mockModel.EXPECT().CheckPasswordHash(user.Password, user.Password).Return(true)
-			mockCommon.EXPECT().RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
-			mockModel.EXPECT().GenerateID().Return(id)
+//TestSignin function tests Signin function
+func TestSignin(t *testing.T) {
+	tests := []TestCase{
+		{
+			name:        "Fail_Not_Registered",
+			url:         "/api/v1/login",
+			mockedUser:  data.User{},
+			statusWant:  http.StatusUnauthorized,
+			mockedError: errors.New("mocked error"),
+		},
+		{
+			name:                "Fail_Redis_DBerror",
+			url:                 "/api/v1/login",
+			mockedUser:          data.User{},
+			statusWant:          http.StatusInternalServerError,
+			mockedError:         nil,
+			mockedLogicalResult: true,
+		},
+		{
+			name:                "Fail_Invalid_Password",
+			url:                 "/api/v1/login",
+			mockedUser:          data.User{},
+			statusWant:          http.StatusUnauthorized,
+			mockedError:         nil,
+			mockedLogicalResult: false,
+		},
+		{
+			name:                "Success_Logged_In",
+			url:                 "/api/v1/login",
+			mockedUser:          data.User{},
+			statusWant:          http.StatusOK,
+			mockedError:         nil,
+			mockedLogicalResult: true,
+			openRedis:           true,
+		},
+	}
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	for _, tc := range tests {
+		RedisClient = mockRedis()
+		if !tc.openRedis {
 			RedisClient.Close()
-			http.HandlerFunc(Signin).ServeHTTP(w, r)
+		}
+		rec := httptest.NewRecorder()
+		jsonBody, err := json.Marshal(tc.mockedUser)
+		if err != nil {
+			t.Fatal(err)
+		}
+		req, _ := http.NewRequest(http.MethodPost, tc.url, bytes.NewBuffer(jsonBody))
+		usersMock := database.NewMockUserCRUD(mockCtrl)
+		modelMock := model.NewMockModel(mockCtrl)
+		model.HelperModel = modelMock
+		database.Users = usersMock
+		usersMock.EXPECT().GetUserPassword(tc.mockedUser.Login).Return(tc.mockedUser.Password, tc.mockedError)
+		if tc.name != "Fail_Not_Registered" {
+			modelMock.EXPECT().CheckPasswordHash(tc.mockedUser.Password, tc.mockedUser.Password).Return(tc.mockedLogicalResult)
+		}
+		testRouter().ServeHTTP(rec, req)
+		if rec.Code != tc.statusWant {
+			t.Errorf("Expected %d, got %d", rec.Code, tc.statusWant)
 		}
 	}
+	RedisClient = database.Client
 }
 
 //TestSignup tests Signup function
 func TestSignup(t *testing.T) {
-	user := data.User{Signin: data.Signin{Login: "oks", Password: "oks"}, Name: "Oksana", Surname: "Zhykina", Role: "User"}
-	jsonBody, err := json.Marshal(user)
-	if err != nil {
-		t.Fatal(err)
-	}
-	r, err := http.NewRequest("POST", "/api/v1/register", bytes.NewBuffer(jsonBody))
-	if err != nil {
-		t.Fatal(err)
-	}
-	w := httptest.NewRecorder()
-	mockCtrlUser := gomock.NewController(t)
-	mockCtrlModel := gomock.NewController(t)
-	mockCtrlCommon := gomock.NewController(t)
-	defer mockCtrlUser.Finish()
-	defer mockCtrlModel.Finish()
-	defer mockCtrlCommon.Finish()
-	mockUserCRUD := mocks.NewMockUserCRUD(mockCtrlUser)
-	mockModel := mocks.NewMockModel(mockCtrlModel)
-	mockCommon := mocks.NewMockCommon(mockCtrlCommon)
-	UserCrud = mockUserCRUD
-	CommonVar = mockCommon
-	ModelVar = mockModel
 	id := uuid.Must(uuid.Parse("08307904-f18e-4fb8-9d18-29cfad38ffaf"))
-	for i := 0; i < 2; i++ {
-		switch i {
-		//case when there was no error
-		case 0:
-			mockModel.EXPECT().GenerateID().Return(id)
-			mockModel.EXPECT().HashPassword(user.Signin.Password).Return(user.Signin.Password, nil)
-			mockUserCRUD.EXPECT().AddUser(user).Return(user, nil)
-			mockCommon.EXPECT().RenderJSON(w, r, http.StatusOK, user)
-			http.HandlerFunc(Signup).ServeHTTP(w, r)
-			//case when there was error while adding user to db
-		case 1:
-			r.Body = ioutil.NopCloser(bytes.NewBuffer(jsonBody))
-			mockModel.EXPECT().GenerateID().Return(id)
-			mockModel.EXPECT().HashPassword(user.Signin.Password).Return(user.Signin.Password, nil)
-			mockUserCRUD.EXPECT().AddUser(user).Return(user, errors.New("error"))
-			mockCommon.EXPECT().RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
-			http.HandlerFunc(Signup).ServeHTTP(w, r)
+	tests := []TestCase{
+		{
+			name:           "Failure_LoginNotAllowed",
+			url:            "/api/v1/register",
+			statusWant:     http.StatusNotAcceptable,
+			mockedUser:     data.User{ID: id},
+			mockedError:    nil,
+			mockedUserList: []data.User{{}},
+		},
+		{
+			name:           "Failure_DBerror",
+			url:            "/api/v1/register",
+			statusWant:     http.StatusInternalServerError,
+			mockedUser:     data.User{ID: id},
+			mockedError:    errors.New("mocked error"),
+			mockedUserList: []data.User{},
+		},
+		{
+			name:           "Success_Registered",
+			url:            "/api/v1/register",
+			statusWant:     http.StatusOK,
+			mockedUser:     data.User{ID: id},
+			mockedError:    nil,
+			mockedUserList: []data.User{},
+		},
+	}
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	for _, tc := range tests {
+		rec := httptest.NewRecorder()
+		jsonBody, err := json.Marshal(tc.mockedUser)
+		if err != nil {
+			t.Fatal(err)
+		}
+		req, _ := http.NewRequest(http.MethodPost, tc.url, bytes.NewBuffer(jsonBody))
+		usersMock := database.NewMockUserCRUD(mockCtrl)
+		modelMock := model.NewMockModel(mockCtrl)
+		model.HelperModel = modelMock
+		database.Users = usersMock
+		usersMock.EXPECT().GetAllUsers().Return(tc.mockedUserList, tc.mockedError)
+		if tc.name == "Success_Registered" {
+			modelMock.EXPECT().HashPassword(tc.mockedUser.Password).Return(tc.mockedUser.Password, nil)
+			usersMock.EXPECT().AddUser(tc.mockedUser).Return(tc.mockedUser, tc.mockedError)
+		}
+		testRouter().ServeHTTP(rec, req)
+		if rec.Code != tc.statusWant {
+			t.Errorf("Expected %d, got %d", tc.statusWant, rec.Code)
 		}
 	}
 }
 
 //TestLogout tests Logout function
 func TestLogout(t *testing.T) {
-	r, err := http.NewRequest("POST", "/api/v1/logout", nil)
-	if err != nil {
-		t.Fatal(err)
+	tests := []TestCase{
+		{
+			name:       "Success_LoggedOut",
+			url:        "/api/v1/logout",
+			statusWant: http.StatusNoContent,
+			openRedis:  true,
+		},
+		{
+			name:       "Failure_DBerror",
+			url:        "/api/v1/logout",
+			statusWant: http.StatusInternalServerError,
+			openRedis:  false,
+		},
 	}
-	w := httptest.NewRecorder()
-	cookie := &http.Cookie{Name: "Cookie",
-		Value: "expected",
-	}
-	http.SetCookie(w, cookie)
-	// Copy the Cookie over to a new Request
-	r = &http.Request{Header: http.Header{"Cookie": w.HeaderMap["Set-Cookie"]}}
-	mockCtrlCommon := gomock.NewController(t)
-	defer mockCtrlCommon.Finish()
-	mockCommon := mocks.NewMockCommon(mockCtrlCommon)
-	CommonVar = mockCommon
-	defer func() {
-		RedisClient = database.Client
-
-	}()
-	RedisClient = mockRedis()
-	for i := 0; i < 2; i++ {
-		switch i {
-		//case when there was no error while accessing redis db, cookie was deleted
-		case 0:
-			_, err = RedisClient.LPush(cookie.Name, cookie.Value).Result()
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	for _, tc := range tests {
+		rec := httptest.NewRecorder()
+		req, _ := http.NewRequest(http.MethodPost, tc.url, nil)
+		cookie := http.Cookie{Name: "Cookie",
+			Value: "expected",
+		}
+		http.SetCookie(rec, &cookie)
+		req.AddCookie(&cookie)
+		RedisClient = mockRedis()
+		if !tc.openRedis {
+			_ = RedisClient.Close()
+		} else {
+			_, err := RedisClient.LPush(cookie.Name, cookie.Value).Result()
 			if err != nil {
 				t.Fatal(err)
 			}
-			mockCommon.EXPECT().RenderJSON(w, r, http.StatusNoContent, emptyResponse)
-			http.HandlerFunc(Logout).ServeHTTP(w, r)
-			//check whether cookie was deleted successfully
-			if cookie, err := r.Cookie(cookie.Name); err != nil {
-				if cookie.MaxAge >= 0 {
-					t.Error("Users hasn't logged out successfully")
-				}
-				t.Fatal(err)
-			}
-		//case when there was an error while accessing redis db
-		case 1:
-			RedisClient.Close()
-			mockCommon.EXPECT().RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
-			http.HandlerFunc(Logout).ServeHTTP(w, r)
 		}
+		testRouter().ServeHTTP(rec, req)
+		if rec.Code != tc.statusWant {
+			t.Errorf("Expected %d, got %d", tc.statusWant, rec.Code)
+		}
+	}
+	RedisClient = database.Client
+}
+
+//TestListAllUsers tests ListAllUsers function
+func TestListAllUsers(t *testing.T) {
+	tests := []TestCase{
+		{
+			name:           "Get_Users_200",
+			url:            "/api/v1/users",
+			statusWant:     http.StatusOK,
+			mockedUserList: []data.User{},
+			mockedError:    nil,
+		},
+		{
+			name:           "Get_Users_404",
+			url:            "/api/v1/users",
+			statusWant:     http.StatusNoContent,
+			mockedUserList: []data.User{},
+			mockedError:    errors.New("db error"),
+		},
+	}
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	for _, tc := range tests {
+		rec := httptest.NewRecorder()
+		req, _ := http.NewRequest(http.MethodGet, tc.url, nil)
+
+		usersMock := database.NewMockUserCRUD(mockCtrl)
+		database.Users = usersMock
+
+		usersMock.EXPECT().GetAllUsers().Return(tc.mockedUserList, tc.mockedError)
+
+		testRouter().ServeHTTP(rec, req)
+		if rec.Code != tc.statusWant {
+			t.Errorf("Expected: %d , got %d", tc.statusWant, rec.Code)
+		}
+
 	}
 }
 
 //TestUpdateUserPage tests UpdateUserPage function
 func TestUpdateUserPage(t *testing.T) {
 	id := uuid.Must(uuid.Parse("08307904-f18e-4fb8-9d18-29cfad38ffaf"))
-	user := data.User{ID: id, Signin: data.Signin{Login: "oks", Password: "oks"}, Name: "Oksana", Surname: "Zhykina", Role: "User"}
-	jsonBody, err := json.Marshal(user)
-	if err != nil {
-		t.Fatal(err)
+	tests := []TestCase{
+		{
+			name:           "Success_Update_User",
+			url:            "/api/v1/user/08307904-f18e-4fb8-9d18-29cfad38ffaf",
+			mockedUser:     data.User{ID: id},
+			mockedAffected: 1,
+			mockedError:    nil,
+			statusWant:     http.StatusOK,
+		},
+		{
+			name:           "Fail_Update_User_DBerror",
+			url:            "/api/v1/user/08307904-f18e-4fb8-9d18-29cfad38ffaf",
+			mockedUser:     data.User{ID: id},
+			mockedAffected: 0,
+			mockedError:    errors.New("mocked error"),
+			statusWant:     http.StatusInternalServerError,
+		},
+		{
+			name:           "Fail_Update_User_No_content",
+			url:            "/api/v1/user/08307904-f18e-4fb8-9d18-29cfad38ffaf",
+			mockedUser:     data.User{ID: id},
+			mockedAffected: 0,
+			mockedError:    nil,
+			statusWant:     http.StatusNotFound,
+		},
 	}
-	r, err := http.NewRequest("PATCH", "/api/v1/user", bytes.NewBuffer(jsonBody))
-	if err != nil {
-		t.Fatal(err)
-	}
-	q := r.URL.Query()
-	q.Add("id", id.String())
-	r.URL.RawQuery = q.Encode()
-	w := httptest.NewRecorder()
-	mockCtrlUser := gomock.NewController(t)
-	mockCtrlModel := gomock.NewController(t)
-	mockCtrlCommon := gomock.NewController(t)
-	defer mockCtrlUser.Finish()
-	defer mockCtrlModel.Finish()
-	defer mockCtrlCommon.Finish()
-	mockUserCRUD := mocks.NewMockUserCRUD(mockCtrlUser)
-	mockModel := mocks.NewMockModel(mockCtrlModel)
-	mockCommon := mocks.NewMockCommon(mockCtrlCommon)
-	UserCrud = mockUserCRUD
-	CommonVar = mockCommon
-	ModelVar = mockModel
-	for i := 0; i < 2; i++ {
-		switch i {
-		//case where there was no error
-		case 0:
-			mockModel.EXPECT().HashPassword(user.Signin.Password).Return(user.Signin.Password, nil)
-			mockUserCRUD.EXPECT().UpdateUser(user, id).Return(nil)
-			mockCommon.EXPECT().RenderJSON(w, r, http.StatusOK, user)
-			http.HandlerFunc(UpdateUserPage).ServeHTTP(w, r)
-			//case when there was error while updating user in db
-		case 1:
-			r.Body = ioutil.NopCloser(bytes.NewBuffer(jsonBody))
-			mockModel.EXPECT().HashPassword(user.Signin.Password).Return(user.Signin.Password, nil)
-			mockUserCRUD.EXPECT().UpdateUser(user, id).Return(errors.New("error"))
-			mockCommon.EXPECT().RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
-			http.HandlerFunc(UpdateUserPage).ServeHTTP(w, r)
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	for _, tc := range tests {
+		rec := httptest.NewRecorder()
+		jsonBody, err := json.Marshal(tc.mockedUser)
+		if err != nil {
+			t.Fatal(err)
+		}
+		req, _ := http.NewRequest(http.MethodPatch, tc.url, bytes.NewBuffer(jsonBody))
+		usersMock := database.NewMockUserCRUD(mockCtrl)
+		modelMock := model.NewMockModel(mockCtrl)
+		model.HelperModel = modelMock
+		database.Users = usersMock
+		modelMock.EXPECT().HashPassword(tc.mockedUser.Password).Return(tc.mockedUser.Password, nil)
+		usersMock.EXPECT().UpdateUser(tc.mockedUser, id).Return(tc.mockedAffected, tc.mockedError)
+		testRouter().ServeHTTP(rec, req)
+		//http.HandlerFunc(UpdateUserPage).ServeHTTP(rec, req)
+		if rec.Code != tc.statusWant {
+			t.Errorf("Expected %d, got %d", rec.Code, tc.statusWant)
 		}
 	}
 }
 
-//TestDeleteUser tests DeleteUser function
-func TestDeleteUser(t *testing.T) {
+//TestDeleteUserPage tests DeleteUserPage function
+func TestDeleteUserPage(t *testing.T) {
 	id := uuid.Must(uuid.Parse("08307904-f18e-4fb8-9d18-29cfad38ffaf"))
-	r, err := http.NewRequest("DELETE", "/api/v1/user", nil)
-	if err != nil {
-		t.Fatal(err)
+	tests := []TestCase{
+		{
+			name:           "Success_Delete_User",
+			url:            "/api/v1/user/08307904-f18e-4fb8-9d18-29cfad38ffaf",
+			mockedAffected: 1,
+			mockedError:    nil,
+			statusWant:     http.StatusOK,
+		},
+		{
+			name:           "Fail_Delete_User_DBerror",
+			url:            "/api/v1/user/08307904-f18e-4fb8-9d18-29cfad38ffaf",
+			mockedAffected: 0,
+			mockedError:    errors.New("mocked error"),
+			statusWant:     http.StatusInternalServerError,
+		},
+		{
+			name:           "Fail_Delete_User_No_content",
+			url:            "/api/v1/user/08307904-f18e-4fb8-9d18-29cfad38ffaf",
+			mockedAffected: 0,
+			mockedError:    nil,
+			statusWant:     http.StatusNotFound,
+		},
 	}
-	q := r.URL.Query()
-	q.Add("id", id.String())
-	r.URL.RawQuery = q.Encode()
-	w := httptest.NewRecorder()
-	mockCtrlUser := gomock.NewController(t)
-	mockCtrlCommon := gomock.NewController(t)
-	defer mockCtrlUser.Finish()
-	defer mockCtrlCommon.Finish()
-	mockUserCRUD := mocks.NewMockUserCRUD(mockCtrlUser)
-	mockCommon := mocks.NewMockCommon(mockCtrlCommon)
-	UserCrud = mockUserCRUD
-	CommonVar = mockCommon
-	for i := 0; i < 2; i++ {
-		switch i {
-		//case when there was no error while deleting user from db
-		case 0:
-			mockUserCRUD.EXPECT().DeleteUser(id).Return(nil)
-			mockCommon.EXPECT().RenderJSON(w, r, http.StatusNotFound, "User was deleted successfully!")
-			http.HandlerFunc(DeleteUserPage).ServeHTTP(w, r)
-		//case when there was an error while deleting user from db
-		case 1:
-			mockUserCRUD.EXPECT().DeleteUser(id).Return(errors.New("error"))
-			mockCommon.EXPECT().RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
-			http.HandlerFunc(DeleteUserPage).ServeHTTP(w, r)
+
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	for _, tc := range tests {
+		rec := httptest.NewRecorder()
+		req, _ := http.NewRequest(http.MethodDelete, tc.url, nil)
+		usersMock := database.NewMockUserCRUD(mockCtrl)
+		database.Users = usersMock
+		usersMock.EXPECT().DeleteUser(id).Return(tc.mockedAffected, tc.mockedError)
+		testRouter().ServeHTTP(rec, req)
+		if rec.Code != tc.statusWant {
+			t.Errorf("Expected %d, got %d", rec.Code, tc.statusWant)
 		}
+
 	}
 }
 
-//TestListAllUsers tests ListAllUsers function
-func TestListAllUsers(t *testing.T) {
-	r, err := http.NewRequest("GET", "/api/v1/users", nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	w := httptest.NewRecorder()
-	mockCtrlUser := gomock.NewController(t)
-	mockCtrlCommon := gomock.NewController(t)
-	defer mockCtrlUser.Finish()
-	defer mockCtrlCommon.Finish()
-	mockUserCRUD := mocks.NewMockUserCRUD(mockCtrlUser)
-	mockCommon := mocks.NewMockCommon(mockCtrlCommon)
-	UserCrud = mockUserCRUD
-	CommonVar = mockCommon
-	for i := 0; i < 2; i++ {
-		switch i {
-		//case when there was no error while getting all users from db
-		case 0:
-			mockUserCRUD.EXPECT().GetAllUsers().Return([]data.User{}, nil)
-			mockCommon.EXPECT().RenderJSON(w, r, http.StatusOK, []data.User{})
-			http.HandlerFunc(ListAllUsers).ServeHTTP(w, r)
-		//case when there was an error while getting all users from db
-		case 1:
-			mockUserCRUD.EXPECT().GetAllUsers().Return([]data.User{}, errors.New("error"))
-			mockCommon.EXPECT().RenderJSON(w, r, http.StatusNoContent, emptyResponse)
-			http.HandlerFunc(ListAllUsers).ServeHTTP(w, r)
-		}
-	}
-}
-
-//TestCheckAccess tests CheckAccess function
+//TestCheckAccess tests CheckAccess fucntion
 func TestCheckAccess(t *testing.T) {
-	r, err := http.NewRequest("GET", "/api/v1/trains", nil)
-	if err != nil {
-		t.Fatal(err)
+	tests := []TestCase{
+		{
+			name:       "Access_Denied_No_Cookie",
+			url:        "/api/v1/trains",
+			resultWant: false,
+			statusWant: http.StatusUnauthorized,
+			cookieSet:  false,
+			openRedis:  true,
+		},
+		{
+			name:       "Access_Denied_Redis_Error",
+			url:        "/api/v1/trains",
+			resultWant: false,
+			statusWant: http.StatusInternalServerError,
+			cookieSet:  true,
+			openRedis:  false,
+		},
+		{
+			name:       "Access_Granted",
+			url:        "/api/v1/trains",
+			resultWant: true,
+			statusWant: http.StatusOK,
+			cookieSet:  true,
+			openRedis:  true,
+		},
 	}
-	w := httptest.NewRecorder()
-	defer func() {
-		RedisClient = database.Client
-	}()
-	for i := 0; i < 3; i++ {
-		switch i {
-		//case when user was not logged in, thus there was no cookie in request
-		case 0:
-			if CheckAccess(w, r) != false {
-				t.Error("Function should return false with no cookies in request")
-			}
-		//case when user was logged in, thus there was cookie in request
-		case 1:
-			cookie := &http.Cookie{Name: "Cookie",
+	for _, tc := range tests {
+		var cookie http.Cookie
+		RedisClient = mockRedis()
+		rec := httptest.NewRecorder()
+		req, _ := http.NewRequest(http.MethodPost, tc.url, nil)
+		if tc.cookieSet {
+			cookie = http.Cookie{Name: "Cookie",
 				Value: "expected",
 			}
-			http.SetCookie(w, cookie)
-			// Copy the Cookie over to a new Request
-			r = &http.Request{Header: http.Header{"Cookie": w.HeaderMap["Set-Cookie"]}}
-			defer func() {
-				RedisClient = database.Client
-			}()
-			RedisClient = mockRedis()
-			_, err = RedisClient.LPush(cookie.Name, cookie.Value).Result()
+			http.SetCookie(rec, &cookie)
+			req.AddCookie(&cookie)
+		}
+		if !tc.openRedis {
+			RedisClient.Close()
+		} else {
+			_, err := RedisClient.LPush(cookie.Name, cookie.Value).Result()
 			if err != nil {
 				t.Fatal(err)
 			}
-			if CheckAccess(w, r) != true {
-				t.Error("Function doesn't work properly")
-			}
-		//case when there was an error while accessing redis db
-		case 2:
-			defer func() {
-				RedisClient = database.Client
-			}()
-			RedisClient = mockRedis()
-			RedisClient.Close()
-			if CheckAccess(w, r) != false {
-				t.Error("Function doesn't work properly")
-			}
+		}
+		if tc.resultWant != CheckAccess(rec, req) {
+			t.Errorf("Expected: %t , got %t", tc.resultWant, CheckAccess(rec, req))
+		}
+		if tc.statusWant != rec.Code {
+			t.Errorf("Expected: %d , got %d", tc.statusWant, rec.Code)
 		}
 	}
+	RedisClient = database.Client
 }
 
-//TestCheckAdmin tests function CheckAdmin
+//TestCheckAdmin tests CheckAdmin function
 func TestCheckAdmin(t *testing.T) {
-	r, err := http.NewRequest("GET", "/api/v1/trains", nil)
-	if err != nil {
-		t.Fatal(err)
+	tests := []TestCase{
+		{
+			name:        "Success_Admin_role",
+			url:         "/api/v1/trains",
+			loggedIn:    true,
+			mockedRole:  "Admin",
+			mockedError: nil,
+			resultWant:  true,
+		},
+		{
+			name:        "Success_User_role",
+			url:         "/api/v1/trains",
+			loggedIn:    true,
+			mockedRole:  "User",
+			mockedError: nil,
+			resultWant:  false,
+		},
+		{
+			name:        "Failure_database_error",
+			url:         "/api/v1/trains",
+			loggedIn:    true,
+			mockedError: errors.New("mocked error"),
+			resultWant:  false,
+		},
 	}
-	w := httptest.NewRecorder()
-	mockCtrlUser := gomock.NewController(t)
-	defer mockCtrlUser.Finish()
-	mockUserCRUD := mocks.NewMockUserCRUD(mockCtrlUser)
-	UserCrud = mockUserCRUD
-	defer func() {
-		LoggedIn = CheckAccess
-	}()
-	for i := 0; i < 4; i++ {
-		cookie := &http.Cookie{Name: "Cookie",
-			Value: "expected",
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	cookie := http.Cookie{Name: "Cookie",
+		Value: "expected",
+	}
+	for _, tc := range tests {
+		LoggedIn = func(http.ResponseWriter, *http.Request) bool {
+			return tc.loggedIn
 		}
-		http.SetCookie(w, cookie)
-		r = &http.Request{Header: http.Header{"Cookie": w.HeaderMap["Set-Cookie"]}}
-		switch i {
-		//case where user wasn't logged in at all
-		case 0:
-			LoggedIn = func(http.ResponseWriter, *http.Request) bool {
-				return false
-			}
-			if CheckAdmin(w, r) != false {
-				t.Error("Function doesn't work properly")
-			}
-		//case when user was logged in with role Admin
-		case 1:
-			LoggedIn = func(http.ResponseWriter, *http.Request) bool {
-				return true
-			}
-			mockUserCRUD.EXPECT().GetUserRole(cookie.Name).Return("Admin", nil)
-			if CheckAdmin(w, r) != true {
-				t.Error("Function doesn't work properly")
-			}
-		//case when user was logged in with role User
-		case 2:
-			LoggedIn = func(http.ResponseWriter, *http.Request) bool {
-				return true
-			}
-			mockUserCRUD.EXPECT().GetUserRole(cookie.Name).Return("User", nil)
-			if CheckAdmin(w, r) != false {
-				t.Error("Function doesn't work properly")
-			}
-		//case when there was error while getting user role from db
-		case 3:
-			LoggedIn = func(http.ResponseWriter, *http.Request) bool {
-				return true
-			}
-			mockUserCRUD.EXPECT().GetUserRole(cookie.Name).Return("", errors.New("Error"))
-			if CheckAdmin(w, r) != false {
-				t.Error("Function doesn't work properly")
-			}
+		rec := httptest.NewRecorder()
+		req, _ := http.NewRequest(http.MethodPost, tc.url, nil)
+		http.SetCookie(rec, &cookie)
+		req.AddCookie(&cookie)
+		usersMock := database.NewMockUserCRUD(mockCtrl)
+		database.Users = usersMock
+		usersMock.EXPECT().GetUserRole(cookie.Name).Return(tc.mockedRole, tc.mockedError)
+		res := CheckAdmin(rec, req)
+		if res != tc.resultWant {
+			t.Errorf("Expected: %t , got %t", tc.resultWant, res)
 		}
 	}
+	LoggedIn = CheckAccess
 }

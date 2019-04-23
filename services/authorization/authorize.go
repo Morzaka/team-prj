@@ -2,29 +2,21 @@ package authorization
 
 import (
 	"encoding/json"
+	"github.com/go-redis/redis"
+	"github.com/go-zoo/bone"
+	"github.com/google/uuid"
 	"io/ioutil"
 	"net/http"
-	"net/url"
-	"time"
-
 	"team-project/database"
 	"team-project/logger"
 	"team-project/services/common"
 	"team-project/services/data"
 	"team-project/services/model"
-
-	"github.com/go-redis/redis"
-	"github.com/google/uuid"
+	"time"
 )
 
 var (
 	emptyResponse interface{}
-	//UserCrud is an interface to call methods from database package
-	UserCrud database.UserCRUD = &database.IUser{}
-	//ModelVar is an interface to call methods from model package
-	ModelVar model.Model = &model.IModel{}
-	//CommonVar is an interface to call methods from common package
-	CommonVar common.Common = &common.ICommon{}
 	//RedisClient variable to refer to redis db
 	RedisClient *redis.Client
 	//LoggedIn variable holds the value of CheckAccess function
@@ -41,15 +33,15 @@ func Signin(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		logger.Logger.Errorf("Error, %s", err)
 	}
-	dbpassword, err := UserCrud.GetUserPassword(user.Login)
+	dbpassword, err := database.Users.GetUserPassword(user.Login)
 	if err != nil {
-		CommonVar.RenderJSON(w, r, http.StatusUnauthorized, emptyResponse)
+		common.RenderJSON(w, r, http.StatusUnauthorized, emptyResponse)
 		return
 	}
 	//if entered password matches the password from database than user is registered
-	if ModelVar.CheckPasswordHash(user.Password, dbpassword) {
+	if model.HelperModel.CheckPasswordHash(user.Password, dbpassword) {
 		//if user is registered than write session id for this user to cookie to tack authorized users
-		sessionID := ModelVar.GenerateID()
+		sessionID := uuid.New()
 		cookie := &http.Cookie{Name: user.Login,
 			Value:   sessionID.String(),
 			Expires: time.Now().Add(15 * time.Minute),
@@ -57,7 +49,7 @@ func Signin(w http.ResponseWriter, r *http.Request) {
 		//add cookie to redis db
 		_, err := RedisClient.LPush(cookie.Name, cookie.Value).Result()
 		if err != nil {
-			CommonVar.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
+			common.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
 			return
 		}
 		//delele this session value from redis in 15 minutes
@@ -65,41 +57,51 @@ func Signin(w http.ResponseWriter, r *http.Request) {
 			time.Sleep(15 * time.Minute)
 			_, err := RedisClient.LRem(cookie.Name, 0, cookie.Value).Result()
 			if err != nil {
-				CommonVar.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
+				common.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
 				return
 			}
 		}()
 		http.SetCookie(w, cookie)
-		CommonVar.RenderJSON(w, r, http.StatusOK, user)
+		common.RenderJSON(w, r, http.StatusOK, user)
 		//else if passwords don't match then render status unauthorized
 	} else {
-		CommonVar.RenderJSON(w, r, http.StatusUnauthorized, emptyResponse)
+		common.RenderJSON(w, r, http.StatusUnauthorized, emptyResponse)
 		return
 	}
-
 }
 
 //Signup function implements user's registration
 func Signup(w http.ResponseWriter, r *http.Request) {
 	var user data.User
-	user.ID = ModelVar.GenerateID()
+	user.ID = uuid.New()
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
 		logger.Logger.Errorf("Error, %s", err)
 	}
+	users, err := database.Users.GetAllUsers()
+	if err != nil {
+		common.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
+		return
+	}
+	for _, each := range users {
+		if each.Login == user.Login {
+			common.RenderJSON(w, r, http.StatusNotAcceptable, "Login is not allowed")
+			return
+		}
+	}
 	// get entered values from the registration form
-	password, err := ModelVar.HashPassword(user.Signin.Password)
+	password, err := model.HelperModel.HashPassword(user.Password)
 	if err != nil {
 		logger.Logger.Errorf("Error, %s", err)
 	}
-	user.Signin.Password = password
+	user.Password = password
 	//add user to database and get his id
-	user, err = UserCrud.AddUser(user)
+	user, err = database.Users.AddUser(user)
 	if err != nil {
-		CommonVar.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
+		common.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
 		return
 	}
-	CommonVar.RenderJSON(w, r, http.StatusOK, user)
+	common.RenderJSON(w, r, http.StatusOK, user)
 }
 
 //Logout implements logging out - deletes cookie from db
@@ -109,7 +111,7 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 	sessionToken := cookie.Name
 	_, err := RedisClient.LRem(sessionToken, 0, cookie.Value).Result()
 	if err != nil {
-		CommonVar.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
+		common.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
 		return
 	}
 	cookie = &http.Cookie{
@@ -117,21 +119,13 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 		MaxAge: -1,
 	}
 	http.SetCookie(w, cookie)
-	CommonVar.RenderJSON(w, r, http.StatusNoContent, emptyResponse)
+	common.RenderJSON(w, r, http.StatusNoContent, emptyResponse)
 }
 
 //UpdateUserPage deletes user
 func UpdateUserPage(w http.ResponseWriter, r *http.Request) {
 	var user data.User
-	u, err := url.Parse(r.URL.String())
-	if err != nil {
-		CommonVar.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
-		return
-	}
-	id, err := uuid.Parse(u.Query().Get("id"))
-	if err != nil {
-		logger.Logger.Errorf("Error, %s", err)
-	}
+	id := uuid.Must(uuid.Parse(bone.GetValue(r, "id")))
 	data, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
 	if err != nil {
@@ -142,48 +136,48 @@ func UpdateUserPage(w http.ResponseWriter, r *http.Request) {
 		logger.Logger.Errorf("Error, %s", err)
 	}
 	// get entered values from the registration form
-	password, err := ModelVar.HashPassword(user.Signin.Password)
+	password, err := model.HelperModel.HashPassword(user.Password)
 	if err != nil {
 		logger.Logger.Errorf("Error, %s", err)
 	}
-	user.Signin.Password = password
+	user.Password = password
 	//add user to database and get his id
-	err = UserCrud.UpdateUser(user, id)
+	affected, err := database.Users.UpdateUser(user, id)
 	if err != nil {
-		CommonVar.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
+		common.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
 		return
 	}
 	user.ID = id
-	CommonVar.RenderJSON(w, r, http.StatusOK, user)
+	if affected > 0 {
+		common.RenderJSON(w, r, http.StatusOK, "User was updated successfully!")
+	} else {
+		common.RenderJSON(w, r, http.StatusNotFound, "No rows affected!")
+	}
 }
 
 //DeleteUserPage deletes user's page
 func DeleteUserPage(w http.ResponseWriter, r *http.Request) {
-	u, err := url.Parse(r.URL.String())
+	id := uuid.Must(uuid.Parse(bone.GetValue(r, "id")))
+	affected, err := database.Users.DeleteUser(id)
 	if err != nil {
-		CommonVar.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
+		common.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
 		return
 	}
-	id, err := uuid.Parse(u.Query().Get("id"))
-	if err != nil {
-		logger.Logger.Errorf("Error, %s", err)
+	if affected > 0 {
+		common.RenderJSON(w, r, http.StatusOK, "User was deleted successfully!")
+	} else {
+		common.RenderJSON(w, r, http.StatusNotFound, "No rows affected!")
 	}
-	err = UserCrud.DeleteUser(id)
-	if err != nil {
-		CommonVar.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
-		return
-	}
-	CommonVar.RenderJSON(w, r, http.StatusNotFound, "User was deleted successfully!")
 }
 
 //ListAllUsers makes a request to db to get all users
 func ListAllUsers(w http.ResponseWriter, r *http.Request) {
-	users, err := UserCrud.GetAllUsers()
+	users, err := database.Users.GetAllUsers()
 	if err != nil {
-		CommonVar.RenderJSON(w, r, http.StatusNoContent, emptyResponse)
+		common.RenderJSON(w, r, http.StatusNoContent, emptyResponse)
 		return
 	}
-	CommonVar.RenderJSON(w, r, http.StatusOK, users)
+	common.RenderJSON(w, r, http.StatusOK, users)
 }
 
 //CheckAccess checks whether user is logged in to give him access to services
@@ -208,6 +202,7 @@ func CheckAccess(w http.ResponseWriter, r *http.Request) bool {
 			active = true
 		}
 	}
+	w.WriteHeader(http.StatusOK)
 	return active
 }
 
@@ -216,7 +211,7 @@ func CheckAdmin(w http.ResponseWriter, r *http.Request) bool {
 	if LoggedIn(w, r) {
 		id, arr := len(r.Cookies())-1, r.Cookies()
 		cookie := arr[id]
-		role, err := UserCrud.GetUserRole(cookie.Name)
+		role, err := database.Users.GetUserRole(cookie.Name)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return false
