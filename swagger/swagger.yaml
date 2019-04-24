@@ -436,58 +436,58 @@ definitions:
       ArrivalCity:
         type: string
         description: Plane arrival city.
-    Ticket:
-      type: "object"
-      properties:
-        place:
-          type: "integer"
-          format: "int"
-        ticket_type:
-          type: "string"
-        discount:
-          type: "string"
-        price:
-          type: "number"
-          format: "float32"
-        total_price:
-          type: "number"
-          format: "float32"
-        name:
-          type: "string"
-        surname:
-          type: "string"
-    Tickets:
-      type: "object"
-      properties:
-        id:
-          type: "string"
-          format: "uuid"
-        train_id:
-          type: "string"
-          format: "uuid"
-        plane_id:
-          type: "string"
-          format: "uuid"
-        user_id:
-          type: "string"
-          format: "uuid"
-        place:
-          type: "integer"
-          format: "int"
-        ticket_type:
-          type: "string"
-        discount:
-          type: "string"
-        price:
-          type: "number"
-          format: "float32"
-        total_price:
-          type: "number"
-          format: "float32"
-        name:
-          type: "string"
-        surname:
-          type: "string"
+  Ticket:
+    type: "object"
+    properties:
+      place:
+        type: "integer"
+        format: "int"
+      ticket_type:
+        type: "string"
+      discount:
+        type: "string"
+      price:
+        type: "number"
+        format: "float32"
+      total_price:
+        type: "number"
+        format: "float32"
+      name:
+        type: "string"
+      surname:
+        type: "string"
+  Tickets:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+        format: "uuid"
+      train_id:
+        type: "string"
+        format: "uuid"
+      plane_id:
+        type: "string"
+        format: "uuid"
+      user_id:
+        type: "string"
+        format: "uuid"
+      place:
+        type: "integer"
+        format: "int"
+      ticket_type:
+        type: "string"
+      discount:
+        type: "string"
+      price:
+        type: "number"
+        format: "float32"
+      total_price:
+        type: "number"
+        format: "float32"
+      name:
+        type: "string"
+      surname:
+        type: "string"
   ErrorMessage:
     type: "object"
     properties:
