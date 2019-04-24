@@ -83,6 +83,3 @@ type Ticket struct {
 	//Arrival_date   time.Time `json:"arrival_date"`
 	//Arrival_time   time.Time `json:"arrival_time"`
 }
-
-//Tickets is a slice of Ticket
-type Tickets []Ticket
