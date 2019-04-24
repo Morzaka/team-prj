@@ -20,8 +20,8 @@ func TestAddUser(t *testing.T) {
 	}
 	Db = db
 	defer db.Close()
-	id,err := uuid.Parse("08307904-f18e-4fb8-9d18-29cfad38ffaf")
-	if err!=nil{
+	id, err := uuid.Parse("08307904-f18e-4fb8-9d18-29cfad38ffaf")
+	if err != nil {
 		t.Fatal(err)
 	}
 	user := data.User{ID: id,
@@ -50,8 +50,8 @@ func TestDeleteUser(t *testing.T) {
 	}
 	Db = db
 	defer db.Close()
-	id,err := uuid.Parse("08307904-f18e-4fb8-9d18-29cfad38ffaf")
-	if err!=nil{
+	id, err := uuid.Parse("08307904-f18e-4fb8-9d18-29cfad38ffaf")
+	if err != nil {
 		t.Fatal(err)
 	}
 	mock.ExpectExec("DELETE").WithArgs(id).WillReturnResult(sqlmock.NewResult(0, 1))
@@ -69,8 +69,8 @@ func TestUpdateUser(t *testing.T) {
 	}
 	Db = db
 	defer db.Close()
-	id,err := uuid.Parse("08307904-f18e-4fb8-9d18-29cfad38ffaf")
-	if err!=nil{
+	id, err := uuid.Parse("08307904-f18e-4fb8-9d18-29cfad38ffaf")
+	if err != nil {
 		t.Fatal(err)
 	}
 	user := data.User{
@@ -146,8 +146,8 @@ func TestGetAllUsers(t *testing.T) {
 	}
 	Db = db
 	defer db.Close()
-	id,err := uuid.Parse("08307904-f18e-4fb8-9d18-29cfad38ffaf")
-	if err!=nil{
+	id, err := uuid.Parse("08307904-f18e-4fb8-9d18-29cfad38ffaf")
+	if err != nil {
 		t.Fatal(err)
 	}
 	rows := sqlmock.NewRows([]string{"id", "name", "surname", "login", "password", "role", "email"}).AddRow(id, "Oksana", "Zhykina", "litleskew", "littleskew", "User", "oks8@gmail.com")

@@ -105,7 +105,7 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 		common.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
 		return
 	}
-	user.Role="User"
+	user.Role = "User"
 	common.RenderJSON(w, r, http.StatusOK, user)
 }
 

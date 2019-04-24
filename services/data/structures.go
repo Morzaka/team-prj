@@ -10,7 +10,7 @@ type User struct {
 	Name     string    `json:"name"`
 	Surname  string    `json:"surname"`
 	Email    string    `json:"email"`
-	Role 	 string	   `json:"role"`
+	Role     string    `json:"role"`
 }
 
 //Signin contains data for logging in

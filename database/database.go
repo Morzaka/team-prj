@@ -5,9 +5,10 @@ import (
 
 	"net/url"
 	"os"
+
+	"github.com/go-redis/redis"
 	//pq lib for using postgres
 	_ "github.com/lib/pq"
-	"github.com/go-redis/redis"
 )
 
 var (
