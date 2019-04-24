@@ -1,6 +1,7 @@
 package train_test
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -8,6 +9,7 @@ import (
 	"team-project/database"
 	"team-project/services"
 	"team-project/services/data"
+	"team-project/services/train"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -26,6 +28,73 @@ type TrainsTestCases struct {
 	mockedErr    error
 }
 
+var testTrain = data.Train{
+	ID:            uuid.Must(uuid.Parse("08307904-f18e-4fb8-9d18-29cfad38ffaf")),
+	DepartureCity: "Lviv",
+	ArrivalCity:   "Kiev",
+	DepartureTime: "8:40",
+	DepartureDate: "29.04.2019",
+	ArrivalTime:   "14:05",
+	ArrivalDate:   "29.04.2019",
+}
+
+func TestValidateIfEmpty(t *testing.T) {
+	v := train.ValidateIfEmpty(testTrain)
+	if v != nil {
+		t.Error("Expcected nil while validatingIfEmptty , got ", v)
+	}
+}
+
+func TestNameIsValid(t *testing.T) {
+	for i := 1; i < 3; i++ {
+		switch i {
+		case 1:
+			v := train.NameIsValid(testTrain.DepartureCity)
+			if v != true {
+				t.Error("Expected that name validation was true, got ", v)
+			}
+		case 2:
+			v := train.NameIsValid(testTrain.ArrivalCity)
+			if v != true {
+				t.Error("Expected that name validation was true, got ", v)
+			}
+		}
+	}
+}
+
+func TestTimeIsValid(t *testing.T) {
+	for i := 1; i < 3; i++ {
+		switch i {
+		case 1:
+			v := train.TimeIsValid(testTrain.DepartureTime)
+			if v != true {
+				t.Error("Expected that name validation was true, got ", v)
+			}
+		case 2:
+			v := train.TimeIsValid(testTrain.ArrivalTime)
+			if v != true {
+				t.Error("Expected that name validation was true, got ", v)
+			}
+		}
+	}
+}
+
+func TestDateIsValid(t *testing.T) {
+	for i := 1; i < 3; i++ {
+		switch i {
+		case 1:
+			v := train.DateIsValid(testTrain.DepartureDate)
+			if v != true {
+				t.Error("Expected that name validation was true, got ", v)
+			}
+		case 2:
+			v := train.DateIsValid(testTrain.ArrivalDate)
+			if v != true {
+				t.Error("Expected that name validation was true, got ", v)
+			}
+		}
+	}
+}
 func TestGetTrains(t *testing.T) {
 	tests := []TrainsTestCases{
 		{
@@ -64,23 +133,20 @@ func TestGetTrains(t *testing.T) {
 }
 
 func TestGetSingleTrain(t *testing.T) {
-	s := "08307904-f18e-4fb8-9d18-29cfad38ffaf"
-	id, err := uuid.Parse(s)
-	if err != nil {
-		t.Fatal(err)
-	}
 	test := []TrainsTestCases{
-		/*{
+		{
 			tcase:       "GetTrainOK",
-			url:         "/api/v1/train/08307904-f18e-4fb8-9d18-29cfad38ffaf",
+			url:         "/api/v1/train?id=08307904-f18e-4fb8-9d18-29cfad38ffaf",
 			expected:    http.StatusOK,
-			mockedTrain: data.Train{},
+			testTrainID: "08307904-f18e-4fb8-9d18-29cfad38ffaf",
+			mockedTrain: testTrain,
 			mockedErr:   nil,
-		},*/
+		},
 		{
 			tcase:       "GetTrain204",
-			url:         "/api/v1/train/08307904-f18e-4fb8-9d18-29cfad38ffaf",
+			url:         "/api/v1/train?id=08307904-f18e-4fb8-9d18-29cfad38aaaf",
 			expected:    http.StatusNoContent,
+			testTrainID: "08307904-f18e-4fb8-9d18-29cfad38aaaf",
 			mockedTrain: data.Train{},
 			mockedErr:   errors.New("db error , no data found"),
 		},
@@ -90,9 +156,7 @@ func TestGetSingleTrain(t *testing.T) {
 	for _, tc := range test {
 		t.Run(tc.tcase, func(t *testing.T) {
 			trainMock := database.NewMockTrainCrud(mockCtrl)
-			trainMock.EXPECT().GetTrain(s).Return(data.Train{
-				ID: id,
-			}, tc.mockedErr)
+			trainMock.EXPECT().GetTrain(tc.testTrainID).Return(tc.mockedTrain, tc.mockedErr)
 			database.Trains = trainMock
 			rec := httptest.NewRecorder()
 			req, err := http.NewRequest("GET", tc.url, nil)
@@ -111,16 +175,16 @@ func TestCreateTrain(t *testing.T) {
 	test := []TrainsTestCases{
 		{
 			tcase:       "GetTrainOK",
-			url:         "/api/v1/train",
+			url:         "/api/v1/trains",
 			expected:    http.StatusOK,
-			mockedTrain: data.Train{},
+			mockedTrain: testTrain,
 			mockedErr:   nil,
 		},
 		{
-			tcase:       "GetTrainOK",
-			url:         "/api/v1/train",
+			tcase:       "GetTrainNoContent",
+			url:         "/api/v1/trains",
 			expected:    http.StatusNoContent,
-			mockedTrain: data.Train{},
+			mockedTrain: testTrain,
 			mockedErr:   errors.New("failed to create"),
 		},
 	}
@@ -129,14 +193,16 @@ func TestCreateTrain(t *testing.T) {
 	for _, tc := range test {
 		t.Run(tc.tcase, func(t *testing.T) {
 			trainMock := database.NewMockTrainCrud(mockCtrl)
-			train := data.Train{}
-			req, err := http.NewRequest("POST", tc.url, nil)
+			b, err := json.Marshal(tc.mockedTrain)
 			if err != nil {
 				t.Fatal(err)
 			}
-			json.NewDecoder(req.Body).Decode(&train)
-			trainMock.EXPECT().AddTrain(train).Return(tc.mockedErr)
+			req, err := http.NewRequest(http.MethodPost, tc.url, bytes.NewBuffer(b))
+			if err != nil {
+				t.Fatal(err)
+			}
 			database.Trains = trainMock
+			trainMock.EXPECT().AddTrain(tc.mockedTrain).Return(tc.mockedErr)
 			rec := httptest.NewRecorder()
 			router.ServeHTTP(rec, req)
 			if rec.Code != tc.expected {
