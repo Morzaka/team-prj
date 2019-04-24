@@ -13,7 +13,7 @@ import (
 
 var emptyResponse interface{}
 
-//ValidateIfEmpty is a
+//ValidateIfEmpty is a validation if train is empty
 func ValidateIfEmpty(t data.Train) error {
 	if t.DepartureCity == "" || t.ArrivalCity == "" || t.DepartureTime == "" || t.DepartureDate == "" || t.ArrivalTime == "" || t.ArrivalDate == "" {
 		return errors.New("Some incoming data is empty =(")
@@ -21,25 +21,25 @@ func ValidateIfEmpty(t data.Train) error {
 	return nil
 }
 
-//NameIsValid is a
+//NameIsValid is a validation if trains name data is valid
 func NameIsValid(str string) bool {
 	var validName = regexp.MustCompile(`^[a-zA-Z]+(?:[\s-][a-zA-Z]+)*$`)
 	return validName.MatchString(str)
 }
 
-//TimeIsValid is a
+//TimeIsValid is a validation if trains time data is valid
 func TimeIsValid(str string) bool {
 	var validName = regexp.MustCompile(`^(2[0-3]|[01]?[0-9]):([0-5]?[0-9])$`)
 	return validName.MatchString(str)
 }
 
-//DateIsValid is a
+//DateIsValid is a validation if trains date data is valid
 func DateIsValid(str string) bool {
 	var validName = regexp.MustCompile(`^\s*(3[01]|[12][0-9]|0?[1-9])\.(1[012]|0?[1-9])\.((?:19|20)\d{2})\s*$`)
 	return validName.MatchString(str)
 }
 
-//Validate is a
+//Validate is a function that validates trains name, date, time data
 func Validate(t data.Train) error {
 	if NameIsValid(t.ArrivalCity) == false || NameIsValid(t.DepartureCity) == false || DateIsValid(t.DepartureDate) == false || DateIsValid(t.ArrivalDate) == false || TimeIsValid(t.ArrivalTime) == false || TimeIsValid(t.DepartureTime) == false {
 		return errors.New("Some data is invalid")
@@ -47,7 +47,7 @@ func Validate(t data.Train) error {
 	return nil
 }
 
-//GetTrains is a method
+//GetTrains is a handler that returns trains from db
 func GetTrains(w http.ResponseWriter, r *http.Request) {
 	trains, err := database.Trains.GetAllTrains()
 	if err != nil {
@@ -69,7 +69,7 @@ func GetTrains(w http.ResponseWriter, r *http.Request) {
 	common.RenderJSON(w, r, http.StatusOK, trains)
 }
 
-//GetSingleTrain is a method
+//GetSingleTrain is a handler that returns single train from db
 func GetSingleTrain(w http.ResponseWriter, r *http.Request) {
 	id, err := model.GetID(r)
 	if err != nil {
@@ -93,7 +93,7 @@ func GetSingleTrain(w http.ResponseWriter, r *http.Request) {
 	common.RenderJSON(w, r, http.StatusOK, train)
 }
 
-//CreateTrain is a method
+//CreateTrain is a handler that creates train
 func CreateTrain(w http.ResponseWriter, r *http.Request) {
 	t := data.Train{}
 	json.NewDecoder(r.Body).Decode(&t)
@@ -113,7 +113,7 @@ func CreateTrain(w http.ResponseWriter, r *http.Request) {
 	common.RenderJSON(w, r, http.StatusOK, t)
 }
 
-//UpdateTrain is a method
+//UpdateTrain is a handler that updates train in db
 func UpdateTrain(w http.ResponseWriter, r *http.Request) {
 	id, err := model.GetID(r)
 	if err != nil {
@@ -144,7 +144,7 @@ func UpdateTrain(w http.ResponseWriter, r *http.Request) {
 	common.RenderJSON(w, r, http.StatusOK, train)
 }
 
-//DeleteTrain is a method
+//DeleteTrain is a handler that deletes train from db
 func DeleteTrain(w http.ResponseWriter, r *http.Request) {
 	id, err := model.GetID(r)
 	if err != nil {
