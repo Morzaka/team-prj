@@ -4,8 +4,8 @@ import (
 	"team-project/services/data"
 
 	"github.com/google/uuid"
-
-	_ "github.com/lib/pq" // pq lib for using postgres
+	// pq lib for using postgres
+	_ "github.com/lib/pq"
 )
 
 //GetAllTrains is a method

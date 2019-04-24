@@ -25,7 +25,7 @@ unitests:
   stage: tests
   script:
     - go get -u github.com/gorilla/mux
-    - go test ./...
+    - go test -covermode=count ./...
     - go vet
 
 validating:

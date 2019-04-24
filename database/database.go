@@ -2,12 +2,15 @@ package database
 
 import (
 	"database/sql"
+
 	"fmt"
+
+	"github.com/go-redis/redis"
+
 	"net/url"
 	"os"
 	"team-project/configurations"
 
-	"github.com/go-redis/redis"
 	//pq lib for using postgres
 	_ "github.com/lib/pq"
 )
@@ -45,8 +48,8 @@ func RedisInit() error {
 	password, _ := u.User.Password()
 	Client = redis.NewClient(&redis.Options{
 		Addr:     u.Host,
-		Password: password, // no password set
-		DB:       0,        // use default DB
+		Password: password,
+		DB:       0, // use default DB
 	})
 	_, err = Client.Ping().Result()
 	if err != nil {

@@ -4,17 +4,24 @@ import "github.com/google/uuid"
 
 //User struct contains user data
 type User struct {
-	ID      uuid.UUID `json:"id"`
-	Signin  Signin    `json:"signin"`
-	Name    string    `json:"name"`
-	Surname string    `json:"surname"`
-	Role    string    `json:"role"`
+	ID       uuid.UUID `json:"id"`
+	Login    string    `json:"login"`
+	Password string    `json:"password"`
+	Name     string    `json:"name"`
+	Surname  string    `json:"surname"`
+	Role     string    `json:"role"`
 }
 
 //Signin contains data for logging in
 type Signin struct {
 	Login    string `json:"login"`
 	Password string `json:"password"`
+}
+
+//Comment structure
+type Comment struct {
+	User    string   `json:"user"`
+	Comment []string `json:"comment"`
 }
 
 //Trip database structure
@@ -42,6 +49,18 @@ type Plane struct {
 	ID            uuid.UUID `json:"id"`
 	DepartureCity string    `json:"departureCity"`
 	ArrivalCity   string    `json:"arrivalCity"`
+}
+
+//Routes contains result of algorithm
+type Routes struct {
+	RouteID  int      `json:"route"`
+	Stations Stations `json:"stations"`
+}
+
+//Stations contains departure and arrival stations
+type Stations struct {
+	StartRoute string `json:"start"`
+	EndRoute   string `json:"end"`
 }
 
 //Ticket datastructure

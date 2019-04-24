@@ -24,8 +24,8 @@ vendor/
 
 # IDEs:
 .idea/
+.vscode/
 
 # logs:
 *.log
 *.log.*
-
