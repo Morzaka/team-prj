@@ -20,7 +20,7 @@ type ticketRepository struct {
 	ticketRepo TicketRepository
 }
 
-// Users is an instance presented IUser
+// TicketRepo is a variable for accessing to Ticket mocked Interface
 var TicketRepo TicketRepository = &ticketRepository{}
 
 

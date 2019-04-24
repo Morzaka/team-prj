@@ -14,6 +14,7 @@ import (
 
 var emptyResponse interface{}
 
+//ValidateForm function validate incoming data from client
 func ValidateForm(tk data.Ticket) error {
 	if tk.Place <= 0 || tk.TicketType == "" || tk.
 		Discount == "" || tk.Price <= 0 || tk.TotalPrice <= 0 || tk.

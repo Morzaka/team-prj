@@ -310,3 +310,41 @@ func TestUpdateTicket(t *testing.T) {
 		})
 	}
 }
+
+func TestDeleteTicket(t *testing.T) {
+	tests := []ListTicketTestCase{
+		{
+			name:          "Delete_Ticket_200",
+			id:            uuid.Must(uuid.Parse("fcb33af4-40a3-4c82-afb1-218731052309")),
+			url:           "/api/v1/ticket/fcb33af4-40a3-4c82-afb1-218731052309",
+			want:          http.StatusOK,
+			mockedError:   nil,
+		},
+		{
+			name:          "Delete_Tickets_500",
+			id:            uuid.Must(uuid.Parse("fcb33af4-40a3-4c82-afb1-218731052309")),
+			url:           "/api/v1/ticket/fcb33af4-40a3-4c82-afb1-218731052309",
+			want:          http.StatusInternalServerError,
+			mockedError:   errors.New("db error"),
+		},
+	}
+
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+
+			ticketMock := database.NewMockTicketRepository(mockCtrl)
+			ticketMock.EXPECT().DeleteTicket(tc.id).Return(tc.mockedError)
+			database.TicketRepo = ticketMock
+
+			rw := httptest.NewRecorder()
+			req, _ := http.NewRequest(http.MethodDelete, tc.url, nil)
+			router.ServeHTTP(rw, req)
+			if rw.Code != tc.want {
+				t.Errorf("Expected: %d , got %d", tc.want, rw.Code)
+			}
+		})
+	}
+}
