@@ -33,6 +33,16 @@ var testData = data.Ticket{
 
 var router = services.NewRouter()
 
+type ListTicketTestCase struct {
+	name          string
+	id            uuid.UUID
+	url           string
+	want          int
+	mockedTicket  data.Ticket
+	mockedTickets []data.Ticket
+	mockedError   error
+}
+
 func TestValidateForm(t *testing.T) {
 	for i := 0; i < 8; i++ {
 		switch i {
@@ -93,16 +103,8 @@ func TestValidateForm(t *testing.T) {
 	}
 }
 
-type ListAllTicketsTestCase struct {
-	name          string
-	url           string
-	want          int
-	mockedTickets []data.Ticket
-	mockedError   error
-}
-
 func TestGetAllTickets(t *testing.T) {
-	tests := []ListAllTicketsTestCase{
+	tests := []ListTicketTestCase{
 		{
 			name:          "Get_Tickets_200",
 			url:           "/api/v1/tickets",
@@ -140,32 +142,23 @@ func TestGetAllTickets(t *testing.T) {
 	}
 }
 
-type ListTicketTestCase struct {
-	name          string
-	id            uuid.UUID
-	url           string
-	want          int
-	mockedTickets data.Ticket
-	mockedError   error
-}
-
 func TestGetOneTicket(t *testing.T) {
 	tests := []ListTicketTestCase{
 		{
-			name:          "Get_Ticket_200",
-			id:            uuid.Must(uuid.Parse("fcb33af4-40a3-4c82-afb1-218731052309")),
-			url:           "/api/v1/ticket/fcb33af4-40a3-4c82-afb1-218731052309",
-			want:          http.StatusOK,
-			mockedTickets: testData,
-			mockedError:   nil,
+			name:         "Get_Ticket_200",
+			id:           uuid.Must(uuid.Parse("fcb33af4-40a3-4c82-afb1-218731052309")),
+			url:          "/api/v1/ticket/fcb33af4-40a3-4c82-afb1-218731052309",
+			want:         http.StatusOK,
+			mockedTicket: testData,
+			mockedError:  nil,
 		},
 		{
-			name:          "Get_Tickets_500",
-			id:            uuid.Must(uuid.Parse("0e3763c6-a7ed-4532-afd7-420c5a480000")),
-			url:           "/api/v1/ticket/0e3763c6-a7ed-4532-afd7-420c5a480000",
-			want:          http.StatusInternalServerError,
-			mockedTickets: data.Ticket{},
-			mockedError:   errors.New("db error"),
+			name:         "Get_Tickets_500",
+			id:           uuid.Must(uuid.Parse("0e3763c6-a7ed-4532-afd7-420c5a480000")),
+			url:          "/api/v1/ticket/0e3763c6-a7ed-4532-afd7-420c5a480000",
+			want:         http.StatusInternalServerError,
+			mockedTicket: data.Ticket{},
+			mockedError:  errors.New("db error"),
 		},
 	}
 
@@ -176,7 +169,7 @@ func TestGetOneTicket(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			if tc.name != "Get_Tickets_400" {
 				ticketMock := database.NewMockTicketRepository(mockCtrl)
-				ticketMock.EXPECT().GetTicket(tc.id).Return(tc.mockedTickets,
+				ticketMock.EXPECT().GetTicket(tc.id).Return(tc.mockedTicket,
 					tc.mockedError)
 				database.TicketRepo = ticketMock
 			}
@@ -204,25 +197,25 @@ func TestCreateTicket(t *testing.T) {
 	}
 	tests := []ListTicketTestCase{
 		{
-			name:          "Post_Ticket_200",
-			url:           "/api/v1/ticket",
-			want:          http.StatusOK,
-			mockedTickets: ticket,
-			mockedError:   nil,
+			name:         "Post_Ticket_200",
+			url:          "/api/v1/ticket",
+			want:         http.StatusOK,
+			mockedTicket: ticket,
+			mockedError:  nil,
 		},
 		{
-			name:          "Post_Tickets_500",
-			url:           "/api/v1/ticket",
-			want:          http.StatusInternalServerError,
-			mockedTickets: ticket,
-			mockedError:   errors.New("db error"),
+			name:         "Post_Tickets_500",
+			url:          "/api/v1/ticket",
+			want:         http.StatusInternalServerError,
+			mockedTicket: ticket,
+			mockedError:  errors.New("db error"),
 		},
 		{
-			name:          "Post_Tickets_406",
-			url:           "/api/v1/ticket",
-			want:          http.StatusNotAcceptable,
-			mockedTickets: data.Ticket{},
-			mockedError:   errors.New("validation failure"),
+			name:         "Post_Tickets_406",
+			url:          "/api/v1/ticket",
+			want:         http.StatusNotAcceptable,
+			mockedTicket: data.Ticket{},
+			mockedError:  errors.New("validation failure"),
 		},
 	}
 
@@ -233,10 +226,10 @@ func TestCreateTicket(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			if tc.name != "Post_Tickets_406" {
 				ticketMock := database.NewMockTicketRepository(mockCtrl)
-				ticketMock.EXPECT().CreateTicket(tc.mockedTickets).Return(tc.mockedError)
+				ticketMock.EXPECT().CreateTicket(tc.mockedTicket).Return(tc.mockedError)
 				database.TicketRepo = ticketMock
 			}
-			b, err := json.Marshal(tc.mockedTickets)
+			b, err := json.Marshal(tc.mockedTicket)
 			if err != nil {
 				t.Error(err)
 			}
@@ -264,25 +257,25 @@ func TestUpdateTicket(t *testing.T) {
 	}
 	tests := []ListTicketTestCase{
 		{
-			name:          "Patch_Ticket_200",
-			url:           "/api/v1/ticket/fcb33af4-40a3-4c82-afb1-218731052309",
-			want:          http.StatusOK,
-			mockedTickets: ticket,
-			mockedError:   nil,
+			name:         "Patch_Ticket_200",
+			url:          "/api/v1/ticket/fcb33af4-40a3-4c82-afb1-218731052309",
+			want:         http.StatusOK,
+			mockedTicket: ticket,
+			mockedError:  nil,
 		},
 		{
-			name:          "Patch_Tickets_500",
-			url:           "/api/v1/ticket/fcb33af4-40a3-4c82-afb1-218731052309",
-			want:          http.StatusInternalServerError,
-			mockedTickets: ticket,
-			mockedError:   errors.New("db error"),
+			name:         "Patch_Tickets_500",
+			url:          "/api/v1/ticket/fcb33af4-40a3-4c82-afb1-218731052309",
+			want:         http.StatusInternalServerError,
+			mockedTicket: ticket,
+			mockedError:  errors.New("db error"),
 		},
 		{
-			name:          "Patch_Tickets_406",
-			url:           "/api/v1/ticket/fcb33af4-40a3-4c82-afb1-218731052309",
-			want:          http.StatusNotAcceptable,
-			mockedTickets: data.Ticket{},
-			mockedError:   errors.New("validation failure"),
+			name:         "Patch_Tickets_406",
+			url:          "/api/v1/ticket/fcb33af4-40a3-4c82-afb1-218731052309",
+			want:         http.StatusNotAcceptable,
+			mockedTicket: data.Ticket{},
+			mockedError:  errors.New("validation failure"),
 		},
 	}
 
@@ -293,10 +286,10 @@ func TestUpdateTicket(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			if tc.name != "Patch_Tickets_406" {
 				ticketMock := database.NewMockTicketRepository(mockCtrl)
-				ticketMock.EXPECT().UpdateTicket(tc.mockedTickets).Return(tc.mockedError)
+				ticketMock.EXPECT().UpdateTicket(tc.mockedTicket).Return(tc.mockedError)
 				database.TicketRepo = ticketMock
 			}
-			b, err := json.Marshal(tc.mockedTickets)
+			b, err := json.Marshal(tc.mockedTicket)
 			if err != nil {
 				t.Error(err)
 			}
@@ -314,18 +307,18 @@ func TestUpdateTicket(t *testing.T) {
 func TestDeleteTicket(t *testing.T) {
 	tests := []ListTicketTestCase{
 		{
-			name:          "Delete_Ticket_200",
-			id:            uuid.Must(uuid.Parse("fcb33af4-40a3-4c82-afb1-218731052309")),
-			url:           "/api/v1/ticket/fcb33af4-40a3-4c82-afb1-218731052309",
-			want:          http.StatusOK,
-			mockedError:   nil,
+			name:        "Delete_Ticket_404",
+			id:          uuid.Must(uuid.Parse("fcb33af4-40a3-4c82-afb1-218731052309")),
+			url:         "/api/v1/ticket/fcb33af4-40a3-4c82-afb1-218731052309",
+			want:        http.StatusNotFound,
+			mockedError: nil,
 		},
 		{
-			name:          "Delete_Tickets_500",
-			id:            uuid.Must(uuid.Parse("fcb33af4-40a3-4c82-afb1-218731052309")),
-			url:           "/api/v1/ticket/fcb33af4-40a3-4c82-afb1-218731052309",
-			want:          http.StatusInternalServerError,
-			mockedError:   errors.New("db error"),
+			name:        "Delete_Tickets_500",
+			id:          uuid.Must(uuid.Parse("fcb33af4-40a3-4c82-afb1-218731052309")),
+			url:         "/api/v1/ticket/fcb33af4-40a3-4c82-afb1-218731052309",
+			want:        http.StatusInternalServerError,
+			mockedError: errors.New("db error"),
 		},
 	}
 

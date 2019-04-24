@@ -78,24 +78,25 @@ func TestGetTicket(t *testing.T) {
 	db, mock := openMockDB(t)
 	defer db.Close()
 
-	okID := testData.ID
+	id := testData.ID
 	errID := uuid.New()
 
 	rowItems := addRowItems()
-	rowItems = append([]driver.Value{okID, testData.TrainID,
+	rowItems = append([]driver.Value{id, testData.TrainID,
 		testData.PlaneID, testData.UserID}, rowItems...)
 
 	rows := sqlmock.NewRows(columns).AddRow(rowItems...)
-	mock.ExpectQuery("SELECT").WithArgs(okID).WillReturnRows(rows)
+	mock.ExpectQuery("SELECT").WithArgs(id).WillReturnRows(rows)
 	mock.ExpectQuery("SELECT").WithArgs(errID).WillReturnError(fmt.Errorf(
 		"no rows found"))
-	if _, err := TicketRepo.GetTicket(okID); err != nil {
+	if _, err := TicketRepo.GetTicket(id); err != nil {
 		t.Errorf("error was not expected while getting user: %s", err)
 	}
 	if _, err := TicketRepo.GetTicket(errID); err == nil {
 		t.Errorf("error was not expected while getting user: %s", err)
 	}
-
+	// Checks whether all queued expectations were met in order.
+	// If any of them was not met - an error is returned.
 	if err := mock.ExpectationsWereMet(); err != nil {
 		t.Errorf("there were unfulfilled expectations: %s", err)
 	}
@@ -111,8 +112,8 @@ func TestCreateTicket(t *testing.T) {
 	rowItems = append([]driver.Value{newTestData.ID}, rowItems...)
 	mock.ExpectExec("INSERT INTO tickets").WithArgs(rowItems...).
 		WillReturnResult(
-			sqlmock.NewResult(1, 8))
-	//execute method that is being tested
+			sqlmock.NewResult(1, 1))
+
 	if err := TicketRepo.CreateTicket(newTestData); err != nil {
 		t.Errorf("error was not expected while adding ticket: %s", err)
 	}
@@ -136,8 +137,8 @@ func TestUpdateTicket(t *testing.T) {
 
 	mock.ExpectExec("UPDATE ticket").WithArgs(testID, ticket.Place,
 		ticket.TicketType, ticket.Discount, ticket.Price, ticket.TotalPrice,
-		ticket.Name, ticket.Surname).WillReturnResult(sqlmock.NewResult(0, 8))
-	// now we execute our method
+		ticket.Name, ticket.Surname).WillReturnResult(sqlmock.NewResult(0, 1))
+
 	if err := TicketRepo.UpdateTicket(ticket); err != nil {
 		t.Errorf("error was not expected while deleting user: %s", err)
 	}
@@ -149,8 +150,8 @@ func TestDeleteTicket(t *testing.T) {
 
 	testID := uuid.Must(uuid.Parse("0e3763c6-a7ed-4532-afd7-420c5a48cea9"))
 	mock.ExpectExec("DELETE").WithArgs(testID).WillReturnResult(sqlmock.
-		NewResult(0, 8))
-	// now we execute our method
+		NewResult(0, 1))
+
 	if err := TicketRepo.DeleteTicket(testID); err != nil {
 		t.Errorf("error was not expected while deleting user: %s", err)
 	}
