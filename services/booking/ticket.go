@@ -3,13 +3,14 @@ package booking
 import (
 	"encoding/json"
 	"errors"
-	"github.com/go-zoo/bone"
-	"github.com/google/uuid"
 	"net/http"
 
 	"team-project/database"
 	"team-project/services/common"
 	"team-project/services/data"
+
+	"github.com/go-zoo/bone"
+	"github.com/google/uuid"
 )
 
 var emptyResponse interface{}
