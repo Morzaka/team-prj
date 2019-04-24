@@ -194,7 +194,7 @@ definitions:
   Response:
     type: "object"
     properties:
-      Response:
+      ResponseBody:
         type: "interface"
         description: "Response generated due to the request: empty interface or string message"
   Login:
