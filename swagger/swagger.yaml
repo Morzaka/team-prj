@@ -4,12 +4,15 @@ info:
   version: 1.0.0
 schemes:
   - http
-host: localhost:8080
+host: team-projectv1.herokuapp.com
 basePath: /api/v1
 produces:
   - application/json
 consumes:
   - application/json
+tags:
+- name: "train"
+  description: "Train CRUD"
 paths:
   /hello/{name}:
     get:
@@ -66,42 +69,103 @@ paths:
           description: Can't add this user or can't parse POST body
           schema:
             $ref: "#/definitions/ErrorMessage"
-  /Train:
+  /trains:
     get:
-      summary: Get all trains info
       tags:
-        - get all trains
+        - "train"
+      summary: "Gets all trains"
+      operationId : "getTrains"
       responses:
-        '200':
-          description: All trains sent
+        200:
+          description: "successful operation"
+          schema: 
+            #$ref: "#/definitions/trains"
+        500:
+          description: "error while getting data from db"
           schema:
-            $ref: "#/definitions/Train"
-        '404':
-          description: Failed to add user
-          schema:
-            $ref: "#/definitions/ErrorMessage"
+            #$ref: "#/definitions/internalservererror"
+        204:
+          description: "No Content"
+          schema: 
+            #$ref: "#/definitions/nocontent"
+  /train:
+    get:
+      tags:
+        - "train"
+      summary: "Gets single train"
+      operationId: "getTrain"
+      responses:
+        200:
+          description: "successful operation"
+          schema: 
+            #$ref: "#/definitions/train"
+        400:
+          description: "Bad Request . Couldn't get id"
+          schema: 
+            #$ref: "#/definitions/badrequest"
+        204:
+          description: "No Content"
+          schema: 
+            #$ref: "#/definitions/nocontent"
     post:
-      summary: Post user to DB
       tags:
-        - post user
-      consumes:
-        - application/json
-      parameters:
-        - in: body
-          name: body
-          description: The user to create
-          required: true
-          schema:
-            $ref: "#/definitions/User"
+        - "train"
+      summary: "Creates train"
+      operationId: "CreateTrain"
       responses:
-        '201':
-          description: User created
+        200:
+          description: "successful operation"
+          schema: 
+            #$ref: "#/definitions/train"
+        500:
+          description: "error while adding data into db"
           schema:
-            $ref: "#/definitions/User"
-        '400':
-          description: Can't add this user or can't parse POST body
+            #$ref: "#/definitions/internalservererror"
+        204:
+          description: "No Content"
+          schema: 
+            #$ref: "#/definitions/nocontent"
+    patch:
+      tags:
+        - "train"
+      summary: "Updates train"
+      operationId: "UpdateTrain"
+      responses:
+        200:
+          description: "successful operation"
+          schema: 
+            #$ref: "#/definitions/train"
+        400:
+          description: "Bad Request . Couldn't get id"
+          schema: 
+            #$ref: "#/definitions/badrequest"
+        500:
+          description: "error while updating data into db"
           schema:
-            $ref: "#/definitions/ErrorMessage"
+            #$ref: "#/definitions/internalservererror"
+        204:
+          description: "No Content"
+          schema: 
+            #$ref: "#/definitions/nocontent"
+    delete:
+      tags:
+        - "train"
+      summary: "Deletes Train"
+      operationId: "DeleteTrain"
+      responses:
+        200:
+          description: "successful operation"
+          schema: 
+            #$ref: "#/definitions/train"
+        400:
+          description: "Bad Request . Couldn't get id"
+          schema: 
+            #$ref: "#/definitions/badrequest"
+        500:
+          description: "error while deleting data from db"
+          schema:
+            #$ref: "#/definitions/internalservererror"
+        
 definitions:
   HelloMessage:
     type: object
