@@ -18,5 +18,5 @@ INSERT INTO trip
   '2b30682a-64ef-11e9-a923-1681be663d3e', 950);
 INSERT INTO trip
   (TripID, TripName, TripTicketID, TripReturnTicketID, TotalTripPrice)
-  VALUES ('3c180ee0-64ef-11e9-a923-1681be663d3e','Weed','434a5614-64ef-11e9-a923-1681be663d3e',
+  VALUES ('3c180ee0-64ef-11e9-a923-1681be663d3e','CoolWeek','434a5614-64ef-11e9-a923-1681be663d3e',
   '56c90c3a-64ef-11e9-a923-1681be663d3e', 850);
