@@ -40,7 +40,8 @@ paths:
       produces:
         - "application/json"
       parameters:
-        - in: "body"
+        - name: "body"
+          in: "body"
           description: "User object tha needs to be added to the database"
           required: true
           schema:
@@ -68,39 +69,31 @@ paths:
       produces:
         - "application/json"
       parameters:
-        - in: "body"
+        - name: "body"
+          in: "body"
           description: "User credentials to log in"
           required: true
           schema:
             $ref: "#/definitions/Login"
       responses:
-       '500':
-           description: "Error with redis/postgres db"
-           schema:
-             $ref: "#/definitions/Response"
-         '401':
-           description: "User is not registered or entered invalid credentials"
-           schema:
-             $ref: "#/definitions/Response"
-         '200':
-           description: "User logged in"
-           schema:
-             $ref: "#/definitions/Login"
-           headers:
-             Set-Cookie:
-               schema:
-                 type: "string"
+        '500':
+          description: "Error with redis/postgres db"
+          schema:
+            $ref: "#/definitions/Response"
+        '401':
+          description: "User is not registered or entered invalid credentials"
+          schema:
+            $ref: "#/definitions/Response"
+        '200':
+          description: "User logged in"
+          schema:
+            $ref: "#/definitions/Login"
+
   /logout:
     post:
       summary: "Logging out"
       tags:
-       - "log out"
-      parameters:
-        - name: "Cookie"
-          in: "header"
-          required: true
-          schema:
-            type: "string"
+        - "log out"
       responses:
         '500':
           description: "Internal server error with database"
@@ -120,11 +113,11 @@ paths:
           description: "Got list of users"
           schema:
             $ref: "#/definitions/Users"
-  /user/:id:
+  /user/{id}:
     delete:
       summary: "Delete user from database"
       tags:
-       - "delete"
+        - "delete"
       parameters:
         - name: "id"
           in: "path"
@@ -143,7 +136,7 @@ paths:
           description: "User was deleted successfully"
           schema:
             $ref: "#/definitions/Response"
-    update:
+    patch:
       summary: "Update user in database"
       tags:
         - "log out"
@@ -176,7 +169,7 @@ definitions:
     type: "object"
     properties:
       ID:
-        type: "uuid"
+        type: "string"
       Name:
         type: "string"
       Surname:
@@ -190,12 +183,12 @@ definitions:
   Users:
     type: "array"
     items:
-      $ref: "#definitions/User"
+      $ref: "#/definitions/User"
   Response:
     type: "object"
     properties:
       ResponseBody:
-        type: "interface"
+        type: "string"
         description: "Response generated due to the request: empty interface or string message"
   Login:
     type: "object"
