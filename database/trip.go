@@ -7,11 +7,11 @@ import (
 )
 
 var (
-	addTrip = `INSERT INTO public.trip (TripID,TripName,TripTicketId,TripReturnTicketId,TotalTripPrice)
+	addTrip = `INSERT INTO public.trip (TripID, TripName,TripTicketID,TripReturnTicketID,TotalTripPrice)
 	VALUES ($1, $2, $3, $4, $5);`
 	selectAllTrips = `SELECT * FROM public.trip;`
-	selectTrip     = `SELECT * FROM public.trip WHERE TripID=$1`
-	updateTrip     = `UPDATE public.trip SET TripName = $2, TotalTripPrice = $3 WHERE TripID = $1;`
+	selectTrip     = `SELECT * FROM public.trip WHERE TripID=$1;`
+	updateTrip     = `UPDATE public.trip SET  TripName = $2, TripTicketID = $3, TripReturnTicketID = $4, TotalTripPrice = $5 WHERE TripID = $1;`
 	deleteTrip     = `DELETE FROM public.trip WHERE TripID = $1;`
 )
 
@@ -44,8 +44,8 @@ func GetTrips() ([]data.Trip, error) {
 }
 
 //UpdateTrip update trip name and total trip price
-func UpdateTrip(trip data.Trip, id uuid.UUID) (data.Trip, error) {
-	_, err := Db.Exec(updateTrip, id, trip.TripName, trip.TotalTripPrice)
+func UpdateTrip(trip data.Trip) (data.Trip, error) {
+	_, err := Db.Exec(updateTrip, trip.TripID, trip.TripName, trip.TripTicketID, trip.TripReturnTicketID, trip.TotalTripPrice)
 	if err != nil {
 		return data.Trip{}, err
 	}
