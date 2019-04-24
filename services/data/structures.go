@@ -9,19 +9,14 @@ type User struct {
 	Password string    `json:"password"`
 	Name     string    `json:"name"`
 	Surname  string    `json:"surname"`
-	Role     string    `json:"role"`
+	Email    string    `json:"email"`
+	Role 	 string	   `json:"role"`
 }
 
 //Signin contains data for logging in
 type Signin struct {
 	Login    string `json:"login"`
 	Password string `json:"password"`
-}
-
-//Comment structure
-type Comment struct {
-	User    string   `json:"user"`
-	Comment []string `json:"comment"`
 }
 
 //Trip database structure

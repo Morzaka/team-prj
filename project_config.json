@@ -8,6 +8,6 @@
   "PgPort": "5432",
   "PgUser":"postgres",
   "PgPassword":"postgres",
-  "PgName":"travel"
+  "PgName":"travel_test"
 }
 

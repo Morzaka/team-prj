@@ -2,6 +2,7 @@ package authorization
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/go-redis/redis"
 	"github.com/go-zoo/bone"
 	"github.com/google/uuid"
@@ -80,6 +81,7 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 	}
 	users, err := database.Users.GetAllUsers()
 	if err != nil {
+		fmt.Println("No content in db")
 		common.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
 		return
 	}
@@ -101,6 +103,7 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 		common.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
 		return
 	}
+	user.Role="User"
 	common.RenderJSON(w, r, http.StatusOK, user)
 }
 
@@ -125,7 +128,11 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 //UpdateUserPage deletes user
 func UpdateUserPage(w http.ResponseWriter, r *http.Request) {
 	var user data.User
-	id := uuid.Must(uuid.Parse(bone.GetValue(r, "id")))
+	id, err := uuid.Parse(bone.GetValue(r, "id"))
+	if err != nil {
+		common.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
+		return
+	}
 	data, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
 	if err != nil {
@@ -157,7 +164,11 @@ func UpdateUserPage(w http.ResponseWriter, r *http.Request) {
 
 //DeleteUserPage deletes user's page
 func DeleteUserPage(w http.ResponseWriter, r *http.Request) {
-	id := uuid.Must(uuid.Parse(bone.GetValue(r, "id")))
+	id, err := uuid.Parse(bone.GetValue(r, "id"))
+	if err != nil {
+		common.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
+		return
+	}
 	affected, err := database.Users.DeleteUser(id)
 	if err != nil {
 		common.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
