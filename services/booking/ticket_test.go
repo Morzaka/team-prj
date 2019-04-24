@@ -197,9 +197,9 @@ func TestCreateTicket(t *testing.T) {
 	}
 	tests := []ListTicketTestCase{
 		{
-			name:         "Post_Ticket_200",
+			name:         "Post_Ticket_201",
 			url:          "/api/v1/ticket",
-			want:         http.StatusOK,
+			want:         http.StatusCreated,
 			mockedTicket: ticket,
 			mockedError:  nil,
 		},
