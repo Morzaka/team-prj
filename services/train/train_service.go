@@ -122,16 +122,16 @@ func UpdateTrain(w http.ResponseWriter, r *http.Request) {
 	}
 	t := data.Train{}
 	json.NewDecoder(r.Body).Decode(&t)
-	if err = ValidateIfEmpty(t); err != nil {
+	if err := ValidateIfEmpty(t); err != nil {
 		common.RenderJSON(w, r, 404, emptyResponse)
 		return
 	}
-	if err = Validate(t); err != nil {
+	if err := Validate(t); err != nil {
 		common.RenderJSON(w, r, 404, emptyResponse)
 		return
 	}
 	t.ID = id
-	err = database.Trains.UpdateTrain(t.ID, t.DepartureCity, t.ArrivalCity, t.DepartureDate, t.DepartureTime, t.ArrivalTime, t.ArrivalDate)
+	err = database.Trains.UpdateTrain(t)
 	if err != nil {
 		common.RenderJSON(w, r, 404, emptyResponse)
 		return

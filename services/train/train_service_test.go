@@ -136,7 +136,7 @@ func TestGetSingleTrain(t *testing.T) {
 	test := []TrainsTestCases{
 		{
 			tcase:       "GetTrainOK",
-			url:         "/api/v1/train?id=08307904-f18e-4fb8-9d18-29cfad38ffaf",
+			url:         "/api/v1/train/08307904-f18e-4fb8-9d18-29cfad38ffaf",
 			expected:    http.StatusOK,
 			testTrainID: "08307904-f18e-4fb8-9d18-29cfad38ffaf",
 			mockedTrain: testTrain,
@@ -144,7 +144,7 @@ func TestGetSingleTrain(t *testing.T) {
 		},
 		{
 			tcase:       "GetTrain204",
-			url:         "/api/v1/train?id=08307904-f18e-4fb8-9d18-29cfad38aaaf",
+			url:         "/api/v1/train/08307904-f18e-4fb8-9d18-29cfad38aaaf",
 			expected:    http.StatusNoContent,
 			testTrainID: "08307904-f18e-4fb8-9d18-29cfad38aaaf",
 			mockedTrain: data.Train{},
@@ -174,15 +174,15 @@ func TestGetSingleTrain(t *testing.T) {
 func TestCreateTrain(t *testing.T) {
 	test := []TrainsTestCases{
 		{
-			tcase:       "GetTrainOK",
-			url:         "/api/v1/trains",
+			tcase:       "CreateTrainOK",
+			url:         "/api/v1/train",
 			expected:    http.StatusOK,
 			mockedTrain: testTrain,
 			mockedErr:   nil,
 		},
 		{
-			tcase:       "GetTrainNoContent",
-			url:         "/api/v1/trains",
+			tcase:       "CreateTrainNoContent",
+			url:         "/api/v1/train",
 			expected:    http.StatusNoContent,
 			mockedTrain: testTrain,
 			mockedErr:   errors.New("failed to create"),
@@ -204,6 +204,77 @@ func TestCreateTrain(t *testing.T) {
 			database.Trains = trainMock
 			trainMock.EXPECT().AddTrain(tc.mockedTrain).Return(tc.mockedErr)
 			rec := httptest.NewRecorder()
+			router.ServeHTTP(rec, req)
+			if rec.Code != tc.expected {
+				t.Error("expected: ", tc.expected, " got: ", rec.Code)
+			}
+		})
+	}
+}
+
+func TestUpdateTrain(t *testing.T) {
+	tests := []TrainsTestCases{
+		{
+			tcase:       "UpdateTrainOk",
+			url:         "/api/v1/train/08307904-f18e-4fb8-9d18-29cfad38ffaf",
+			expected:    202,
+			mockedTrain: testTrain,
+			mockedErr:   nil,
+		},
+		/*{
+			tcase:       "UpdateTrainNoContent",
+			url:         "/api/v1/train/08307904-f18e-4fb8-9d18-29cfad38ffaf",
+			expected:    404,
+			mockedTrain: data.Train{},
+			mockedErr:   errors.New("failed to update"),
+		},*/
+	}
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	for _, tc := range tests {
+		t.Run(tc.tcase, func(t *testing.T) {
+			trainMock := database.NewMockTrainCrud(mockCtrl)
+			b, err := json.Marshal(tc.mockedTrain)
+			if err != nil {
+				t.Fatal(err)
+			}
+			req, _ := http.NewRequest(http.MethodPatch, tc.url, bytes.NewBuffer(b))
+			rec := httptest.NewRecorder()
+			database.Trains = trainMock
+			trainMock.EXPECT().UpdateTrain(tc.mockedTrain).Return(tc.mockedErr)
+			trainMock.EXPECT().GetTrain(tc.mockedTrain.ID.String()).Return(tc.mockedTrain, tc.mockedErr)
+			router.ServeHTTP(rec, req)
+			if rec.Code != tc.expected {
+				t.Error("expected: ", tc.expected, " got: ", rec.Code)
+			}
+		})
+	}
+}
+
+func TestDeleteTrain(t *testing.T) {
+	tests := []TrainsTestCases{
+		{
+			tcase:     "DeleteTrainOk",
+			url:       "/api/v1/train/08307904-f18e-4fb8-9d18-29cfad38ffaf",
+			expected:  202,
+			mockedErr: nil,
+		},
+		{
+			tcase:     "UpdateTrainNoContent",
+			url:       "/api/v1/train/08307904-f18e-4fb8-9d18-29cfad38ffaf",
+			expected:  202,
+			mockedErr: errors.New("failed to delete"),
+		},
+	}
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	for _, tc := range tests {
+		t.Run(tc.tcase, func(t *testing.T) {
+			trainMock := database.NewMockTrainCrud(mockCtrl)
+			req, _ := http.NewRequest(http.MethodDelete, tc.url, nil)
+			rec := httptest.NewRecorder()
+			database.Trains = trainMock
+			trainMock.EXPECT().DeleteTrain(uuid.Must(uuid.Parse("08307904-f18e-4fb8-9d18-29cfad38ffaf")))
 			router.ServeHTTP(rec, req)
 			if rec.Code != tc.expected {
 				t.Error("expected: ", tc.expected, " got: ", rec.Code)
