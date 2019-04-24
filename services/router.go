@@ -3,7 +3,7 @@ package services
 import (
 	"team-project/services/authorization"
 	"team-project/services/booking"
-	"team-project/services/model"
+	"team-project/services/plane"
 	"team-project/services/train"
 	"team-project/swagger"
 
@@ -15,14 +15,12 @@ func NewRouter() *bone.Mux {
 	router := bone.New().Prefix("/api")
 	subV1 := bone.New()
 	router.SubRoute("/v1", subV1)
-	// GetFunc, PostFunc etc ... takes http.HandlerFunc
-	subV1.GetFunc("/startpage", model.GetStart)
 	subV1.PostFunc("/register", authorization.Signup)
 	subV1.PostFunc("/login", authorization.Signin)
 	subV1.PostFunc("/logout", authorization.Logout)
 	subV1.DeleteFunc("/user/:id", authorization.DeleteUserPage)
 	subV1.PatchFunc("/user/:id", authorization.UpdateUserPage)
-	subV1.GetFunc("/users", authorization.GetAllUsers)
+	subV1.GetFunc("/users", authorization.ListAllUsers)
 	subV1.GetFunc("/hello/:name", swagger.GetHello)
 
 	// Tickets routs
@@ -38,6 +36,13 @@ func NewRouter() *bone.Mux {
 	subV1.PostFunc("/train", train.CreateTrain)
 	subV1.PatchFunc("/train/:id", train.UpdateTrain)
 	subV1.DeleteFunc("/train/:id", train.DeleteTrain)
+
+	// Plane routes
+	subV1.GetFunc("/planes", plane.GetPlanes)
+	subV1.GetFunc("/plane/:id", plane.GetPlane)
+	subV1.PostFunc("/plane", plane.CreatePlane)
+	subV1.PatchFunc("/plane/:id", plane.UpdatePlane)
+	subV1.DeleteFunc("/plane/:id", plane.DeletePlane)
 
 	return router
 }
