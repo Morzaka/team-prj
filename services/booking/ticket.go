@@ -9,10 +9,14 @@ import (
 	"team-project/database"
 	"team-project/services/common"
 	"team-project/services/data"
-	"team-project/services/model"
+
+	"github.com/go-zoo/bone"
+	"github.com/google/uuid"
 )
 
-var emptyResponse interface{}
+var (
+	emptyResponse interface{}
+)
 
 func validateForm(tk data.Ticket) error {
 	if tk.Place == 0 || tk.TicketType == "" || tk.
@@ -39,12 +43,7 @@ func GetAllTickets(w http.ResponseWriter, r *http.Request) {
 
 //GetOneTicket for GETing information about one tickets
 func GetOneTicket(w http.ResponseWriter, r *http.Request) {
-	id, err := model.GetID(r)
-	if err != nil {
-		common.RenderJSON(w, r, http.StatusBadRequest, emptyResponse)
-		return
-	}
-
+	id := uuid.Must(uuid.Parse(bone.GetValue(r, "id")))
 	tk, err := database.GetTicket(id)
 	switch {
 	case err == sql.ErrNoRows:
@@ -61,7 +60,7 @@ func GetOneTicket(w http.ResponseWriter, r *http.Request) {
 func CreateTicket(w http.ResponseWriter, r *http.Request) {
 	// get values from client (json format)
 	tk := data.Ticket{}
-	tk.ID = model.GenerateID()
+	tk.ID = uuid.New()
 	err := json.NewDecoder(r.Body).Decode(&tk)
 	if err != nil {
 		common.RenderJSON(w, r, http.StatusBadRequest, tk)
@@ -97,13 +96,9 @@ func CreateTicket(w http.ResponseWriter, r *http.Request) {
 //UpdateTicket (PATCH) for updating one tickets in DB
 func UpdateTicket(w http.ResponseWriter, r *http.Request) {
 	// get values from client (json format)
-	id, err := model.GetID(r)
-	if err != nil {
-		common.RenderJSON(w, r, http.StatusBadRequest, emptyResponse)
-		return
-	}
+	id := uuid.Must(uuid.Parse(bone.GetValue(r, "id")))
 	tk := data.Ticket{}
-	err = json.NewDecoder(r.Body).Decode(&tk)
+	err := json.NewDecoder(r.Body).Decode(&tk)
 	if err != nil {
 		common.RenderJSON(w, r, http.StatusBadRequest, tk)
 		return
@@ -139,12 +134,8 @@ func UpdateTicket(w http.ResponseWriter, r *http.Request) {
 
 //DeleteTicket (DELETE) for deleting one tickets in DB by id
 func DeleteTicket(w http.ResponseWriter, r *http.Request) {
-	id, err := model.GetID(r)
-	if err != nil {
-		common.RenderJSON(w, r, http.StatusBadRequest, emptyResponse)
-		return
-	}
-	err = database.DeleteTicket(id)
+	id := uuid.Must(uuid.Parse(bone.GetValue(r, "id")))
+	err := database.DeleteTicket(id)
 	switch {
 	case err == sql.ErrNoRows:
 		common.RenderJSON(w, r, http.StatusNotFound, emptyResponse)
