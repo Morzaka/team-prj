@@ -51,17 +51,17 @@ func Validate(t data.Train) error {
 func GetTrains(w http.ResponseWriter, r *http.Request) {
 	trains, err := database.Trains.GetAllTrains()
 	if err != nil {
-		common.RenderJSON(w, r, http.StatusNoContent, emptyResponse)
+		common.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
 		return
 	}
 
 	for _, train := range trains {
 		if err = ValidateIfEmpty(train); err != nil {
-			common.RenderJSON(w, r, 404, emptyResponse)
+			common.RenderJSON(w, r, http.StatusNoContent, emptyResponse)
 			return
 		}
 		if err = Validate(train); err != nil {
-			common.RenderJSON(w, r, 404, emptyResponse)
+			common.RenderJSON(w, r, http.StatusNoContent, emptyResponse)
 			return
 		}
 	}
@@ -73,7 +73,7 @@ func GetTrains(w http.ResponseWriter, r *http.Request) {
 func GetSingleTrain(w http.ResponseWriter, r *http.Request) {
 	id, err := model.GetID(r)
 	if err != nil {
-		common.RenderJSON(w, r, http.StatusBadRequest, emptyResponse)
+		common.RenderJSON(w, r, http.StatusBadRequest, "Couldn't get id")
 		return
 	}
 	newid := id.String()
@@ -107,7 +107,7 @@ func CreateTrain(w http.ResponseWriter, r *http.Request) {
 	}
 	err := database.Trains.AddTrain(t)
 	if err != nil {
-		common.RenderJSON(w, r, http.StatusNoContent, emptyResponse)
+		common.RenderJSON(w, r, http.StatusInternalServerError, "Error occured while adding train to database")
 		return
 	}
 	common.RenderJSON(w, r, http.StatusOK, t)
@@ -117,44 +117,44 @@ func CreateTrain(w http.ResponseWriter, r *http.Request) {
 func UpdateTrain(w http.ResponseWriter, r *http.Request) {
 	id, err := model.GetID(r)
 	if err != nil {
-		common.RenderJSON(w, r, 404, emptyResponse)
+		common.RenderJSON(w, r, http.StatusBadRequest, "Couldn't get id")
 		return
 	}
 	t := data.Train{}
 	json.NewDecoder(r.Body).Decode(&t)
 	if err := ValidateIfEmpty(t); err != nil {
-		common.RenderJSON(w, r, 404, emptyResponse)
+		common.RenderJSON(w, r, http.StatusNoContent, emptyResponse)
 		return
 	}
 	if err := Validate(t); err != nil {
-		common.RenderJSON(w, r, 404, emptyResponse)
+		common.RenderJSON(w, r, http.StatusNoContent, emptyResponse)
 		return
 	}
 	t.ID = id
 	err = database.Trains.UpdateTrain(t)
 	if err != nil {
-		common.RenderJSON(w, r, 404, emptyResponse)
+		common.RenderJSON(w, r, http.StatusInternalServerError, "Couldn't update data")
 		return
 	}
 	train, err := database.Trains.GetTrain(t.ID.String())
 	if err != nil {
-		common.RenderJSON(w, r, 404, emptyResponse)
+		common.RenderJSON(w, r, http.StatusNoContent, "Couldn't return updated data")
 		return
 	}
-	common.RenderJSON(w, r, 202, train)
+	common.RenderJSON(w, r, http.StatusOK, train)
 }
 
 //DeleteTrain is a method
 func DeleteTrain(w http.ResponseWriter, r *http.Request) {
 	id, err := model.GetID(r)
 	if err != nil {
-		common.RenderJSON(w, r, 404, emptyResponse)
+		common.RenderJSON(w, r, http.StatusBadRequest, "Couldn't get id")
 		return
 	}
 	err = database.Trains.DeleteTrain(id)
 	if err != nil {
-		common.RenderJSON(w, r, 404, emptyResponse)
+		common.RenderJSON(w, r, http.StatusInternalServerError, "Error occured while deleting train from database")
 		return
 	}
-	common.RenderJSON(w, r, 202, emptyResponse)
+	common.RenderJSON(w, r, http.StatusOK, "Train was successfully updated")
 }

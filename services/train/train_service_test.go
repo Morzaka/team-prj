@@ -98,16 +98,16 @@ func TestDateIsValid(t *testing.T) {
 func TestGetTrains(t *testing.T) {
 	tests := []TrainsTestCases{
 		{
-			tcase:        "GetTrains200",
+			tcase:        "OkGetTrains",
 			url:          "/api/v1/trains",
 			expected:     http.StatusOK,
 			mockedTrains: []data.Train{},
 			mockedErr:    nil,
 		},
 		{
-			tcase:        "GetTrains204",
+			tcase:        "InternalServerError",
 			url:          "/api/v1/trains",
-			expected:     http.StatusNoContent,
+			expected:     http.StatusInternalServerError,
 			mockedTrains: []data.Train{},
 			mockedErr:    errors.New("db error"),
 		},
@@ -141,9 +141,17 @@ func TestGetSingleTrain(t *testing.T) {
 			testTrainID: "08307904-f18e-4fb8-9d18-29cfad38ffaf",
 			mockedTrain: testTrain,
 			mockedErr:   nil,
-		},
+		}, /*
+			{
+				tcase:       "BadRequestGetTrain",
+				url:         "/api/v1/train/08307904-f18e-4fb8-9d18-29cfad38aaff",
+				expected:    http.StatusBadRequest,
+				testTrainID: "08307904-f18e-4fb8-9d18-29cfad38aaff",
+				mockedTrain: data.Train{},
+				mockedErr:   errors.New("db error , no data found"),
+			},*/
 		{
-			tcase:       "GetTrain204",
+			tcase:       "NoContentGetTrain",
 			url:         "/api/v1/train/08307904-f18e-4fb8-9d18-29cfad38aaaf",
 			expected:    http.StatusNoContent,
 			testTrainID: "08307904-f18e-4fb8-9d18-29cfad38aaaf",
@@ -155,14 +163,14 @@ func TestGetSingleTrain(t *testing.T) {
 	defer mockCtrl.Finish()
 	for _, tc := range test {
 		t.Run(tc.tcase, func(t *testing.T) {
-			trainMock := database.NewMockTrainCrud(mockCtrl)
-			trainMock.EXPECT().GetTrain(tc.testTrainID).Return(tc.mockedTrain, tc.mockedErr)
-			database.Trains = trainMock
 			rec := httptest.NewRecorder()
 			req, err := http.NewRequest("GET", tc.url, nil)
 			if err != nil {
 				t.Fatal(err)
 			}
+			trainMock := database.NewMockTrainCrud(mockCtrl)
+			trainMock.EXPECT().GetTrain(tc.testTrainID).Return(tc.mockedTrain, tc.mockedErr)
+			database.Trains = trainMock
 			router.ServeHTTP(rec, req)
 			if rec.Code != tc.expected {
 				t.Error("expected: ", tc.expected, " got: ", rec.Code)
@@ -183,7 +191,7 @@ func TestCreateTrain(t *testing.T) {
 		{
 			tcase:       "CreateTrainNoContent",
 			url:         "/api/v1/train",
-			expected:    http.StatusNoContent,
+			expected:    http.StatusInternalServerError,
 			mockedTrain: testTrain,
 			mockedErr:   errors.New("failed to create"),
 		},
@@ -217,17 +225,17 @@ func TestUpdateTrain(t *testing.T) {
 		{
 			tcase:       "UpdateTrainOk",
 			url:         "/api/v1/train/08307904-f18e-4fb8-9d18-29cfad38ffaf",
-			expected:    202,
+			expected:    http.StatusOK,
 			mockedTrain: testTrain,
 			mockedErr:   nil,
-		},
-		/*{
-			tcase:       "UpdateTrainNoContent",
-			url:         "/api/v1/train/08307904-f18e-4fb8-9d18-29cfad38ffaf",
-			expected:    404,
-			mockedTrain: data.Train{},
-			mockedErr:   errors.New("failed to update"),
-		},*/
+		}, /*
+			{
+				tcase:       "UpdateTrainNoContent",
+				url:         "/api/v1/train/08307904-f18e-4fb8-9d18-29cfad38ffaf",
+				expected:    http.StatusNoContent,
+				mockedTrain: data.Train{},
+				mockedErr:   errors.New("failed to update"),
+			},*/
 	}
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
@@ -256,14 +264,8 @@ func TestDeleteTrain(t *testing.T) {
 		{
 			tcase:     "DeleteTrainOk",
 			url:       "/api/v1/train/08307904-f18e-4fb8-9d18-29cfad38ffaf",
-			expected:  202,
+			expected:  http.StatusOK,
 			mockedErr: nil,
-		},
-		{
-			tcase:     "UpdateTrainNoContent",
-			url:       "/api/v1/train/08307904-f18e-4fb8-9d18-29cfad38ffaf",
-			expected:  202,
-			mockedErr: errors.New("failed to delete"),
 		},
 	}
 	mockCtrl := gomock.NewController(t)
