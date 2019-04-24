@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"team-project/services/data"
 	"testing"
+	"github.com/thoas/go-funk"
 )
 
 //test if path from Lviv to Kyiv contains TrainsId
