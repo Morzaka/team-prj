@@ -6,12 +6,10 @@ import (
 	"github.com/google/uuid"
 	"net/http"
 
-	"github.com/go-zoo/bone"
 	"team-project/database"
 	"team-project/services/authorization"
 	"team-project/services/common"
 	"team-project/services/data"
-	"team-project/services/model"
 
 	"github.com/go-zoo/bone"
 )
