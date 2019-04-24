@@ -35,9 +35,9 @@ func NewRouter() *bone.Mux {
 	// Train routes
 	subV1.GetFunc("/trains", train.GetTrains)
 	subV1.GetFunc("/train/:id", train.GetSingleTrain)
-	subV1.PostFunc("/trains", train.CreateTrain)
-	subV1.PatchFunc("/trains/:id", train.UpdateTrain)
-	subV1.DeleteFunc("/trains/:id", train.DeleteTrain)
+	subV1.PostFunc("/train", train.CreateTrain)
+	subV1.PatchFunc("/train/:id", train.UpdateTrain)
+	subV1.DeleteFunc("/train/:id", train.DeleteTrain)
 
 	return router
 }

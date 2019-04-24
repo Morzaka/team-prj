@@ -93,15 +93,15 @@ func (mr *MockTrainCrudMockRecorder) GetTrain(arg0 interface{}) *gomock.Call {
 }
 
 // UpdateTrain mocks base method
-func (m *MockTrainCrud) UpdateTrain(arg0 uuid.UUID, arg1, arg2, arg3, arg4, arg5, arg6 string) error {
+func (m *MockTrainCrud) UpdateTrain(arg0 data.Train) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateTrain", arg0, arg1, arg2, arg3, arg4, arg5, arg6)
+	ret := m.ctrl.Call(m, "UpdateTrain", arg0)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // UpdateTrain indicates an expected call of UpdateTrain
-func (mr *MockTrainCrudMockRecorder) UpdateTrain(arg0, arg1, arg2, arg3, arg4, arg5, arg6 interface{}) *gomock.Call {
+func (mr *MockTrainCrudMockRecorder) UpdateTrain(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateTrain", reflect.TypeOf((*MockTrainCrud)(nil).UpdateTrain), arg0, arg1, arg2, arg3, arg4, arg5, arg6)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateTrain", reflect.TypeOf((*MockTrainCrud)(nil).UpdateTrain), arg0)
 }

@@ -66,6 +66,42 @@ paths:
           description: Can't add this user or can't parse POST body
           schema:
             $ref: "#/definitions/ErrorMessage"
+  /Train:
+    get:
+      summary: Get all trains info
+      tags:
+        - get all trains
+      responses:
+        '200':
+          description: All trains sent
+          schema:
+            $ref: "#/definitions/Train"
+        '404':
+          description: Failed to add user
+          schema:
+            $ref: "#/definitions/ErrorMessage"
+    post:
+      summary: Post user to DB
+      tags:
+        - post user
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: The user to create
+          required: true
+          schema:
+            $ref: "#/definitions/User"
+      responses:
+        '201':
+          description: User created
+          schema:
+            $ref: "#/definitions/User"
+        '400':
+          description: Can't add this user or can't parse POST body
+          schema:
+            $ref: "#/definitions/ErrorMessage"
 definitions:
   HelloMessage:
     type: object

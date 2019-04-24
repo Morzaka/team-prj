@@ -76,6 +76,36 @@ func TestGetTrain(t *testing.T) {
 	}
 }
 
+func TestUpdateTrain(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatal(err)
+	}
+	Db = db
+	defer db.Close()
+	s := "08307904-f18e-4fb8-9d18-29cfad38ffaf"
+	id, err := uuid.Parse(s)
+	if err != nil {
+		t.Fatal(err)
+	}
+	train := data.Train{
+		ID:            id,
+		DepartureCity: "Lviv",
+		ArrivalCity:   "Kiev",
+		DepartureTime: "14:35",
+		DepartureDate: "24.04.2019",
+		ArrivalTime:   "20:05",
+		ArrivalDate:   "24.04.2019",
+	}
+	mock.ExpectExec("update public.trains").WithArgs(train.DepartureCity, train.ArrivalCity, train.DepartureTime, train.DepartureDate, train.ArrivalTime, train.ArrivalDate, id).WillReturnResult(sqlmock.NewResult(0, 1))
+	if err := Trains.UpdateTrain(train); err != nil {
+		t.Error("error was occured while updating train in tests ", err)
+	}
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Error("Value from Updating is different from expected", err)
+	}
+}
+
 func TestDeleteTrain(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	if err != nil {
