@@ -141,15 +141,7 @@ func TestGetSingleTrain(t *testing.T) {
 			testTrainID: "08307904-f18e-4fb8-9d18-29cfad38ffaf",
 			mockedTrain: testTrain,
 			mockedErr:   nil,
-		}, /*
-			{
-				tcase:       "BadRequestGetTrain",
-				url:         "/api/v1/train/08307904-f18e-4fb8-9d18-29cfad38aaff",
-				expected:    http.StatusBadRequest,
-				testTrainID: "08307904-f18e-4fb8-9d18-29cfad38aaff",
-				mockedTrain: data.Train{},
-				mockedErr:   errors.New("db error , no data found"),
-			},*/
+		},
 		{
 			tcase:       "NoContentGetTrain",
 			url:         "/api/v1/train/08307904-f18e-4fb8-9d18-29cfad38aaaf",
