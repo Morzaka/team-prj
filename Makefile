@@ -13,7 +13,6 @@ all:
 tests:
 	go test -covermode=count ./...
 
-
 mockgen: ## Run mockgen cli fro generate mocks
 	mockgen \
 		-destination=database/mock.go \
