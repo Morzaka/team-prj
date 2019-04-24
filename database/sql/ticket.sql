@@ -1,5 +1,5 @@
 -- Tickets
-
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE TABLE tickets
 (
     id             uuid        DEFAULT uuid_generate_v4() NOT NULL,
