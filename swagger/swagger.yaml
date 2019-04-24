@@ -30,56 +30,213 @@ paths:
           description: Failed
           schema:
             $ref: "#/definitions/ErrorMessage"
-  /User:
+  /planes:
     get:
-      summary: Get all users info
+      summary: Get all planes from Database
       tags:
-        - get all users
+        - get
       responses:
         '200':
-          description: All users sent
+          description: Planes get successfully
           schema:
-            $ref: "#/definitions/User"
+            $ref: "#/definitions/Plane"
         '404':
-          description: Failed to add user
-          schema:
-            $ref: "#/definitions/ErrorMessage"
+          description: Can't find plane with such id
+  /plane:
     post:
-      summary: Post user to DB
+      summary: Create plane to Database
       tags:
-        - post user
+        - create
       consumes:
         - application/json
       parameters:
         - in: body
           name: body
-          description: The user to create
+          description: The plane to create
           required: true
           schema:
-            $ref: "#/definitions/User"
+            $ref: "#/definitions/Plane"
       responses:
         '201':
-          description: User created
+          description: Plane create successfully
           schema:
-            $ref: "#/definitions/User"
+            $ref: "#/definitions/Plane"
         '400':
-          description: Can't add this user or can't parse POST body
+          description: Can't create plane
           schema:
             $ref: "#/definitions/ErrorMessage"
+  /plane/{id}:
+    get:
+      summary: Get plane from Database
+      tags:
+        - get
+      consumes:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        '201':
+          description: Plane get successfully
+          schema:
+            $ref: "#/definitions/Plane"
+        '400':
+          description: Can't get plane
+          schema:
+            $ref: "#/definitions/ErrorMessage"
+    delete:
+      summary: Delete plane from DB
+      tags:
+        - delete
+      consumes:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        '201':
+          description: Plane delete successfully
+          schema:
+            $ref: "#/definitions/Plane"
+        '400':
+          description: Can't delete plane
+          schema:
+            $ref: "#/definitions/ErrorMessage"
+    patch:
+      summary: Update plane from Database
+      tags:
+        - update
+      consumes:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        '201':
+          description: Plane update successfully
+          schema:
+            $ref: "#/definitions/Plane"
+        '400':
+          description: Can't update plane
+          schema:
+            $ref: "#/definitions/ErrorMessage"
+  /tickets:
+    get:
+      tags:
+        - "tickets"
+      summary: "Returns list of tickets"
+      description: "Returns a map of status codes to quantities"
+      #operationId: "getInventory"
+      produces:
+        - "application/json"
+      parameters: []
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            type: "object"
+            additionalProperties:
+              type: "integer"
+              format: "int32"
+      security:
+        - api_key: []
+    /store/order:
+      post:
+        tags:
+          - "store"
+        summary: "Place an order for a pet"
+        description: ""
+        operationId: "placeOrder"
+        produces:
+          - "application/xml"
+          - "application/json"
+        parameters:
+          - in: "body"
+            name: "body"
+            description: "order placed for purchasing the pet"
+            required: true
+            schema:
+              $ref: "#/definitions/Order"
+        responses:
+          200:
+            description: "successful operation"
+            schema:
+              $ref: "#/definitions/Order"
+          400:
+            description: "Invalid Order"
+    /store/order/{orderId}:
+      get:
+        tags:
+          - "store"
+        summary: "Find purchase order by ID"
+        description: "For valid response try integer IDs with value >= 1 and <= 10.         Other values will generated exceptions"
+        operationId: "getOrderById"
+        produces:
+          - "application/xml"
+          - "application/json"
+        parameters:
+          - name: "orderId"
+            in: "path"
+            description: "ID of pet that needs to be fetched"
+            required: true
+            type: "integer"
+            maximum: 10.0
+            minimum: 1.0
+            format: "int64"
+        responses:
+          200:
+            description: "successful operation"
+            schema:
+              $ref: "#/definitions/Order"
+          400:
+            description: "Invalid ID supplied"
+          404:
+            description: "Order not found"
+      delete:
+        tags:
+          - "store"
+        summary: "Delete purchase order by ID"
+        description: "For valid response try integer IDs with positive integer value.         Negative or non-integer values will generate API errors"
+        operationId: "deleteOrder"
+        produces:
+          - "application/xml"
+          - "application/json"
+        parameters:
+          - name: "orderId"
+            in: "path"
+            description: "ID of the order that needs to be deleted"
+            required: true
+            type: "integer"
+            minimum: 1.0
+            format: "int64"
+        responses:
+          400:
+            description: "Invalid ID supplied"
+          404:
+            description: "Order not found"
 definitions:
+  Plane:
+    type: object
+    properties:
+      id:
+        type: string
+        description: The plane ID in DB in UUID format.
+      DepartureCity:
+        type: string
+        description: Plane departure city.
+      ArrivalCity:
+        type: string
+        description: Plane arrival city.
   HelloMessage:
     type: object
     properties:
       name:
-        type: string
-        description: User name.
-  User:
-    type: object
-    properties:
-      ID:
-        type: string
-        description: The user ID in DB in UUID format.
-      Name:
         type: string
         description: User name.
   ErrorMessage:
