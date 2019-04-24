@@ -1,90 +1,205 @@
-swagger: '2.0'
+swagger: "2.0"
 info:
-  title: Team project Service API
-  version: 1.0.0
+  title: "Team project Service API"
+  version: "1.0.0"
 schemes:
-  - http
-host: localhost:8080
-basePath: /api/v1
+  - "http"
+host: "localhost:8080"
+basePath: "/api/v1"
 produces:
-  - application/json
+  - "application/json"
 consumes:
-  - application/json
+  - "application/json"
 paths:
   /hello/{name}:
     get:
-      summary: Hello message test
+      summary: "Hello message test"
       tags:
-        - HelloMessage
+        - "HelloMessage"
       parameters:
-        - name: name
-          in: path
+        - name: "name"
+          in: "path"
           required: true
-          type: string
+          type: "string"
       responses:
         '200':
-          description: Message is successfully
+          description: "Message is successful"
           schema:
             $ref: "#/definitions/HelloMessage"
         '404':
-          description: Failed
+          description: "Failed"
           schema:
             $ref: "#/definitions/ErrorMessage"
-  /User:
-    get:
-      summary: Get all users info
-      tags:
-        - get all users
-      responses:
-        '200':
-          description: All users sent
-          schema:
-            $ref: "#/definitions/User"
-        '404':
-          description: Failed to add user
-          schema:
-            $ref: "#/definitions/ErrorMessage"
+  /register:
     post:
-      summary: Post user to DB
+      summary: "Register new user"
       tags:
-        - post user
+        - "create"
       consumes:
-        - application/json
+        - "application/json"
+      produces:
+        - "application/json"
       parameters:
-        - in: body
-          name: body
-          description: The user to create
+        - name: "body"
+          in: "body"
+          description: "User object tha needs to be added to the database"
           required: true
           schema:
             $ref: "#/definitions/User"
       responses:
-        '201':
-          description: User created
+        '500':
+          description: "Internal server error with db"
           schema:
-            $ref: "#/definitions/User"
-        '400':
-          description: Can't add this user or can't parse POST body
+            $ref: '#/definitions/Response'
+        '406':
+          description: "Registration not allowed"
           schema:
             $ref: "#/definitions/ErrorMessage"
+        '200':
+          description: "User was registered successfully"
+          schema:
+            $ref: "#/definitions/User"
+  /login:
+    post:
+      summary: "User logs in"
+      tags:
+        - "log in"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "body"
+          in: "body"
+          description: "User credentials to log in"
+          required: true
+          schema:
+            $ref: "#/definitions/Login"
+      responses:
+        '500':
+          description: "Error with redis/postgres db"
+          schema:
+            $ref: "#/definitions/Response"
+        '401':
+          description: "User is not registered or entered invalid credentials"
+          schema:
+            $ref: "#/definitions/Response"
+        '200':
+          description: "User logged in"
+          schema:
+            $ref: "#/definitions/Login"
+
+  /logout:
+    post:
+      summary: "Logging out"
+      tags:
+        - "log out"
+      responses:
+        '500':
+          description: "Internal server error with database"
+          schema:
+            $ref: "#/definitions/Response"
+        '204':
+          description: "User was logged out successfully"
+  /users:
+    get:
+      summary: "Get all users from database"
+      responses:
+        '204':
+          description: "No users in database to return"
+          schema:
+            $ref: "#/definitions/Response"
+        '200':
+          description: "Got list of users"
+          schema:
+            $ref: "#/definitions/Users"
+  /user/{id}:
+    delete:
+      summary: "Delete user from database"
+      tags:
+        - "delete"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          type: "string"
+      responses:
+        '500':
+          description: "Internal server error with database"
+          schema:
+            $ref: "#/definitions/Response"
+        '404':
+          description: "User was not found in database"
+          schema:
+            $ref: "#/definitions/Response"
+        '200':
+          description: "User was deleted successfully"
+          schema:
+            $ref: "#/definitions/Response"
+    patch:
+      summary: "Update user in database"
+      tags:
+        - "log out"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          type: "string"
+      responses:
+        '500':
+          description: "Internal server error with database"
+          schema:
+            $ref: "#/definitions/Response"
+        '404':
+          description: "User was not found in database"
+          schema:
+            $ref: "#/definitions/Response"
+        '200':
+          description: "User was updated successfully"
+          schema:
+            $ref: "#/definitions/User"
 definitions:
   HelloMessage:
-    type: object
+    type: "object"
     properties:
       name:
-        type: string
-        description: User name.
+        type: "string"
+        description: "User name"
   User:
-    type: object
+    type: "object"
     properties:
       ID:
-        type: string
-        description: The user ID in DB in UUID format.
+        type: "string"
       Name:
-        type: string
-        description: User name.
+        type: "string"
+      Surname:
+        type: "string"
+      Login:
+        type: "string"
+      Password:
+        type: "string"
+      Email:
+        type: "string"
+  Users:
+    type: "array"
+    items:
+      $ref: "#/definitions/User"
+  Response:
+    type: "object"
+    properties:
+      ResponseBody:
+        type: "string"
+        description: "Response generated due to the request: empty interface or string message"
+  Login:
+    type: "object"
+    properties:
+      Login:
+        type: "string"
+      Password:
+        type: "string"
   ErrorMessage:
-    type: object
+    type: "object"
     properties:
       Message:
-        type: string
-        description: Error message
+        type: "string"
+        description: "Error message"
