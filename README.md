@@ -12,7 +12,7 @@ run
 * `go get -d -v ./...`
 * `go install -v ./...`
 * `go get -u golang.org/x/vgo`
-* `vgo build`
+* `go build`
 
 **Web server start:**
 -
