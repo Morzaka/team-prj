@@ -53,7 +53,7 @@ type Plane struct {
 
 //Routes contains result of algorithm
 type Routes struct {
-	RouteID  int      `json:"route"`
+	RouteID  string   `json:"route"`
 	Stations Stations `json:"stations"`
 }
 
