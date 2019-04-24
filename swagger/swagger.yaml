@@ -42,9 +42,9 @@ paths:
       parameters:
         - in: "body"
           description: "User object tha needs to be added to the database"
-        required: true
-        schema:
-          $ref: "#/definitions/User"
+          required: true
+          schema:
+            $ref: "#/definitions/User"
       responses:
         '500':
           description: "Internal server error with db"
@@ -70,9 +70,9 @@ paths:
       parameters:
         - in: "body"
           description: "User credentials to log in"
-        required: true
-        schema:
-          $ref: "#/definitions/Login"
+          required: true
+          schema:
+            $ref: "#/definitions/Login"
       responses:
        '500':
            description: "Error with redis/postgres db"
@@ -97,10 +97,10 @@ paths:
        - "log out"
       parameters:
         - name: "Cookie"
-        in: "header"
-        required: true
-        schema:
-          type: "string"
+          in: "header"
+          required: true
+          schema:
+            type: "string"
       responses:
         '500':
           description: "Internal server error with database"
@@ -196,7 +196,7 @@ definitions:
     properties:
       Response:
         type: "interface"
-        description: "response generated due to the request: empty interface or string message"
+        description: "Response generated due to the request: empty interface or string message"
   Login:
     type: "object"
     properties:
