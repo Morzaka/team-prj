@@ -3,17 +3,19 @@ package authorization
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/go-redis/redis"
-	"github.com/go-zoo/bone"
-	"github.com/google/uuid"
 	"io/ioutil"
 	"net/http"
+	"time"
+
 	"team-project/database"
 	"team-project/logger"
 	"team-project/services/common"
 	"team-project/services/data"
 	"team-project/services/model"
-	"time"
+
+	"github.com/go-redis/redis"
+	"github.com/go-zoo/bone"
+	"github.com/google/uuid"
 )
 
 var (
