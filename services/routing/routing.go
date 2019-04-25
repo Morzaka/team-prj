@@ -6,22 +6,12 @@ import (
 	"net/http"
 	"team-project/configurations"
 	"time"
-
+	"team-project/services/data"
 	"team-project/logger"
 	"team-project/services/common"
-	"team-project/services/data"
+	)
 
-	"github.com/thoas/go-funk"
-)
 
-//RouteStruct is a struct of Routes
-type RouteStruct struct {
-	Index  string   `json:"index"`
-	Routes []string `json:"routes"`
-}
-
-// RouteStructs is a slice of Struct of Routes
-type RouteStructs []RouteStruct
 
 var (
 	//RouteStorage is a map of stations id as key and stations as value
@@ -30,6 +20,23 @@ var (
 )
 
 var myClient = &http.Client{Timeout: 10 * time.Second}
+//indexOf function finds first occurence of element in the slice
+func indexOf(n int, f func(int) bool) int {
+	for i := 0; i < n; i++ {
+		if f(i) {
+			return i
+		}
+	}
+	return -1
+}
+//IndexOfString gets the index at which the first occurrence of a string value is found in array or return -1
+// if the value cannot be found
+
+func IndexOfString(a []string, x string) int {
+	return indexOf(len(a), func(i int) bool { return a[i] == x })
+}
+
+
 
 //gets railroad Data
 func getData() map[string][]string {
@@ -43,7 +50,7 @@ func getData() map[string][]string {
 	if err != nil {
 		logger.Logger.Error("Error while reading http request to JSONApi")
 	}
-	routes := new(RouteStructs)
+	routes := new(data.RouteStructs)
 	json.Unmarshal(respBytes, &routes)
 
 	for _, v := range *routes {
@@ -73,8 +80,8 @@ func FindPath(w http.ResponseWriter, r *http.Request) {
 		logger.Logger.Errorf("Error, %s", err)
 	}
 	for key, value := range RouteStorage {
-		if indexStart := funk.IndexOf(value, stations.StartRoute); indexStart != -1 {
-			if indexEnd := funk.IndexOf(value, stations.EndRoute); indexEnd != -1 {
+		if indexStart := IndexOfString(value, stations.StartRoute); indexStart != -1 {
+			if indexEnd := IndexOfString(value, stations.EndRoute); indexEnd != -1 {
 				result := data.Routes{key, stations}
 				pathResult = append(pathResult, result)
 			}

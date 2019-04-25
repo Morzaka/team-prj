@@ -5,8 +5,14 @@ import (
 	"strconv"
 	"team-project/services/data"
 	"testing"
-	"github.com/thoas/go-funk"
+
 )
+var (
+	stations   data.Stations
+	pathResult []data.Routes
+	sum        int
+)
+
 
 //test if path from Lviv to Kyiv contains TrainsId
 func testRouting(t *testing.T) {
@@ -15,11 +21,6 @@ func testRouting(t *testing.T) {
 	"start":"Lviv"",
 	"end":"Kyiv"
 }`
-	var (
-		stations   data.Stations
-		pathResult []data.Routes
-		sum        int
-	)
 
 	if initialised == false {
 		RouteStorage = getData()
@@ -28,8 +29,8 @@ func testRouting(t *testing.T) {
 	json.Unmarshal([]byte(cityJSON), &stations)
 
 	for key, value := range RouteStorage {
-		if indexStart := funk.IndexOf(value, stations.StartRoute); indexStart != -1 {
-			if indexEnd := funk.IndexOf(value, stations.EndRoute); indexEnd != -1 {
+		if indexStart := IndexOfString(value, stations.StartRoute); indexStart != -1 {
+			if indexEnd := IndexOfString(value, stations.EndRoute); indexEnd != -1 {
 				result := data.Routes{key, stations}
 				pathResult = append(pathResult, result)
 			}
