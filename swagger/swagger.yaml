@@ -159,6 +159,24 @@ paths:
           description: "User was updated successfully"
           schema:
             $ref: "#/definitions/User"
+    get:
+      summary: "Get user by login"
+      tags:
+        - "authorization"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          type: "string"
+      responses:
+        '404':
+          description: "User was not found in database"
+          schema:
+            $ref: "#/definitions/Response"
+        '200':
+          description: "User was returned successfully"
+          schema:
+            $ref: "#/definitions/User"
   /planes:
     get:
       summary: Get all planes from Database

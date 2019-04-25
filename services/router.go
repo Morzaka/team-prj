@@ -20,6 +20,7 @@ func NewRouter() *bone.Mux {
 	subV1.PostFunc("/logout", authorization.Logout)
 	subV1.DeleteFunc("/user/:id", authorization.DeleteUserPage)
 	subV1.PatchFunc("/user/:id", authorization.UpdateUserPage)
+	subV1.GetFunc("/user/:id", authorization.GetOneUser)
 	subV1.GetFunc("/users", authorization.ListAllUsers)
 	subV1.GetFunc("/hello/:name", swagger.GetHello)
 
