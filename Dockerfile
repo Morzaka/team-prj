@@ -26,9 +26,8 @@ RUN go mod download
 COPY . .
 
 # Build the Go app
-RUN CGO_ENABLED=0 go build \
-    -installsuffix 'static' \
-    -o team-project .
+RUN CGO_ENABLED=0 GOOS=linux go build -a \
+ -installsuffix cgo -ldflags '-extldflags "-static"' -o team-project
 
 ######## Second stage: from scratch #######
 FROM scratch AS final

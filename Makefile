@@ -20,7 +20,8 @@ mockgen: ## Run mockgen cli fro generate mocks
 		team-project/database TicketRepository, UserCRUD, Model, TripRepository
 
 go-build:
-	GOOS=linux GOARCH=amd64 go build -o team-project
+	GOOS=linux GOARCH=amd64 go build -a -installsuffix cgo -ldflags '-extldflags "-static"' o team-project
+
 
 dc-build:
 	docker-compose build

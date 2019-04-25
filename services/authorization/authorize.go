@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"regexp"
 	"time"
+	"unsafe"
 
 	"team-project/database"
 	"team-project/logger"
@@ -271,4 +272,65 @@ func Validation(user data.User) (bool, string) {
 		errMessage += " Invalid Login"
 	}
 	return validName && validLogin && validPass && validSurname, errMessage
+}
+
+//ValidateRegisterNotEmpty checks if  there are no  empty fields in user struct
+func ValidateRegisterNotEmpty (user interface{}) bool {
+
+	switch v := user.(type) {
+	case data.Signin:
+		{
+			start := unsafe.Pointer(&v)
+			inside := *(*string)(start)
+			checker := *(*string)(unsafe.Pointer((uintptr(start) + unsafe.Sizeof(start))))
+
+			if inside == "" && checker == "" {
+				logger.Logger.Error(" Both login and password for Data Signin are empty")
+				return false
+			}
+
+			if inside == "" {
+				logger.Logger.Error(" login e for Data Signin is empty")
+				return false
+			}
+
+			if checker == "" {
+				fmt.Println("password value for Data Signin  is empty")
+				return false
+
+			}
+
+		}
+
+	case data.User:
+		{
+			if (&v).Login == "" && (&v).Password == "" && (&v).Name == "" && (&v).Surname == "" {
+				logger.Logger.Error("All fields are empty")
+				return false
+			}
+			if (&v).Login == "" {
+				logger.Logger.Error("Login field is empty")
+				return false
+			}
+			if (&v).Password == "" {
+				logger.Logger.Error("Password field is empty")
+				return false
+			}
+			if (&v).Name == "" {
+				logger.Logger.Error("Name field is empty")
+				return false
+			}
+			if (&v).Surname == "" {
+				logger.Logger.Error("Surname field is empty")
+				return false
+			}
+		}
+	default:
+
+		logger.Logger.Error(" Unknown type to validate")
+		return false
+
+	}
+	return true
+
 }
