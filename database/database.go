@@ -2,10 +2,11 @@ package database
 
 import (
 	"database/sql"
-	"github.com/go-redis/redis"
+
 	"net/url"
 	"os"
 
+	"github.com/go-redis/redis"
 	//pq lib for using postgres
 	_ "github.com/lib/pq"
 )
