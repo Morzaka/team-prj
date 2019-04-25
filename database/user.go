@@ -27,19 +27,19 @@ type IUser struct {
 var Users UserCRUD = &IUser{}
 
 var (
-	insertUser = `INSERT INTO public.user (id,name,surname,login, password,role)
+	insertUser = `INSERT INTO public.user (id,name,surname,login,password,email)
 	VALUES ($1, $2, $3, $4, $5, $6);`
 	selectUserPassword = `SELECT password FROM public.user WHERE login=$1;`
 	selectUserRole     = `SELECT role FROM public.user WHERE login=$1;`
 	selectAllUsers     = `SELECT * from public.user;`
-	updateUser         = `UPDATE public.user SET name = $2, surname = $3, login=$4, password=$5, role=$6 WHERE id = $1;`
+	updateUser         = `UPDATE public.user SET name = $2, surname = $3, login=$4, password=$5, email=$6 WHERE id = $1;`
 	deleteUser         = `DELETE FROM public.user WHERE id = $1;`
 )
 
 //AddUser adds info about new user to the database
 func (*IUser) AddUser(user data.User) (data.User, error) {
 	//insert values to the database
-	_, err := Db.Exec(insertUser, user.ID, user.Name, user.Surname, user.Login, user.Password, user.Role)
+	_, err := Db.Exec(insertUser, user.ID, user.Name, user.Surname, user.Login, user.Password, user.Email)
 	if err != nil {
 		return data.User{}, err
 	}
@@ -72,7 +72,7 @@ func (*IUser) GetUserRole(login string) (string, error) {
 //UpdateUser updates user's personal information
 func (*IUser) UpdateUser(user data.User, id uuid.UUID) (int64, error) {
 	var count int64
-	res, err := Db.Exec(updateUser, id, user.Name, user.Surname, user.Login, user.Password, user.Role)
+	res, err := Db.Exec(updateUser, id, user.Name, user.Surname, user.Login, user.Password, user.Email)
 	if err != nil {
 		return count, err
 	}
@@ -107,7 +107,7 @@ func (*IUser) GetAllUsers() ([]data.User, error) {
 	defer rows.Close()
 	for rows.Next() {
 		var user data.User
-		err = rows.Scan(&user.ID, &user.Name, &user.Surname, &user.Login, &user.Password, &user.Role)
+		err = rows.Scan(&user.ID, &user.Name, &user.Surname, &user.Login, &user.Password, &user.Email, &user.Role)
 		if err != nil {
 			return users, err
 		}

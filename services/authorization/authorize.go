@@ -2,18 +2,20 @@ package authorization
 
 import (
 	"encoding/json"
-	"github.com/go-redis/redis"
-	"github.com/go-zoo/bone"
-	"github.com/google/uuid"
 	"io/ioutil"
 	"net/http"
 	"regexp"
+	"time"
+
 	"team-project/database"
 	"team-project/logger"
 	"team-project/services/common"
 	"team-project/services/data"
 	"team-project/services/model"
-	"time"
+
+	"github.com/go-redis/redis"
+	"github.com/go-zoo/bone"
+	"github.com/google/uuid"
 )
 
 var (
@@ -22,6 +24,8 @@ var (
 	RedisClient *redis.Client
 	//LoggedIn variable holds the value of CheckAccess function
 	LoggedIn = CheckAccess
+	//Validate variable holds the value of Validation function
+	Validate = Validation
 )
 
 //Signin implements signing in
@@ -79,6 +83,11 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		logger.Logger.Errorf("Error, %s", err)
 	}
+	valid,msg:= Validate(user)
+	if !valid{
+		common.RenderJSON(w, r, http.StatusBadRequest, msg)
+		return
+	}
 	users, err := database.Users.GetAllUsers()
 	if err != nil {
 		common.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
@@ -102,6 +111,7 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 		common.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
 		return
 	}
+	user.Role = "User"
 	common.RenderJSON(w, r, http.StatusOK, user)
 }
 
@@ -126,7 +136,11 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 //UpdateUserPage deletes user
 func UpdateUserPage(w http.ResponseWriter, r *http.Request) {
 	var user data.User
-	id := uuid.Must(uuid.Parse(bone.GetValue(r, "id")))
+	id, err := uuid.Parse(bone.GetValue(r, "id"))
+	if err != nil {
+		common.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
+		return
+	}
 	data, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
 	if err != nil {
@@ -158,7 +172,11 @@ func UpdateUserPage(w http.ResponseWriter, r *http.Request) {
 
 //DeleteUserPage deletes user's page
 func DeleteUserPage(w http.ResponseWriter, r *http.Request) {
-	id := uuid.Must(uuid.Parse(bone.GetValue(r, "id")))
+	id, err := uuid.Parse(bone.GetValue(r, "id"))
+	if err != nil {
+		common.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
+		return
+	}
 	affected, err := database.Users.DeleteUser(id)
 	if err != nil {
 		common.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
@@ -243,7 +261,6 @@ func Validation(user data.User) (bool, string) {
 	} else {
 		errMessage += " Invalid Name"
 	}
-
 	if checkName.MatchString(user.Surname) && len(user.Name) < 40 {
 		validSurname = true
 	} else {

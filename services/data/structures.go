@@ -9,6 +9,7 @@ type User struct {
 	Password string    `json:"password"`
 	Name     string    `json:"name"`
 	Surname  string    `json:"surname"`
+	Email    string    `json:"email"`
 	Role     string    `json:"role"`
 }
 
@@ -16,12 +17,6 @@ type User struct {
 type Signin struct {
 	Login    string `json:"login"`
 	Password string `json:"password"`
-}
-
-//Comment structure
-type Comment struct {
-	User    string   `json:"user"`
-	Comment []string `json:"comment"`
 }
 
 //Trip database structure
@@ -92,6 +87,3 @@ type Ticket struct {
 	//Arrival_date   time.Time `json:"arrival_date"`
 	//Arrival_time   time.Time `json:"arrival_time"`
 }
-
-//Tickets is a slice of Ticket
-type Tickets []Ticket
