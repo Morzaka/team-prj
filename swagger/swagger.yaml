@@ -269,7 +269,7 @@ paths:
         200:
           description: "successful operation"
           schema: 
-            #$ref: "#/definitions/Trains"
+            $ref: "#/definitions/Trains"
         500:
           description: "error while getting data from db"
           schema:
@@ -277,7 +277,7 @@ paths:
         204:
           description: "No Content"
           schema: 
-            #$ref: "#/definitions/NoContent"
+            $ref: "#/definitions/NoContent"
   /train:
     get:
       tags:
@@ -288,7 +288,7 @@ paths:
         200:
           description: "successful operation"
           schema: 
-            #$ref: "#/definitions/Train"
+            $ref: "#/definitions/Train"
         400:
           description: "Bad Request . Couldn't get id"
           schema: 
@@ -296,7 +296,7 @@ paths:
         204:
           description: "No Content"
           schema: 
-            #$ref: "#/definitions/NoContent"
+            $ref: "#/definitions/NoContent"
     post:
       tags:
         - "train"
@@ -306,7 +306,7 @@ paths:
         200:
           description: "successful operation"
           schema: 
-            #$ref: "#/definitions/Train"
+            $ref: "#/definitions/Train"
         500:
           description: "error while adding data into db"
           schema:
@@ -314,7 +314,7 @@ paths:
         204:
           description: "No Content"
           schema: 
-            #$ref: "#/definitions/NoContent"
+            $ref: "#/definitions/NoContent"
     patch:
       tags:
         - "train"
@@ -324,7 +324,7 @@ paths:
         200:
           description: "successful operation"
           schema: 
-            #$ref: "#/definitions/Train"
+            $ref: "#/definitions/Train"
         400:
           description: "Bad Request . Couldn't get id"
           schema: 
@@ -336,7 +336,7 @@ paths:
         204:
           description: "No Content"
           schema: 
-            #$ref: "#/definitions/NoContent"
+            $ref: "#/definitions/NoContent"
     delete:
       tags:
         - "train"
@@ -346,7 +346,7 @@ paths:
         200:
           description: "successful operation"
           schema: 
-            #$ref: "#/definitions/Train"
+            $ref: "#/definitions/Train"
         400:
           description: "Bad Request . Couldn't get id"
           schema: 
