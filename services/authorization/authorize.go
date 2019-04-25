@@ -25,10 +25,10 @@ var (
 	RedisClient *redis.Client
 	//LoggedIn variable holds the value of CheckAccess function
 	LoggedIn = CheckAccess
+	//AdminRole variable to refer to function CheckAdmin
+	AdminRole = CheckAdmin
 	//Validate variable holds the value of Validation function
 	Validate = Validation
-	//Admin variable to refer to function CheckAdmin
-	Admin = CheckAdmin
 )
 
 //Signin implements signing in

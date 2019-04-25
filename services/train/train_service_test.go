@@ -113,7 +113,7 @@ func TestGetTrains(t *testing.T) {
 			mockedErr:    errors.New("db error"),
 		},
 	}
-	authorization.Admin = func(http.ResponseWriter, *http.Request) bool {
+	authorization.AdminRole = func(http.ResponseWriter, *http.Request) bool {
 		return true
 	}
 	mockCtrl := gomock.NewController(t)
@@ -134,7 +134,7 @@ func TestGetTrains(t *testing.T) {
 			}
 		})
 	}
-	authorization.Admin = authorization.CheckAdmin
+	authorization.AdminRole = authorization.CheckAdmin
 }
 
 func TestGetSingleTrain(t *testing.T) {
@@ -156,7 +156,7 @@ func TestGetSingleTrain(t *testing.T) {
 			mockedErr:   errors.New("db error , no data found"),
 		},
 	}
-	authorization.Admin = func(http.ResponseWriter, *http.Request) bool {
+	authorization.AdminRole = func(http.ResponseWriter, *http.Request) bool {
 		return true
 	}
 	mockCtrl := gomock.NewController(t)
@@ -177,7 +177,7 @@ func TestGetSingleTrain(t *testing.T) {
 			}
 		})
 	}
-	authorization.Admin = authorization.CheckAdmin
+	authorization.AdminRole = authorization.CheckAdmin
 }
 
 func TestCreateTrain(t *testing.T) {
@@ -197,7 +197,7 @@ func TestCreateTrain(t *testing.T) {
 			mockedErr:   errors.New("failed to create"),
 		},
 	}
-	authorization.Admin = func(http.ResponseWriter, *http.Request) bool {
+	authorization.AdminRole = func(http.ResponseWriter, *http.Request) bool {
 		return true
 	}
 	mockCtrl := gomock.NewController(t)
@@ -222,7 +222,7 @@ func TestCreateTrain(t *testing.T) {
 			}
 		})
 	}
-	authorization.Admin = authorization.CheckAdmin
+	authorization.AdminRole = authorization.CheckAdmin
 }
 
 func TestUpdateTrain(t *testing.T) {
@@ -235,7 +235,7 @@ func TestUpdateTrain(t *testing.T) {
 			mockedErr:   nil,
 		},
 	}
-	authorization.Admin = func(http.ResponseWriter, *http.Request) bool {
+	authorization.AdminRole = func(http.ResponseWriter, *http.Request) bool {
 		return true
 	}
 	mockCtrl := gomock.NewController(t)
@@ -258,7 +258,7 @@ func TestUpdateTrain(t *testing.T) {
 			}
 		})
 	}
-	authorization.Admin = authorization.CheckAdmin
+	authorization.AdminRole = authorization.CheckAdmin
 }
 
 func TestDeleteTrain(t *testing.T) {
@@ -276,7 +276,7 @@ func TestDeleteTrain(t *testing.T) {
 			mockedErr: errors.New("db error"),
 		},
 	}
-	authorization.Admin = func(http.ResponseWriter, *http.Request) bool {
+	authorization.AdminRole = func(http.ResponseWriter, *http.Request) bool {
 		return true
 	}
 	mockCtrl := gomock.NewController(t)
@@ -294,5 +294,5 @@ func TestDeleteTrain(t *testing.T) {
 			}
 		})
 	}
-	authorization.Admin = authorization.CheckAdmin
+	authorization.AdminRole = authorization.CheckAdmin
 }

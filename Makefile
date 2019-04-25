@@ -19,7 +19,6 @@ mockgen: ## Run mockgen cli fro generate mocks
 		-package database \
 		team-project/database TicketRepository, UserCRUD, Model
 
-
 go-build:
 	GOOS=linux GOARCH=amd64 go build -o team-project
 
