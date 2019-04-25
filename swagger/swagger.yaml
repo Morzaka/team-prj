@@ -162,7 +162,7 @@ paths:
     get:
       summary: Get all planes from Database
       tags:
-        - get
+        - plane
       responses:
         '200':
           description: Planes get successfully
@@ -174,7 +174,7 @@ paths:
     post:
       summary: Create plane to Database
       tags:
-        - create
+        - plane
       consumes:
         - application/json
       parameters:
@@ -197,7 +197,7 @@ paths:
     get:
       summary: Get plane from Database
       tags:
-        - get
+        - plane
       consumes:
         - application/json
       parameters:
@@ -217,7 +217,7 @@ paths:
     delete:
       summary: Delete plane from DB
       tags:
-        - delete
+        - plane
       consumes:
         - application/json
       parameters:
@@ -237,7 +237,7 @@ paths:
     patch:
       summary: Update plane from Database
       tags:
-        - update
+        - plane
       consumes:
         - application/json
       parameters:
