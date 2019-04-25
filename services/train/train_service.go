@@ -68,11 +68,11 @@ func GetTrains(w http.ResponseWriter, r *http.Request) {
 
 	for _, train := range trains {
 		if err = ValidateIfEmpty(train); err != nil {
-			common.RenderJSON(w, r, http.StatusNoContent, "Empty data found")
+			common.RenderJSON(w, r, http.StatusNoContent, emptyResponse)
 			return
 		}
 		if err = Validate(train); err != nil {
-			common.RenderJSON(w, r, http.StatusNoContent, "Validation failed")
+			common.RenderJSON(w, r, http.StatusNoContent, emptyResponse)
 			return
 		}
 	}
@@ -94,11 +94,11 @@ func GetSingleTrain(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err = ValidateIfEmpty(train); err != nil {
-		common.RenderJSON(w, r, http.StatusNoContent, "Empty data found")
+		common.RenderJSON(w, r, http.StatusNoContent, emptyResponse)
 		return
 	}
 	if err = Validate(train); err != nil {
-		common.RenderJSON(w, r, http.StatusNoContent, "Validation failed")
+		common.RenderJSON(w, r, http.StatusNoContent, emptyResponse)
 		return
 	}
 	common.RenderJSON(w, r, http.StatusOK, train)
@@ -113,11 +113,11 @@ func CreateTrain(w http.ResponseWriter, r *http.Request) {
 	t := data.Train{}
 	json.NewDecoder(r.Body).Decode(&t)
 	if err := ValidateIfEmpty(t); err != nil {
-		common.RenderJSON(w, r, http.StatusNoContent, "Empty data found")
+		common.RenderJSON(w, r, http.StatusNoContent, emptyResponse)
 		return
 	}
 	if err := Validate(t); err != nil {
-		common.RenderJSON(w, r, http.StatusNoContent, "Validation failed")
+		common.RenderJSON(w, r, http.StatusNoContent, emptyResponse)
 		return
 	}
 	err := database.Trains.AddTrain(t)
@@ -138,11 +138,11 @@ func UpdateTrain(w http.ResponseWriter, r *http.Request) {
 	t := data.Train{}
 	json.NewDecoder(r.Body).Decode(&t)
 	if err := ValidateIfEmpty(t); err != nil {
-		common.RenderJSON(w, r, http.StatusNoContent, "Empty data found")
+		common.RenderJSON(w, r, http.StatusNoContent, emptyResponse)
 		return
 	}
 	if err := Validate(t); err != nil {
-		common.RenderJSON(w, r, http.StatusNoContent, "Validation failed")
+		common.RenderJSON(w, r, http.StatusNoContent, emptyResponse)
 		return
 	}
 	t.ID = id
