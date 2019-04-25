@@ -56,7 +56,7 @@ func (*ticketRepository) AllTickets() ([]data.Ticket, error) {
 			&tk.Place, &tk.TicketType, &tk.Discount, &tk.Price, &tk.TotalPrice,
 			&tk.Name, &tk.Surname) /*, &tk.From_place, &tk.Departure_date,
 		&tk.Departure_time, &tk.To_place, &tk.Arrival_date,
-		&tk.Arrival_time*/// order matters
+		&tk.Arrival_time*/ // order matters
 		if err != nil {
 			return nil, err
 		}
@@ -77,7 +77,7 @@ func (*ticketRepository) GetTicket(id uuid.UUID) (data.Ticket, error) {
 		&tk.Place, &tk.TicketType, &tk.Discount, &tk.Price, &tk.TotalPrice,
 		&tk.Name, &tk.Surname) /*, &tk.From_place, &tk.Departure_date,
 	&tk.Departure_time, &tk.To_place, &tk.Arrival_date,
-	&tk.Arrival_time*/    // order matters
+	&tk.Arrival_time*/ // order matters
 	if err != nil {
 		return tk, err
 	}

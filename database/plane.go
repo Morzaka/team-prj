@@ -6,21 +6,21 @@ import (
 	"team-project/services/data"
 )
 
-
 // PlaneRepository for mocking
 type PlaneRepository interface {
 	GetPlanes() ([]data.Plane, error)
 	GetPlane(id uuid.UUID) (data.Plane, error)
 	AddPlane(plane data.Plane) (data.Plane, error)
-	UpdatePlane(plane data.Plane,id uuid.UUID) (data.Plane,error)
+	UpdatePlane(plane data.Plane, id uuid.UUID) (data.Plane, error)
 	DeletePlane(id uuid.UUID) error
 }
 
-//IUser structure contains interface TicketRepository
+// planeRepository structure contains interface PlaneRepository
 type planeRepository struct {
 	planeRepo PlaneRepository
 }
 
+// PlaneRepo is a variable
 var PlaneRepo PlaneRepository = &planeRepository{}
 
 var (
