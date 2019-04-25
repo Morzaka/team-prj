@@ -6,6 +6,20 @@ import (
 	"team-project/services/data"
 )
 
+type TripRepository interface {
+	AddTrip(trip data.Trip) (data.Trip, error)
+	GetTrips() ([]data.Trip, error)
+	UpdateTrip(trip data.Trip) (data.Trip, error)
+	DeleteTrip(id uuid.UUID) error
+	GetTrip(id uuid.UUID) (data.Trip, error)
+}
+
+type tripRepository struct {
+	tripRepo TripRepository
+}
+
+var TripRepo TripRepository = &tripRepository{}
+
 var (
 	addTrip = `INSERT INTO public.trip (TripID, TripName,TripTicketID,TripReturnTicketID,TotalTripPrice)
 	VALUES ($1, $2, $3, $4, $5);`
@@ -16,7 +30,7 @@ var (
 )
 
 //AddTrip function add new trip into database table
-func AddTrip(trip data.Trip) (data.Trip, error) {
+func (*tripRepository) AddTrip(trip data.Trip) (data.Trip, error) {
 	_, err := Db.Exec(addTrip, trip.TripID, trip.TripName, trip.TripTicketID, trip.TripReturnTicketID, trip.TotalTripPrice)
 	if err != nil {
 		return data.Trip{}, err
@@ -25,7 +39,7 @@ func AddTrip(trip data.Trip) (data.Trip, error) {
 }
 
 //GetTrips return all trips which exist in table
-func GetTrips() ([]data.Trip, error) {
+func (*tripRepository) GetTrips() ([]data.Trip, error) {
 	rows, err := Db.Query(selectAllTrips)
 	if err != nil {
 		return []data.Trip{}, err
@@ -44,7 +58,7 @@ func GetTrips() ([]data.Trip, error) {
 }
 
 //UpdateTrip update trip name and total trip price
-func UpdateTrip(trip data.Trip) (data.Trip, error) {
+func (*tripRepository) UpdateTrip(trip data.Trip) (data.Trip, error) {
 	_, err := Db.Exec(updateTrip, trip.TripID, trip.TripName, trip.TripTicketID, trip.TripReturnTicketID, trip.TotalTripPrice)
 	if err != nil {
 		return data.Trip{}, err
@@ -53,7 +67,7 @@ func UpdateTrip(trip data.Trip) (data.Trip, error) {
 }
 
 //DeleteTrip delete trip from table
-func DeleteTrip(id uuid.UUID) error {
+func (*tripRepository) DeleteTrip(id uuid.UUID) error {
 	_, err := Db.Exec(deleteTrip, id)
 	if err != nil {
 		return err
@@ -62,7 +76,7 @@ func DeleteTrip(id uuid.UUID) error {
 }
 
 //GetTrip return element which Trip_if equal to id
-func GetTrip(id uuid.UUID) (data.Trip, error) {
+func (*tripRepository) GetTrip(id uuid.UUID) (data.Trip, error) {
 	p := data.Trip{}
 	err := Db.QueryRow(selectTrip, id).Scan(&p.TripID, &p.TripName, &p.TripTicketID, &p.TripReturnTicketID, &p.TotalTripPrice)
 	if err != nil {
