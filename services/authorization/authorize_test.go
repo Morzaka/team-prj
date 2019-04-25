@@ -58,7 +58,7 @@ type TestCase struct {
 	mockedRole          string
 	mockedAffected      int64
 	mockedLogicalResult bool
-	messageWant 		string
+	messageWant         string
 	cookieSet           bool
 	openRedis           bool
 	resultWant          bool
@@ -132,8 +132,8 @@ func TestSignin(t *testing.T) {
 
 //TestSignup tests Signup function
 func TestSignup(t *testing.T) {
-	id,err := uuid.Parse("08307904-f18e-4fb8-9d18-29cfad38ffaf")
-	if err!=nil{
+	id, err := uuid.Parse("08307904-f18e-4fb8-9d18-29cfad38ffaf")
+	if err != nil {
 		t.Fatal(err)
 	}
 	tests := []TestCase{
@@ -165,7 +165,7 @@ func TestSignup(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 	for _, tc := range tests {
-		Validate = func(user data.User)(bool, string){
+		Validate = func(user data.User) (bool, string) {
 			return true, ""
 		}
 		rec := httptest.NewRecorder()
@@ -477,39 +477,39 @@ func TestCheckAdmin(t *testing.T) {
 }
 
 func TestValidation(t *testing.T) {
-	tests:=[]TestCase{
+	tests := []TestCase{
 		{
 			mockedUser: data.User{
 				Name: "Oksana", Surname: "Zhykina", Login: "oks_zh", Password: "oksana88zh", Email: "oks88zh@gmail.com",
 			},
 			messageWant: "",
-			resultWant: true,
+			resultWant:  true,
 		},
 		{
 			mockedUser: data.User{
 				Name: "Oksana", Surname: "Zhykina", Login: "oks_zh", Password: "ok", Email: "oks88zh@gmail.com",
 			},
 			messageWant: "Invalid Password",
-			resultWant: false,
+			resultWant:  false,
 		},
 		{
 			mockedUser: data.User{
 				Name: "356oks", Surname: "Zhykina", Login: "oks_zh", Password: "oks_zh888", Email: "oks88zh@gmail.com",
 			},
 			messageWant: " Invalid Name",
-			resultWant: false,
+			resultWant:  false,
 		},
 		{
 			mockedUser: data.User{
 				Name: "Oksana", Surname: "999zhyk", Login: "oks_zh", Password: "oks_zh888", Email: "oks88zh@gmail.com",
 			},
 			messageWant: "Invalid Surname",
-			resultWant: false,
+			resultWant:  false,
 		},
 	}
-	for _,tc:=range tests{
-		if valid, msg := Validation(tc.mockedUser); valid!=tc.resultWant && msg!=tc.messageWant{
-			t.Errorf("Expected %t, %s, got %t, %s", tc.resultWant, tc.messageWant,valid,msg)
+	for _, tc := range tests {
+		if valid, msg := Validation(tc.mockedUser); valid != tc.resultWant && msg != tc.messageWant {
+			t.Errorf("Expected %t, %s, got %t, %s", tc.resultWant, tc.messageWant, valid, msg)
 		}
 	}
 }

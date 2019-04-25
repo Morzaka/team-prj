@@ -83,8 +83,8 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		logger.Logger.Errorf("Error, %s", err)
 	}
-	valid,msg:= Validate(user)
-	if !valid{
+	valid, msg := Validate(user)
+	if !valid {
 		common.RenderJSON(w, r, http.StatusBadRequest, msg)
 		return
 	}
