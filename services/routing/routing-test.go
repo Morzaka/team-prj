@@ -13,8 +13,8 @@ var (
 	sum        int
 )
 
-//test if path from Lviv to Kyiv contains TrainsId
-func testRouting(t *testing.T) {
+//TestRouting if path from Lviv to Kyiv contains TrainsId
+func TestRouting(t *testing.T) {
 
 	cityJSON := `{
 	"start":"Lviv"",
@@ -30,7 +30,7 @@ func testRouting(t *testing.T) {
 	for key, value := range RouteStorage {
 		if indexStart := IndexOfString(value, stations.StartRoute); indexStart != -1 {
 			if indexEnd := IndexOfString(value, stations.EndRoute); indexEnd != -1 {
-				result := data.Routes{key, stations}
+				result := data.Routes{RouteID: key, Stations: stations}
 				pathResult = append(pathResult, result)
 			}
 
