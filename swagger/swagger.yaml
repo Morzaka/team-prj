@@ -88,7 +88,6 @@ paths:
           description: "User logged in"
           schema:
             $ref: "#/definitions/Login"
-
   /logout:
     post:
       summary: "Logging out"
@@ -271,8 +270,8 @@ paths:
             $ref: "#/definitions/Tickets"
         500:
           description: "Database request failure"
-      security:
-        - api_key: []
+      # security:
+      #   - api_key: []
   /ticket:
     post:
       tags:
@@ -293,15 +292,15 @@ paths:
         201:
           description: "Ticked successful created"
           schema:
-            $ref: "#/definitions/Tickets"
+            $ref: "#/definitions/TicketFull"
         406:
           description: "All fields must be complete"
           schema:
             $ref: "#/definitions/Ticket"
         500:
           description: "Database request failure"
-      security:
-        - api_key: []
+      # security:
+      #   - api_key: []
   /ticket/{ticketId}:
     get:
       tags:
@@ -322,7 +321,7 @@ paths:
         200:
           description: "successful operation"
           schema:
-            $ref: "#/definitions/Tickets"
+            $ref: "#/definitions/TicketFull"
         400:
           description: "Invalid ID supplied"
         500:
@@ -352,15 +351,15 @@ paths:
         200:
           description: "successfully updated"
           schema:
-            $ref: "#/definitions/Tickets"
+            $ref: "#/definitions/TicketFull"
         400:
           description: "Invalid Ticked supplied"
         404:
           description: "Ticked not found"
         500:
           description: "Database request failure"
-      security:
-        - api_key: []
+      # security:
+      #   - api_key: []
     delete:
       tags:
         - "tickets"
@@ -383,8 +382,8 @@ paths:
           description: "Ticket not found. Successfully deleted"
         500:
           description: "Database request failure"
-      security:
-        - api_key: []
+      # security:
+      #   - api_key: []
 definitions:
   HelloMessage:
     type: "object"
@@ -456,7 +455,7 @@ definitions:
         type: "string"
       surname:
         type: "string"
-  Tickets:
+  TicketFull:
     type: "object"
     properties:
       id:
@@ -488,6 +487,10 @@ definitions:
         type: "string"
       surname:
         type: "string"
+  Tickets:
+    type: "array"
+    items:
+      $ref: "#/definitions/TicketFull"
   ErrorMessage:
     type: "object"
     properties:
