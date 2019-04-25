@@ -4,6 +4,7 @@ import (
 	"team-project/services/authorization"
 	"team-project/services/booking"
 	"team-project/services/plane"
+	"team-project/services/routing"
 	"team-project/services/train"
 	"team-project/services/trip"
 	"team-project/swagger"
@@ -34,9 +35,9 @@ func NewRouter() *bone.Mux {
 	// Train routes
 	subV1.GetFunc("/trains", train.GetTrains)
 	subV1.GetFunc("/train/:id", train.GetSingleTrain)
-	subV1.PostFunc("/trains", train.CreateTrain)
-	subV1.PatchFunc("/trains/:id", train.UpdateTrain)
-	subV1.DeleteFunc("/trains/:id", train.DeleteTrain)
+	subV1.PostFunc("/train", train.CreateTrain)
+	subV1.PatchFunc("/train/:id", train.UpdateTrain)
+	subV1.DeleteFunc("/train/:id", train.DeleteTrain)
 
 	// Plane routes
 	subV1.GetFunc("/planes", plane.GetPlanes)
@@ -44,6 +45,9 @@ func NewRouter() *bone.Mux {
 	subV1.PostFunc("/plane", plane.CreatePlane)
 	subV1.PatchFunc("/plane/:id", plane.UpdatePlane)
 	subV1.DeleteFunc("/plane/:id", plane.DeletePlane)
+
+	//Get Routes
+	subV1.PostFunc("/routes", routing.FindPath)
 
 	// Trip routes
 	subV1.GetFunc("/trips", trip.GetTrips)
