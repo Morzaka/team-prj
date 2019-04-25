@@ -18,7 +18,7 @@ var emptyResponse interface{}
 func ValidateFormTrip(trip data.Trip) error {
 	if trip.TripName == "" || trip.TotalTripPrice <= 0 || trip.TripName != string(trip.TripName) || trip.
 		TotalTripPrice != float32(trip.TotalTripPrice) {
-		return errors.New("Fields should be not empty or invalid data type of field.")
+		return errors.New("fields should be not empty or invalid data type of field")
 	}
 	return nil
 }
