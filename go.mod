@@ -29,8 +29,8 @@ require (
 	github.com/onsi/ginkgo v1.8.0 // indirect
 	github.com/onsi/gomega v1.5.0 // indirect
 	github.com/sirupsen/logrus v1.4.1
-	github.com/thoas/go-funk v0.4.0
 	github.com/spf13/viper v1.3.2 // indirect
+	github.com/thoas/go-funk v0.4.0
 	github.com/toqueteos/webbrowser v1.1.0 // indirect
 	github.com/urfave/negroni v1.0.0
 	github.com/x-cray/logrus-prefixed-formatter v0.5.2
