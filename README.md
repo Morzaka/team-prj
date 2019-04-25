@@ -11,6 +11,10 @@ run
 * https `git clone https://gitlab.com/golang-lv-388/team-project.git`
 * `go build`
 
+**Server address**
+
+> https://team-projectv1.herokuapp.com/
+
 **Web server run local start:**
 -
 >For running local make changes to the file `database/database.go`
@@ -27,4 +31,5 @@ configurations.Config.PgPassword, configurations.Config.PgName)`
 **Run web server in a docker container:**
  * run `docker-compose up --build`
 > listen http://localhost:8080
+
 

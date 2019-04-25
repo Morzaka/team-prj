@@ -2,6 +2,7 @@ package authorization
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"regexp"
@@ -26,6 +27,8 @@ var (
 	LoggedIn = CheckAccess
 	//Validate variable holds the value of Validation function
 	Validate = Validation
+	//Admin variable to refer to function CheckAdmin
+	Admin = CheckAdmin
 )
 
 //Signin implements signing in
@@ -83,13 +86,9 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		logger.Logger.Errorf("Error, %s", err)
 	}
-	valid, msg := Validate(user)
-	if !valid {
-		common.RenderJSON(w, r, http.StatusBadRequest, msg)
-		return
-	}
 	users, err := database.Users.GetAllUsers()
 	if err != nil {
+		fmt.Println("No content in db")
 		common.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
 		return
 	}
