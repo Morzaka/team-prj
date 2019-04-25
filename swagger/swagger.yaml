@@ -597,6 +597,8 @@ definitions:
         description: "Error message"
   Trains:
     type: "array"
+    items:
+      $ref: "#/definitions/Train"
   Train:
     type: "object"
     properties:
