@@ -29,7 +29,7 @@ require (
 	github.com/sirupsen/logrus v1.4.1
 	github.com/spf13/viper v1.3.2 // indirect
 	github.com/toqueteos/webbrowser v1.1.0 // indirect
-	github.com/urfave/negroni v1.0.0 // indirect
+	github.com/urfave/negroni v1.0.0
 	github.com/x-cray/logrus-prefixed-formatter v0.5.2
 	github.com/yuin/gopher-lua v0.0.0-20190206043414-8bfc7677f583 // indirect
 	golang.org/x/crypto v0.0.0-20190424203555-c05e17bb3b2d
