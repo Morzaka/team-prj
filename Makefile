@@ -19,6 +19,11 @@ mockgen: ## Run mockgen cli fro generate mocks
 		-package database \
 		team-project/database TicketRepository, UserCRUD, Model, TripRepository
 
+perf-test:
+	vegeta attack -targets=src/performance/test-login.txt -duration=54s -rate=200 | tee src/performance/results.bin | vegeta report
+	cat src/performance/results.bin | vegeta report -reporter=plot > src/performance/plot.html
+
+
 go-build:
 	GOOS=linux GOARCH=amd64 go build -a -installsuffix cgo -ldflags '-extldflags "-static"' o team-project
 

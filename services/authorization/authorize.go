@@ -275,7 +275,7 @@ func Validation(user data.User) (bool, string) {
 }
 
 //ValidateRegisterNotEmpty checks if  there are no  empty fields in user struct
-func ValidateRegisterNotEmpty (user interface{}) bool {
+func ValidateRegisterNotEmpty(user interface{}) bool {
 
 	switch v := user.(type) {
 	case data.Signin:

@@ -1,5 +1,5 @@
-CREATE TABLE public.trip
-(
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE TABLE IF NOT EXISTS trip (
   TripID uuid NOT NULL,
   TripName character varying(30) NOT NULL,
   TripTicketID uuid NOT NULL,

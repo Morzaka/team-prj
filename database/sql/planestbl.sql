@@ -1,5 +1,5 @@
-CREATE TABLE plane
-(
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE TABLE  IF NOT EXISTS planes (
     id uuid NOT NULL,
     departureCity text NOT NULL,
     arrivalCity text NOT NULL,

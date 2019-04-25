@@ -1,4 +1,5 @@
-CREATE TABLE public.trains
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE TABLE  IF NOT EXISTS trains
 (
     id uuid DEFAULT uuid_generate_v4() NOT NULL,
     departure_city text NOT NULL,

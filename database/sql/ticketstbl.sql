@@ -1,6 +1,6 @@
 -- Tickets
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-CREATE TABLE tickets
+CREATE TABLE  IF NOT EXISTS tickets
 (
     id             uuid        DEFAULT uuid_generate_v4() NOT NULL,
     train_id       uuid        DEFAULT uuid_generate_v4() NOT NULL, -- references train(id), -- uncomment when train,
@@ -28,9 +28,12 @@ CREATE TABLE tickets
 -- VALUES (23, 'Plane', '-20%', 100.00, 80.00, 'Lyubomyr', 'Mykhalchyshyn', 'Lviv',
 --         '04-apr-2019', '22:30', 'Kharkiv', '05-apr-2019', '07:30');
 
-INSERT INTO tickets(place, ticket_type, discount, price, total_price, name,
-                    surname)
-VALUES (44, 'bus', '-5%', 200.00, 180.00, 'Stepko', 'Brovarskij');
+
+INSERT INTO tickets(id,train_id,plane_id,user_id,place,ticket_type,discount, price, total_price, "name",surname)
+VALUES ('e1e0fd8d-9645-4c46-8ec7-8d27025a5ee8','84458656-8f8c-40a7-827a-7bc14cf86314',
+'98a57b8e-c081-4234-9c29-f29e74f82221','c1fcc072-b47d-43de-94a7-26208064ce1a',
+44, 'bus', '-5%', 200.00, 180.00, 'Stepko', 'Brovarskij');
+
 
 INSERT INTO tickets(place, ticket_type, discount, price, total_price, name,
                     surname)
