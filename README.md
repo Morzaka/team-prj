@@ -31,5 +31,3 @@ configurations.Config.PgPassword, configurations.Config.PgName)`
 **Run web server in a docker container:**
  * run `docker-compose up --build`
 > listen http://localhost:8080
-
-
