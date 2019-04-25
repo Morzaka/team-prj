@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"team-project/database"
 	"team-project/services"
+	"team-project/services/authorization"
 	"team-project/services/data"
 	"team-project/services/train"
 	"testing"
@@ -112,6 +113,9 @@ func TestGetTrains(t *testing.T) {
 			mockedErr:    errors.New("db error"),
 		},
 	}
+	authorization.Admin = func(http.ResponseWriter, *http.Request) bool {
+		return true
+	}
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 	for _, tc := range tests {
@@ -130,6 +134,7 @@ func TestGetTrains(t *testing.T) {
 			}
 		})
 	}
+	authorization.Admin = authorization.CheckAdmin
 }
 
 func TestGetSingleTrain(t *testing.T) {
@@ -151,6 +156,9 @@ func TestGetSingleTrain(t *testing.T) {
 			mockedErr:   errors.New("db error , no data found"),
 		},
 	}
+	authorization.Admin = func(http.ResponseWriter, *http.Request) bool {
+		return true
+	}
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 	for _, tc := range test {
@@ -169,6 +177,7 @@ func TestGetSingleTrain(t *testing.T) {
 			}
 		})
 	}
+	authorization.Admin = authorization.CheckAdmin
 }
 
 func TestCreateTrain(t *testing.T) {
@@ -187,6 +196,9 @@ func TestCreateTrain(t *testing.T) {
 			mockedTrain: testTrain,
 			mockedErr:   errors.New("failed to create"),
 		},
+	}
+	authorization.Admin = func(http.ResponseWriter, *http.Request) bool {
+		return true
 	}
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
@@ -210,6 +222,7 @@ func TestCreateTrain(t *testing.T) {
 			}
 		})
 	}
+	authorization.Admin = authorization.CheckAdmin
 }
 
 func TestUpdateTrain(t *testing.T) {
@@ -228,6 +241,9 @@ func TestUpdateTrain(t *testing.T) {
 				mockedTrain: data.Train{},
 				mockedErr:   errors.New("failed to update"),
 			},*/
+	}
+	authorization.Admin = func(http.ResponseWriter, *http.Request) bool {
+		return true
 	}
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
@@ -249,6 +265,7 @@ func TestUpdateTrain(t *testing.T) {
 			}
 		})
 	}
+	authorization.Admin = authorization.CheckAdmin
 }
 
 func TestDeleteTrain(t *testing.T) {
@@ -259,6 +276,9 @@ func TestDeleteTrain(t *testing.T) {
 			expected:  http.StatusOK,
 			mockedErr: nil,
 		},
+	}
+	authorization.Admin = func(http.ResponseWriter, *http.Request) bool {
+		return true
 	}
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
@@ -275,4 +295,5 @@ func TestDeleteTrain(t *testing.T) {
 			}
 		})
 	}
+	authorization.Admin = authorization.CheckAdmin
 }

@@ -8,6 +8,7 @@ import (
 	"regexp"
 
 	"team-project/database"
+	"team-project/services/authorization"
 	"team-project/services/common"
 	"team-project/services/data"
 
@@ -55,10 +56,10 @@ func Validate(t data.Train) error {
 
 //GetTrains is a handler that returns trains from db
 func GetTrains(w http.ResponseWriter, r *http.Request) {
-	/*if !authorization.CheckAdmin(w, r) {
+	if !authorization.Admin(w, r) {
 		common.RenderJSON(w, r, http.StatusForbidden, emptyResponse)
 		return
-	}*/
+	}
 	trains, err := database.Trains.GetAllTrains()
 	if err != nil {
 		common.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
@@ -81,10 +82,10 @@ func GetTrains(w http.ResponseWriter, r *http.Request) {
 
 //GetSingleTrain is a handler that returns single train from db
 func GetSingleTrain(w http.ResponseWriter, r *http.Request) {
-	/*if !authorization.CheckAdmin(w, r) {
+	if !authorization.Admin(w, r) {
 		common.RenderJSON(w, r, http.StatusForbidden, emptyResponse)
 		return
-	}*/
+	}
 	id := uuid.Must(uuid.Parse(bone.GetValue(r, "id")))
 	newid := id.String()
 	train, err := database.Trains.GetTrain(newid)
@@ -105,10 +106,10 @@ func GetSingleTrain(w http.ResponseWriter, r *http.Request) {
 
 //CreateTrain is a handler that creates train
 func CreateTrain(w http.ResponseWriter, r *http.Request) {
-	/*if !authorization.CheckAdmin(w, r) {
+	if !authorization.Admin(w, r) {
 		common.RenderJSON(w, r, http.StatusForbidden, emptyResponse)
 		return
-	}*/
+	}
 	t := data.Train{}
 	json.NewDecoder(r.Body).Decode(&t)
 	if err := ValidateIfEmpty(t); err != nil {
@@ -129,10 +130,10 @@ func CreateTrain(w http.ResponseWriter, r *http.Request) {
 
 //UpdateTrain is a handler that updates train in db
 func UpdateTrain(w http.ResponseWriter, r *http.Request) {
-	/*if !authorization.CheckAdmin(w, r) {
+	if !authorization.Admin(w, r) {
 		common.RenderJSON(w, r, http.StatusForbidden, emptyResponse)
 		return
-	}*/
+	}
 	id := uuid.Must(uuid.Parse(bone.GetValue(r, "id")))
 	t := data.Train{}
 	json.NewDecoder(r.Body).Decode(&t)
@@ -160,10 +161,10 @@ func UpdateTrain(w http.ResponseWriter, r *http.Request) {
 
 //DeleteTrain is a handler that deletes train from db
 func DeleteTrain(w http.ResponseWriter, r *http.Request) {
-	/*if !authorization.CheckAdmin(w, r) {
+	if !authorization.Admin(w, r) {
 		common.RenderJSON(w, r, http.StatusForbidden, emptyResponse)
 		return
-	}*/
+	}
 	id := uuid.Must(uuid.Parse(bone.GetValue(r, "id")))
 	err := database.Trains.DeleteTrain(id)
 	if err != nil {
