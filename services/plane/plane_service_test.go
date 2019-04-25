@@ -33,66 +33,6 @@ type ListPlaneTestCase struct {
 	mockedPlanes  []data.Plane
 	mockedError   error
 }
-//
-//func TestValidateForm(t *testing.T) {
-//	for i := 0; i < 8; i++ {
-//		switch i {
-//		case 0:
-//			v := booking.ValidateForm(testData)
-//			if v != nil {
-//				t.Error("Expected nil, got ", v)
-//			}
-//		case 1:
-//			testData.Place = 0
-//			v := booking.ValidateForm(testData)
-//			if v == nil {
-//				t.Error("Expected nil, got ", v)
-//			}
-//		case 2:
-//			testData.Place = 21
-//			testData.TicketType = ""
-//			v := booking.ValidateForm(testData)
-//			if v == nil {
-//				t.Error("Expected nil, got ", v)
-//			}
-//		case 3:
-//			testData.TicketType = "Train"
-//			testData.Discount = ""
-//			v := booking.ValidateForm(testData)
-//			if v == nil {
-//				t.Error("Expected nil, got ", v)
-//			}
-//		case 4:
-//			testData.Discount = "-10%"
-//			testData.Price = -2
-//			v := booking.ValidateForm(testData)
-//			if v == nil {
-//				t.Error("Expected nil, got ", v)
-//			}
-//		case 5:
-//			testData.Price = 23.32
-//			testData.TotalPrice = 0
-//			v := booking.ValidateForm(testData)
-//			if v == nil {
-//				t.Error("Expected nil, got ", v)
-//			}
-//		case 6:
-//			testData.TotalPrice = 23.32
-//			testData.Name = ""
-//			v := booking.ValidateForm(testData)
-//			if v == nil {
-//				t.Error("Expected nil, got ", v)
-//			}
-//		case 7:
-//			testData.Name = "Pavlo"
-//			testData.Surname = ""
-//			v := booking.ValidateForm(testData)
-//			if v == nil {
-//				t.Error("Expected nil, got ", v)
-//			}
-//		}
-//	}
-//}
 
 func TestGetPlanes(t *testing.T) {
 	tests := []ListPlaneTestCase{
