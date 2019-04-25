@@ -1,7 +1,6 @@
 package booking
 
 import (
-	"database/sql"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -9,14 +8,17 @@ import (
 	"team-project/database"
 	"team-project/services/common"
 	"team-project/services/data"
-	"team-project/services/model"
+
+	"github.com/go-zoo/bone"
+	"github.com/google/uuid"
 )
 
 var emptyResponse interface{}
 
-func validateForm(tk data.Ticket) error {
-	if tk.Place == 0 || tk.TicketType == "" || tk.
-		Discount == "" || tk.Price == 0 || tk.TotalPrice == 0 || tk.
+//ValidateForm function validate incoming data from client
+func ValidateForm(tk data.Ticket) error {
+	if tk.Place <= 0 || tk.TicketType == "" || tk.
+		Discount == "" || tk.Price <= 0 || tk.TotalPrice <= 0 || tk.
 		Name == "" || tk.Surname == "" {
 		return errors.New("all fields must be complete")
 	}
@@ -25,12 +27,8 @@ func validateForm(tk data.Ticket) error {
 
 //GetAllTickets for GETing information about all tickets
 func GetAllTickets(w http.ResponseWriter, r *http.Request) {
-	tkts, err := database.GetAllTickets()
-	switch {
-	case err == sql.ErrNoRows:
-		common.RenderJSON(w, r, http.StatusNoContent, emptyResponse)
-		return
-	case err != nil:
+	tkts, err := database.TicketRepo.AllTickets()
+	if err != nil {
 		common.RenderJSON(w, r, http.StatusInternalServerError, tkts)
 		return
 	}
@@ -39,18 +37,9 @@ func GetAllTickets(w http.ResponseWriter, r *http.Request) {
 
 //GetOneTicket for GETing information about one tickets
 func GetOneTicket(w http.ResponseWriter, r *http.Request) {
-	id, err := model.GetID(r)
+	id := uuid.Must(uuid.Parse(bone.GetValue(r, "id")))
+	tk, err := database.TicketRepo.GetTicket(id)
 	if err != nil {
-		common.RenderJSON(w, r, http.StatusBadRequest, emptyResponse)
-		return
-	}
-
-	tk, err := database.GetTicket(id)
-	switch {
-	case err == sql.ErrNoRows:
-		common.RenderJSON(w, r, http.StatusNotFound, emptyResponse)
-		return
-	case err != nil:
 		common.RenderJSON(w, r, http.StatusInternalServerError, tk)
 		return
 	}
@@ -59,17 +48,15 @@ func GetOneTicket(w http.ResponseWriter, r *http.Request) {
 
 //CreateTicket (POST) for creating one tickets & add to DB
 func CreateTicket(w http.ResponseWriter, r *http.Request) {
-	// get values from client (json format)
 	tk := data.Ticket{}
-	tk.ID = model.GenerateID()
+	tk.ID = uuid.New()
 	err := json.NewDecoder(r.Body).Decode(&tk)
 	if err != nil {
 		common.RenderJSON(w, r, http.StatusBadRequest, tk)
 		return
 	}
 
-	// validate form values
-	err = validateForm(tk)
+	err = ValidateForm(tk)
 	if err != nil {
 		common.RenderJSON(w, r, http.StatusNotAcceptable, err.Error())
 		return
@@ -82,37 +69,27 @@ func CreateTicket(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//insert data to DB 'ticket' table
-	err = database.CreateTicket(tk)
-	switch {
-	case err == sql.ErrNoRows:
-		common.RenderJSON(w, r, http.StatusNotFound, emptyResponse)
-		return
-	case err != nil:
+	err = database.TicketRepo.CreateTicket(tk)
+	if err != nil {
 		common.RenderJSON(w, r, http.StatusInternalServerError, tk)
 		return
 	}
-	common.RenderJSON(w, r, http.StatusOK, tk)
+	common.RenderJSON(w, r, http.StatusCreated, tk)
 }
 
 //UpdateTicket (PATCH) for updating one tickets in DB
 func UpdateTicket(w http.ResponseWriter, r *http.Request) {
-	// get values from client (json format)
-	id, err := model.GetID(r)
-	if err != nil {
-		common.RenderJSON(w, r, http.StatusBadRequest, emptyResponse)
-		return
-	}
+	// get ID value from client (json format)
+	id := uuid.Must(uuid.Parse(bone.GetValue(r, "id")))
 	tk := data.Ticket{}
-	err = json.NewDecoder(r.Body).Decode(&tk)
+	err := json.NewDecoder(r.Body).Decode(&tk)
 	if err != nil {
 		common.RenderJSON(w, r, http.StatusBadRequest, tk)
 		return
 	}
 
 	tk.ID = id
-
-	// validate form values
-	err = validateForm(tk)
+	err = ValidateForm(tk)
 	if err != nil {
 		common.RenderJSON(w, r, http.StatusNotAcceptable, err.Error())
 		return
@@ -125,12 +102,8 @@ func UpdateTicket(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//insert data to DB 'ticket' table
-	err = database.UpdateTicket(tk)
-	switch {
-	case err == sql.ErrNoRows:
-		common.RenderJSON(w, r, http.StatusNotFound, emptyResponse)
-		return
-	case err != nil:
+	err = database.TicketRepo.UpdateTicket(tk)
+	if err != nil {
 		common.RenderJSON(w, r, http.StatusInternalServerError, tk)
 		return
 	}
@@ -139,17 +112,9 @@ func UpdateTicket(w http.ResponseWriter, r *http.Request) {
 
 //DeleteTicket (DELETE) for deleting one tickets in DB by id
 func DeleteTicket(w http.ResponseWriter, r *http.Request) {
-	id, err := model.GetID(r)
+	id := uuid.Must(uuid.Parse(bone.GetValue(r, "id")))
+	err := database.TicketRepo.DeleteTicket(id)
 	if err != nil {
-		common.RenderJSON(w, r, http.StatusBadRequest, emptyResponse)
-		return
-	}
-	err = database.DeleteTicket(id)
-	switch {
-	case err == sql.ErrNoRows:
-		common.RenderJSON(w, r, http.StatusNotFound, emptyResponse)
-		return
-	case err != nil:
 		common.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
 		return
 	}

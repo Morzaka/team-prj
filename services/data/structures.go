@@ -4,11 +4,13 @@ import "github.com/google/uuid"
 
 //User struct contains user data
 type User struct {
-	ID      uuid.UUID `json:"id"`
-	Signin  Signin    `json:"signin"`
-	Name    string    `json:"name"`
-	Surname string    `json:"surname"`
-	Role    string    `json:"role"`
+	ID       uuid.UUID `json:"id"`
+	Login    string    `json:"login"`
+	Password string    `json:"password"`
+	Name     string    `json:"name"`
+	Surname  string    `json:"surname"`
+	Email    string    `json:"email"`
+	Role     string    `json:"role"`
 }
 
 //Signin contains data for logging in
@@ -44,6 +46,18 @@ type Plane struct {
 	ArrivalCity   string    `json:"arrivalCity"`
 }
 
+//Routes contains result of algorithm
+type Routes struct {
+	RouteID  int      `json:"route"`
+	Stations Stations `json:"stations"`
+}
+
+//Stations contains departure and arrival stations
+type Stations struct {
+	StartRoute string `json:"start"`
+	EndRoute   string `json:"end"`
+}
+
 //Ticket datastructure
 type Ticket struct {
 	ID         uuid.UUID `json:"id"`
@@ -64,6 +78,3 @@ type Ticket struct {
 	//Arrival_date   time.Time `json:"arrival_date"`
 	//Arrival_time   time.Time `json:"arrival_time"`
 }
-
-//Tickets is a slice of Ticket
-type Tickets []Ticket
