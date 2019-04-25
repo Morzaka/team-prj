@@ -269,6 +269,12 @@ func TestDeleteTrain(t *testing.T) {
 			expected:  http.StatusOK,
 			mockedErr: nil,
 		},
+		{
+			tcase:     "DeleteTrainError",
+			url:       "/api/v1/train/08307904-f18e-4fb8-9d18-29cfad38ffaf",
+			expected:  http.StatusInternalServerError,
+			mockedErr: errors.New("db error"),
+		},
 	}
 	authorization.Admin = func(http.ResponseWriter, *http.Request) bool {
 		return true
@@ -281,7 +287,7 @@ func TestDeleteTrain(t *testing.T) {
 			req, _ := http.NewRequest(http.MethodDelete, tc.url, nil)
 			rec := httptest.NewRecorder()
 			database.Trains = trainMock
-			trainMock.EXPECT().DeleteTrain(uuid.Must(uuid.Parse("08307904-f18e-4fb8-9d18-29cfad38ffaf")))
+			trainMock.EXPECT().DeleteTrain(uuid.Must(uuid.Parse("08307904-f18e-4fb8-9d18-29cfad38ffaf"))).Return(tc.mockedErr)
 			router.ServeHTTP(rec, req)
 			if rec.Code != tc.expected {
 				t.Error("expected: ", tc.expected, " got: ", rec.Code)

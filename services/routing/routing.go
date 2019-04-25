@@ -78,7 +78,7 @@ func FindPath(w http.ResponseWriter, r *http.Request) {
 	for key, value := range RouteStorage {
 		if indexStart := IndexOfString(value, stations.StartRoute); indexStart != -1 {
 			if indexEnd := IndexOfString(value, stations.EndRoute); indexEnd != -1 {
-				result := data.Routes{key, stations}
+				result := data.Routes{RouteID: key, Stations: stations}
 				pathResult = append(pathResult, result)
 			}
 
