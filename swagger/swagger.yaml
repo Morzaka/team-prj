@@ -32,9 +32,9 @@ paths:
             $ref: "#/definitions/ErrorMessage"
   /register:
     post:
-      summary: "Register new user"
+      summary: "User's registration"
       tags:
-        - "create"
+        - "authorization"
       consumes:
         - "application/json"
       produces:
@@ -61,9 +61,9 @@ paths:
             $ref: "#/definitions/User"
   /login:
     post:
-      summary: "User logs in"
+      summary: "User's logging in"
       tags:
-        - "log in"
+        - "authorization"
       consumes:
         - "application/json"
       produces:
@@ -92,7 +92,7 @@ paths:
     post:
       summary: "Logging out"
       tags:
-        - "log out"
+        - "authorization"
       responses:
         '500':
           description: "Internal server error with database"
@@ -103,6 +103,8 @@ paths:
   /users:
     get:
       summary: "Get all users from database"
+      tags:
+        - "authorization"
       responses:
         '204':
           description: "No users in database to return"
@@ -116,7 +118,7 @@ paths:
     delete:
       summary: "Delete user from database"
       tags:
-        - "delete"
+        - "authorization"
       parameters:
         - name: "id"
           in: "path"
@@ -138,7 +140,7 @@ paths:
     patch:
       summary: "Update user in database"
       tags:
-        - "log out"
+        - "authorization"
       parameters:
         - name: "id"
           in: "path"
@@ -384,6 +386,102 @@ paths:
           description: "Database request failure"
       # security:
       #   - api_key: []
+  /trains:
+    get:
+      tags:
+        - "train"
+      summary: "Gets all trains"
+      operationId : "getTrains"
+      responses:
+        '200':
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Trains"
+        '500':
+          description: "error while getting data from db"
+          schema:
+            $ref: "#/definitions/ErrorMessage"
+        '204':
+          description: "No Content"
+          schema:
+            $ref: "#/definitions/NoContent"
+  /train:
+    get:
+      tags:
+        - "train"
+      summary: "Gets single train"
+      operationId: "getTrain"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Train"
+        400:
+          description: "Bad Request . Couldn't get id"
+          schema:
+            $ref: "#/definitions/ErrorMessage"
+        204:
+          description: "No Content"
+          schema:
+            $ref: "#/definitions/NoContent"
+    post:
+      tags:
+        - "train"
+      summary: "Creates train"
+      operationId: "CreateTrain"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Train"
+        500:
+          description: "error while adding data into db"
+          schema:
+            $ref: "#/definitions/ErrorMessage"
+        204:
+          description: "No Content"
+          schema:
+            $ref: "#/definitions/NoContent"
+    patch:
+      tags:
+        - "train"
+      summary: "Updates train"
+      operationId: "UpdateTrain"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Train"
+        400:
+          description: "Bad Request . Couldn't get id"
+          schema:
+            $ref: "#/definitions/ErrorMessage"
+        500:
+          description: "error while updating data into db"
+          schema:
+            $ref: "#/definitions/ErrorMessage"
+        204:
+          description: "No Content"
+          schema:
+            $ref: "#/definitions/NoContent"
+    delete:
+      tags:
+        - "train"
+      summary: "Deletes Train"
+      operationId: "DeleteTrain"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Train"
+        400:
+          description: "Bad Request . Couldn't get id"
+          schema:
+            $ref: "#/definitions/ErrorMessage"
+        500:
+          description: "error while deleting data from db"
+          schema:
+            $ref: "#/definitions/ErrorMessage"
 definitions:
   HelloMessage:
     type: "object"
@@ -497,3 +595,31 @@ definitions:
       Message:
         type: "string"
         description: "Error message"
+  Trains:
+    type: "array"
+    items:
+      $ref: "#/definitions/Train"
+  Train:
+    type: "object"
+    properties:
+      ID:
+        type: "string"
+        format: "uuid"
+      DepartureCity:
+        type: "string"
+      ArrivalCity:
+        type: "string"
+      DepartureTime:
+        type: "string"
+      DepartureDate:
+        type: "string"
+      ArrivalTime:
+        type: "string"
+      ArrivalDate:
+        type: "string"
+  NoContent:
+    type: "object"
+    properties:
+      Message:
+        type: "string"
+        description: "No Content error message"

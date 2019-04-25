@@ -48,7 +48,7 @@ type Plane struct {
 
 //Routes contains result of algorithm
 type Routes struct {
-	RouteID  int      `json:"route"`
+	RouteID  string   `json:"route"`
 	Stations Stations `json:"stations"`
 }
 
@@ -57,6 +57,15 @@ type Stations struct {
 	StartRoute string `json:"start"`
 	EndRoute   string `json:"end"`
 }
+
+//RouteStruct is a struct of Routes
+type RouteStruct struct {
+	Index  string   `json:"index"`
+	Routes []string `json:"routes"`
+}
+
+// RouteStructs is a slice of Struct of Routes
+type RouteStructs []RouteStruct
 
 //Ticket datastructure
 type Ticket struct {

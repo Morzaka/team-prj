@@ -2,7 +2,6 @@ package database
 
 import (
 	"database/sql"
-
 	"net/url"
 	"os"
 
@@ -21,6 +20,7 @@ var (
 //PostgresInit connects to postgres database
 func PostgresInit() error {
 	db, err := sql.Open("postgres", os.Getenv("DATABASE_URL")) // heroku requires to get connection from env variable
+	//db, err := sql.Open("postgres", fmt.Sprintf("host=%s port=%s user=%s "+"password=%s dbname=%s sslmode=disable", configurations.Config.PgHost, configurations.Config.PgPort, configurations.Config.PgUser, configurations.Config.PgPassword, configurations.Config.PgName))
 	if err != nil {
 		return err
 	}
