@@ -20,15 +20,18 @@ func TestAddUser(t *testing.T) {
 	}
 	Db = db
 	defer db.Close()
-	id := uuid.Must(uuid.Parse("08307904-f18e-4fb8-9d18-29cfad38ffaf"))
+	id, err := uuid.Parse("08307904-f18e-4fb8-9d18-29cfad38ffaf")
+	if err != nil {
+		t.Fatal(err)
+	}
 	user := data.User{ID: id,
 		Login:    "whythat",
 		Password: "whythat",
 		Name:     "Yuri",
 		Surname:  "Zhykin",
-		Role:     "User",
+		Email:    "yuri77@gmail.com",
 	}
-	mock.ExpectExec("INSERT INTO public.user").WithArgs(user.ID, user.Name, user.Surname, user.Login, user.Password, user.Role).WillReturnResult(sqlmock.NewResult(1, 1))
+	mock.ExpectExec("INSERT INTO public.user").WithArgs(user.ID, user.Name, user.Surname, user.Login, user.Password, user.Email).WillReturnResult(sqlmock.NewResult(1, 1))
 	// now we execute our method
 	if user, err = userTest.AddUser(user); err != nil {
 		t.Errorf("error was not expected while adding user: %s", err)
@@ -47,7 +50,10 @@ func TestDeleteUser(t *testing.T) {
 	}
 	Db = db
 	defer db.Close()
-	id := uuid.Must(uuid.Parse("08307904-f18e-4fb8-9d18-29cfad38ffaf"))
+	id, err := uuid.Parse("08307904-f18e-4fb8-9d18-29cfad38ffaf")
+	if err != nil {
+		t.Fatal(err)
+	}
 	mock.ExpectExec("DELETE").WithArgs(id).WillReturnResult(sqlmock.NewResult(0, 1))
 	// now we execute our method
 	if _, err = userTest.DeleteUser(id); err != nil {
@@ -63,16 +69,19 @@ func TestUpdateUser(t *testing.T) {
 	}
 	Db = db
 	defer db.Close()
-	id := uuid.Must(uuid.Parse("08307904-f18e-4fb8-9d18-29cfad38ffaf"))
+	id, err := uuid.Parse("08307904-f18e-4fb8-9d18-29cfad38ffaf")
+	if err != nil {
+		t.Fatal(err)
+	}
 	user := data.User{
 		ID:       id,
 		Login:    "whythat",
 		Password: "whythat",
 		Name:     "Jakob",
 		Surname:  "Spalding",
-		Role:     "User",
+		Email:    "jake11spal@gmail.com",
 	}
-	mock.ExpectExec("UPDATE public.user").WithArgs(id, user.Name, user.Surname, user.Login, user.Password, user.Role).WillReturnResult(sqlmock.NewResult(0, 1))
+	mock.ExpectExec("UPDATE public.user").WithArgs(id, user.Name, user.Surname, user.Login, user.Password, user.Email).WillReturnResult(sqlmock.NewResult(0, 1))
 	// now we execute our method
 	if _, err = userTest.UpdateUser(user, id); err != nil {
 		t.Errorf("error was not expected while deleting user: %s", err)
@@ -137,8 +146,11 @@ func TestGetAllUsers(t *testing.T) {
 	}
 	Db = db
 	defer db.Close()
-	id := uuid.Must(uuid.Parse("08307904-f18e-4fb8-9d18-29cfad38ffaf"))
-	rows := sqlmock.NewRows([]string{"id", "name", "surname", "login", "password", "role"}).AddRow(id, "Oksana", "Zhykina", "litleskew", "littleskew", "User")
+	id, err := uuid.Parse("08307904-f18e-4fb8-9d18-29cfad38ffaf")
+	if err != nil {
+		t.Fatal(err)
+	}
+	rows := sqlmock.NewRows([]string{"id", "name", "surname", "login", "password", "role", "email"}).AddRow(id, "Oksana", "Zhykina", "litleskew", "littleskew", "User", "oks8@gmail.com")
 	mock.ExpectQuery("SELECT").WillReturnRows(rows)
 	if _, err = userTest.GetAllUsers(); err != nil {
 		t.Errorf("error was not expected while getting user: %s", err)

@@ -74,7 +74,7 @@ func CreateTicket(w http.ResponseWriter, r *http.Request) {
 		common.RenderJSON(w, r, http.StatusInternalServerError, tk)
 		return
 	}
-	common.RenderJSON(w, r, http.StatusOK, tk)
+	common.RenderJSON(w, r, http.StatusCreated, tk)
 }
 
 //UpdateTicket (PATCH) for updating one tickets in DB
