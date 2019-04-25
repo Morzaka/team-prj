@@ -47,7 +47,7 @@ func main() {
 	middlewareManager.UseHandler(services.NewRouter())
 	fmt.Println("Starting HTTP listener...")
 	//Starting server
-	err = http.ListenAndServe(port, middlewareManager)
+	err = http.ListenAndServe(":"+port, middlewareManager)
 	if err != nil {
 		logger.Logger.Errorf("Error, %s", err)
 	}
