@@ -5,9 +5,9 @@ import (
 	"team-project/services/authorization"
 	"team-project/services/booking"
 	"team-project/services/plane"
+	"team-project/services/routing"
 	"team-project/services/train"
 	"team-project/swagger"
-	"team-project/services/routing"
 )
 
 //NewRouter creates a router for URL

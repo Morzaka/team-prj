@@ -5,14 +5,13 @@ import (
 	"strconv"
 	"team-project/services/data"
 	"testing"
-
 )
+
 var (
 	stations   data.Stations
 	pathResult []data.Routes
 	sum        int
 )
-
 
 //test if path from Lviv to Kyiv contains TrainsId
 func testRouting(t *testing.T) {

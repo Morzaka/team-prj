@@ -5,21 +5,19 @@ import (
 	"io/ioutil"
 	"net/http"
 	"team-project/configurations"
-	"time"
-	"team-project/services/data"
 	"team-project/logger"
 	"team-project/services/common"
-	)
-
-
+	"team-project/services/data"
+	"time"
+)
 
 var (
 	//RouteStorage is a map of stations id as key and stations as value
 	RouteStorage map[string][]string
 	initialised  = false
+	myClient     = &http.Client{Timeout: 10 * time.Second}
 )
 
-var myClient = &http.Client{Timeout: 10 * time.Second}
 //indexOf function finds first occurence of element in the slice
 func indexOf(n int, f func(int) bool) int {
 	for i := 0; i < n; i++ {
@@ -29,16 +27,14 @@ func indexOf(n int, f func(int) bool) int {
 	}
 	return -1
 }
+
 //IndexOfString gets the index at which the first occurrence of a string value is found in array or return -1
 // if the value cannot be found
-
 func IndexOfString(a []string, x string) int {
 	return indexOf(len(a), func(i int) bool { return a[i] == x })
 }
 
-
-
-//gets railroad Data
+//getData gets railroad Data
 func getData() map[string][]string {
 	routeS := make(map[string][]string, 100)
 	r, err := myClient.Get(configurations.Config.JSONApi)
