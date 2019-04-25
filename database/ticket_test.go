@@ -90,10 +90,10 @@ func TestGetTicket(t *testing.T) {
 	mock.ExpectQuery("SELECT").WithArgs(errID).WillReturnError(fmt.Errorf(
 		"no rows found"))
 	if _, err := TicketRepo.GetTicket(id); err != nil {
-		t.Errorf("error was not expected while getting user: %s", err)
+		t.Errorf("error was not expected while getting ticket: %s", err)
 	}
 	if _, err := TicketRepo.GetTicket(errID); err == nil {
-		t.Errorf("error was not expected while getting user: %s", err)
+		t.Errorf("error was not expected while getting ticket: %s", err)
 	}
 	// Checks whether all queued expectations were met in order.
 	// If any of them was not met - an error is returned.
@@ -140,7 +140,7 @@ func TestUpdateTicket(t *testing.T) {
 		ticket.Name, ticket.Surname).WillReturnResult(sqlmock.NewResult(0, 1))
 
 	if err := TicketRepo.UpdateTicket(ticket); err != nil {
-		t.Errorf("error was not expected while deleting user: %s", err)
+		t.Errorf("error was not expected while updating tickets: %s", err)
 	}
 }
 
@@ -153,6 +153,6 @@ func TestDeleteTicket(t *testing.T) {
 		NewResult(0, 1))
 
 	if err := TicketRepo.DeleteTicket(testID); err != nil {
-		t.Errorf("error was not expected while deleting user: %s", err)
+		t.Errorf("error was not expected while deleting ticket: %s", err)
 	}
 }

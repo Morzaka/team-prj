@@ -10,6 +10,7 @@ import (
 
 	"team-project/database"
 	"team-project/services"
+	"team-project/services/authorization"
 	"team-project/services/booking"
 	"team-project/services/data"
 
@@ -34,13 +35,14 @@ var testData = data.Ticket{
 var router = services.NewRouter()
 
 type ListTicketTestCase struct {
-	name          string
-	id            uuid.UUID
-	url           string
-	want          int
-	mockedTicket  data.Ticket
-	mockedTickets []data.Ticket
-	mockedError   error
+	name            string
+	id              uuid.UUID
+	url             string
+	want            int
+	mockedTicket    data.Ticket
+	mockedTickets   []data.Ticket
+	mockedError     error
+	mockedAuthorize bool
 }
 
 func TestValidateForm(t *testing.T) {
@@ -106,33 +108,45 @@ func TestValidateForm(t *testing.T) {
 func TestGetAllTickets(t *testing.T) {
 	tests := []ListTicketTestCase{
 		{
-			name:          "Get_Tickets_200",
-			url:           "/api/v1/tickets",
-			want:          http.StatusOK,
-			mockedTickets: []data.Ticket{},
-			mockedError:   nil,
+			name:            "Get_Tickets_200",
+			url:             "/api/v1/tickets",
+			want:            http.StatusOK,
+			mockedTickets:   []data.Ticket{},
+			mockedError:     nil,
+			mockedAuthorize: true,
 		},
 		{
-			name:          "Get_Tickets_500",
-			url:           "/api/v1/tickets",
-			want:          http.StatusInternalServerError,
-			mockedTickets: []data.Ticket{},
-			mockedError:   errors.New("db error"),
+			name:            "Get_Tickets_500",
+			url:             "/api/v1/tickets",
+			want:            http.StatusInternalServerError,
+			mockedTickets:   []data.Ticket{},
+			mockedError:     errors.New("db error"),
+			mockedAuthorize: true,
+		},
+		{
+			name:            "Get_Tickets_403",
+			url:             "/api/v1/tickets",
+			want:            http.StatusForbidden,
+			mockedAuthorize: false,
 		},
 	}
 
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
+	defer func() { authorization.AdminRole = authorization.CheckAccess }()
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			ticketMock := database.NewMockTicketRepository(mockCtrl)
-			ticketMock.EXPECT().AllTickets().Return(tc.mockedTickets, tc.mockedError)
-			database.TicketRepo = ticketMock
-
+			authorization.AdminRole = func(w http.ResponseWriter, r *http.Request) bool {
+				return tc.mockedAuthorize
+			}
+			if tc.mockedAuthorize {
+				ticketMock := database.NewMockTicketRepository(mockCtrl)
+				ticketMock.EXPECT().AllTickets().Return(tc.mockedTickets, tc.mockedError)
+				database.TicketRepo = ticketMock
+			}
 			rw := httptest.NewRecorder()
 			req, _ := http.NewRequest(http.MethodGet, tc.url, nil)
-			//http.HandlerFunc(.GetAllTickets).ServeHTTP(rw, req)
 			router.ServeHTTP(rw, req)
 
 			if rw.Code != tc.want {
@@ -145,29 +159,41 @@ func TestGetAllTickets(t *testing.T) {
 func TestGetOneTicket(t *testing.T) {
 	tests := []ListTicketTestCase{
 		{
-			name:         "Get_Ticket_200",
-			id:           uuid.Must(uuid.Parse("fcb33af4-40a3-4c82-afb1-218731052309")),
-			url:          "/api/v1/ticket/fcb33af4-40a3-4c82-afb1-218731052309",
-			want:         http.StatusOK,
-			mockedTicket: testData,
-			mockedError:  nil,
+			name:            "Get_Ticket_200",
+			id:              uuid.Must(uuid.Parse("fcb33af4-40a3-4c82-afb1-218731052309")),
+			url:             "/api/v1/ticket/fcb33af4-40a3-4c82-afb1-218731052309",
+			want:            http.StatusOK,
+			mockedTicket:    testData,
+			mockedError:     nil,
+			mockedAuthorize: true,
 		},
 		{
-			name:         "Get_Tickets_500",
-			id:           uuid.Must(uuid.Parse("0e3763c6-a7ed-4532-afd7-420c5a480000")),
-			url:          "/api/v1/ticket/0e3763c6-a7ed-4532-afd7-420c5a480000",
-			want:         http.StatusInternalServerError,
-			mockedTicket: data.Ticket{},
-			mockedError:  errors.New("db error"),
+			name:            "Get_Tickets_500",
+			id:              uuid.Must(uuid.Parse("0e3763c6-a7ed-4532-afd7-420c5a480000")),
+			url:             "/api/v1/ticket/0e3763c6-a7ed-4532-afd7-420c5a480000",
+			want:            http.StatusInternalServerError,
+			mockedTicket:    data.Ticket{},
+			mockedError:     errors.New("db error"),
+			mockedAuthorize: true,
+		},
+		{
+			name:            "Get_Tickets_403",
+			url:             "/api/v1/ticket/fcb33af4-40a3-4c82-afb1-218731052309",
+			want:            http.StatusForbidden,
+			mockedAuthorize: false,
 		},
 	}
 
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
+	defer func() { authorization.LoggedIn = authorization.CheckAccess }()
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			if tc.name != "Get_Tickets_400" {
+			authorization.LoggedIn = func(w http.ResponseWriter, r *http.Request) bool {
+				return tc.mockedAuthorize
+			}
+			if tc.mockedAuthorize {
 				ticketMock := database.NewMockTicketRepository(mockCtrl)
 				ticketMock.EXPECT().GetTicket(tc.id).Return(tc.mockedTicket,
 					tc.mockedError)
@@ -176,7 +202,6 @@ func TestGetOneTicket(t *testing.T) {
 
 			rw := httptest.NewRecorder()
 			req, _ := http.NewRequest(http.MethodGet, tc.url, nil)
-			//http.HandlerFunc(GetOneTicket).ServeHTTP(rw, req)
 			router.ServeHTTP(rw, req)
 			if rw.Code != tc.want {
 				t.Errorf("Expected: %d , got %d", tc.want, rw.Code)
@@ -197,34 +222,47 @@ func TestCreateTicket(t *testing.T) {
 	}
 	tests := []ListTicketTestCase{
 		{
-			name:         "Post_Ticket_201",
-			url:          "/api/v1/ticket",
-			want:         http.StatusCreated,
-			mockedTicket: ticket,
-			mockedError:  nil,
+			name:            "Post_Ticket_201",
+			url:             "/api/v1/ticket",
+			want:            http.StatusCreated,
+			mockedTicket:    ticket,
+			mockedError:     nil,
+			mockedAuthorize: true,
 		},
 		{
-			name:         "Post_Tickets_500",
-			url:          "/api/v1/ticket",
-			want:         http.StatusInternalServerError,
-			mockedTicket: ticket,
-			mockedError:  errors.New("db error"),
+			name:            "Post_Tickets_500",
+			url:             "/api/v1/ticket",
+			want:            http.StatusInternalServerError,
+			mockedTicket:    ticket,
+			mockedError:     errors.New("db error"),
+			mockedAuthorize: true,
 		},
 		{
-			name:         "Post_Tickets_406",
-			url:          "/api/v1/ticket",
-			want:         http.StatusNotAcceptable,
-			mockedTicket: data.Ticket{},
-			mockedError:  errors.New("validation failure"),
+			name:            "Post_Tickets_406",
+			url:             "/api/v1/ticket",
+			want:            http.StatusNotAcceptable,
+			mockedTicket:    data.Ticket{},
+			mockedError:     errors.New("validation failure"),
+			mockedAuthorize: true,
+		},
+		{
+			name:            "Get_Tickets_403",
+			url:             "/api/v1/ticket",
+			want:            http.StatusForbidden,
+			mockedAuthorize: false,
 		},
 	}
 
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
+	defer func() { authorization.AdminRole = authorization.CheckAccess }()
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			if tc.name != "Post_Tickets_406" {
+			authorization.AdminRole = func(w http.ResponseWriter, r *http.Request) bool {
+				return tc.mockedAuthorize
+			}
+			if tc.name != "Post_Tickets_406" && tc.mockedAuthorize {
 				ticketMock := database.NewMockTicketRepository(mockCtrl)
 				ticketMock.EXPECT().CreateTicket(tc.mockedTicket).Return(tc.mockedError)
 				database.TicketRepo = ticketMock
@@ -257,34 +295,47 @@ func TestUpdateTicket(t *testing.T) {
 	}
 	tests := []ListTicketTestCase{
 		{
-			name:         "Patch_Ticket_200",
-			url:          "/api/v1/ticket/fcb33af4-40a3-4c82-afb1-218731052309",
-			want:         http.StatusOK,
-			mockedTicket: ticket,
-			mockedError:  nil,
+			name:            "Patch_Ticket_200",
+			url:             "/api/v1/ticket/fcb33af4-40a3-4c82-afb1-218731052309",
+			want:            http.StatusOK,
+			mockedTicket:    ticket,
+			mockedError:     nil,
+			mockedAuthorize: true,
 		},
 		{
-			name:         "Patch_Tickets_500",
-			url:          "/api/v1/ticket/fcb33af4-40a3-4c82-afb1-218731052309",
-			want:         http.StatusInternalServerError,
-			mockedTicket: ticket,
-			mockedError:  errors.New("db error"),
+			name:            "Patch_Tickets_500",
+			url:             "/api/v1/ticket/fcb33af4-40a3-4c82-afb1-218731052309",
+			want:            http.StatusInternalServerError,
+			mockedTicket:    ticket,
+			mockedError:     errors.New("db error"),
+			mockedAuthorize: true,
 		},
 		{
-			name:         "Patch_Tickets_406",
-			url:          "/api/v1/ticket/fcb33af4-40a3-4c82-afb1-218731052309",
-			want:         http.StatusNotAcceptable,
-			mockedTicket: data.Ticket{},
-			mockedError:  errors.New("validation failure"),
+			name:            "Patch_Tickets_406",
+			url:             "/api/v1/ticket/fcb33af4-40a3-4c82-afb1-218731052309",
+			want:            http.StatusNotAcceptable,
+			mockedTicket:    data.Ticket{},
+			mockedError:     errors.New("validation failure"),
+			mockedAuthorize: true,
+		},
+		{
+			name:            "Get_Tickets_403",
+			url:             "/api/v1/ticket/fcb33af4-40a3-4c82-afb1-218731052309",
+			want:            http.StatusForbidden,
+			mockedAuthorize: false,
 		},
 	}
 
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
+	defer func() { authorization.AdminRole = authorization.CheckAccess }()
 
 	for _, tc := range tests {
+		authorization.AdminRole = func(w http.ResponseWriter, r *http.Request) bool {
+			return tc.mockedAuthorize
+		}
 		t.Run(tc.name, func(t *testing.T) {
-			if tc.name != "Patch_Tickets_406" {
+			if tc.name != "Patch_Tickets_406" && tc.mockedAuthorize {
 				ticketMock := database.NewMockTicketRepository(mockCtrl)
 				ticketMock.EXPECT().UpdateTicket(tc.mockedTicket).Return(tc.mockedError)
 				database.TicketRepo = ticketMock
@@ -307,31 +358,43 @@ func TestUpdateTicket(t *testing.T) {
 func TestDeleteTicket(t *testing.T) {
 	tests := []ListTicketTestCase{
 		{
-			name:        "Delete_Ticket_404",
-			id:          uuid.Must(uuid.Parse("fcb33af4-40a3-4c82-afb1-218731052309")),
-			url:         "/api/v1/ticket/fcb33af4-40a3-4c82-afb1-218731052309",
-			want:        http.StatusNotFound,
-			mockedError: nil,
+			name:            "Delete_Ticket_200",
+			id:              uuid.Must(uuid.Parse("fcb33af4-40a3-4c82-afb1-218731052309")),
+			url:             "/api/v1/ticket/fcb33af4-40a3-4c82-afb1-218731052309",
+			want:            http.StatusOK,
+			mockedError:     nil,
+			mockedAuthorize: true,
 		},
 		{
-			name:        "Delete_Tickets_500",
-			id:          uuid.Must(uuid.Parse("fcb33af4-40a3-4c82-afb1-218731052309")),
-			url:         "/api/v1/ticket/fcb33af4-40a3-4c82-afb1-218731052309",
-			want:        http.StatusInternalServerError,
-			mockedError: errors.New("db error"),
+			name:            "Delete_Tickets_500",
+			id:              uuid.Must(uuid.Parse("fcb33af4-40a3-4c82-afb1-218731052309")),
+			url:             "/api/v1/ticket/fcb33af4-40a3-4c82-afb1-218731052309",
+			want:            http.StatusInternalServerError,
+			mockedError:     errors.New("db error"),
+			mockedAuthorize: true,
+		},
+		{
+			name:            "Get_Tickets_403",
+			url:             "/api/v1/ticket/fcb33af4-40a3-4c82-afb1-218731052309",
+			want:            http.StatusForbidden,
+			mockedAuthorize: false,
 		},
 	}
 
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
+	defer func() { authorization.AdminRole = authorization.CheckAccess }()
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-
-			ticketMock := database.NewMockTicketRepository(mockCtrl)
-			ticketMock.EXPECT().DeleteTicket(tc.id).Return(tc.mockedError)
-			database.TicketRepo = ticketMock
-
+			authorization.AdminRole = func(w http.ResponseWriter, r *http.Request) bool {
+				return tc.mockedAuthorize
+			}
+			if tc.mockedAuthorize {
+				ticketMock := database.NewMockTicketRepository(mockCtrl)
+				ticketMock.EXPECT().DeleteTicket(tc.id).Return(tc.mockedError)
+				database.TicketRepo = ticketMock
+			}
 			rw := httptest.NewRecorder()
 			req, _ := http.NewRequest(http.MethodDelete, tc.url, nil)
 			router.ServeHTTP(rw, req)

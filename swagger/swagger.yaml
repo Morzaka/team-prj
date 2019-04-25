@@ -9,10 +9,7 @@ basePath: "/api/v1"
 produces:
   - "application/json"
 consumes:
-  - application/json
-tags:
-- name: "train"
-  description: "Train CRUD"
+  - "application/json"
 paths:
   /hello/{name}:
     get:
@@ -91,7 +88,6 @@ paths:
           description: "User logged in"
           schema:
             $ref: "#/definitions/Login"
-
   /logout:
     post:
       summary: "Logging out"
@@ -161,6 +157,24 @@ paths:
             $ref: "#/definitions/Response"
         '200':
           description: "User was updated successfully"
+          schema:
+            $ref: "#/definitions/User"
+    get:
+      summary: "Get user by login"
+      tags:
+        - "authorization"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          type: "string"
+      responses:
+        '404':
+          description: "User was not found in database"
+          schema:
+            $ref: "#/definitions/Response"
+        '200':
+          description: "User was returned successfully"
           schema:
             $ref: "#/definitions/User"
   /planes:
@@ -259,102 +273,6 @@ paths:
           description: Can't update plane
           schema:
             $ref: "#/definitions/ErrorMessage"
-  /trains:
-    get:
-      tags:
-        - "train"
-      summary: "Gets all trains"
-      operationId : "getTrains"
-      responses:
-        '200':
-          description: "successful operation"
-          schema: 
-            $ref: "#/definitions/Trains"
-        '500':
-          description: "error while getting data from db"
-          schema:
-            $ref: "#/definitions/ErrorMessage"
-        '204':
-          description: "No Content"
-          schema: 
-            $ref: "#/definitions/NoContent"
-  /train:
-    get:
-      tags:
-        - "train"
-      summary: "Gets single train"
-      operationId: "getTrain"
-      responses:
-        200:
-          description: "successful operation"
-          schema: 
-            $ref: "#/definitions/Train"
-        400:
-          description: "Bad Request . Couldn't get id"
-          schema: 
-            $ref: "#/definitions/ErrorMessage"
-        204:
-          description: "No Content"
-          schema: 
-            $ref: "#/definitions/NoContent"
-    post:
-      tags:
-        - "train"
-      summary: "Creates train"
-      operationId: "CreateTrain"
-      responses:
-        200:
-          description: "successful operation"
-          schema: 
-            $ref: "#/definitions/Train"
-        500:
-          description: "error while adding data into db"
-          schema:
-            $ref: "#/definitions/ErrorMessage"
-        204:
-          description: "No Content"
-          schema: 
-            $ref: "#/definitions/NoContent"
-    patch:
-      tags:
-        - "train"
-      summary: "Updates train"
-      operationId: "UpdateTrain"
-      responses:
-        200:
-          description: "successful operation"
-          schema: 
-            $ref: "#/definitions/Train"
-        400:
-          description: "Bad Request . Couldn't get id"
-          schema: 
-            $ref: "#/definitions/ErrorMessage"
-        500:
-          description: "error while updating data into db"
-          schema:
-            $ref: "#/definitions/ErrorMessage"
-        204:
-          description: "No Content"
-          schema: 
-            $ref: "#/definitions/NoContent"
-    delete:
-      tags:
-        - "train"
-      summary: "Deletes Train"
-      operationId: "DeleteTrain"
-      responses:
-        200:
-          description: "successful operation"
-          schema: 
-            $ref: "#/definitions/Train"
-        400:
-          description: "Bad Request . Couldn't get id"
-          schema: 
-            $ref: "#/definitions/ErrorMessage"
-        500:
-          description: "error while deleting data from db"
-          schema:
-            $ref: "#/definitions/ErrorMessage"
   /tickets:
     get:
       tags:
@@ -372,8 +290,8 @@ paths:
             $ref: "#/definitions/Tickets"
         500:
           description: "Database request failure"
-      security:
-        - api_key: []
+      # security:
+      #   - api_key: []
   /ticket:
     post:
       tags:
@@ -394,15 +312,15 @@ paths:
         201:
           description: "Ticked successful created"
           schema:
-            $ref: "#/definitions/Tickets"
+            $ref: "#/definitions/TicketFull"
         406:
           description: "All fields must be complete"
           schema:
             $ref: "#/definitions/Ticket"
         500:
           description: "Database request failure"
-      security:
-        - api_key: []
+      # security:
+      #   - api_key: []
   /ticket/{ticketId}:
     get:
       tags:
@@ -423,7 +341,7 @@ paths:
         200:
           description: "successful operation"
           schema:
-            $ref: "#/definitions/Tickets"
+            $ref: "#/definitions/TicketFull"
         400:
           description: "Invalid ID supplied"
         500:
@@ -453,15 +371,15 @@ paths:
         200:
           description: "successfully updated"
           schema:
-            $ref: "#/definitions/Tickets"
+            $ref: "#/definitions/TicketFull"
         400:
           description: "Invalid Ticked supplied"
         404:
           description: "Ticked not found"
         500:
           description: "Database request failure"
-      security:
-        - api_key: []
+      # security:
+      #   - api_key: []
     delete:
       tags:
         - "tickets"
@@ -484,8 +402,104 @@ paths:
           description: "Ticket not found. Successfully deleted"
         500:
           description: "Database request failure"
-      security:
-        - api_key: []
+      # security:
+      #   - api_key: []
+  /trains:
+    get:
+      tags:
+        - "train"
+      summary: "Gets all trains"
+      operationId : "getTrains"
+      responses:
+        '200':
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Trains"
+        '500':
+          description: "error while getting data from db"
+          schema:
+            $ref: "#/definitions/ErrorMessage"
+        '204':
+          description: "No Content"
+          schema:
+            $ref: "#/definitions/NoContent"
+  /train:
+    get:
+      tags:
+        - "train"
+      summary: "Gets single train"
+      operationId: "getTrain"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Train"
+        400:
+          description: "Bad Request . Couldn't get id"
+          schema:
+            $ref: "#/definitions/ErrorMessage"
+        204:
+          description: "No Content"
+          schema:
+            $ref: "#/definitions/NoContent"
+    post:
+      tags:
+        - "train"
+      summary: "Creates train"
+      operationId: "CreateTrain"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Train"
+        500:
+          description: "error while adding data into db"
+          schema:
+            $ref: "#/definitions/ErrorMessage"
+        204:
+          description: "No Content"
+          schema:
+            $ref: "#/definitions/NoContent"
+    patch:
+      tags:
+        - "train"
+      summary: "Updates train"
+      operationId: "UpdateTrain"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Train"
+        400:
+          description: "Bad Request . Couldn't get id"
+          schema:
+            $ref: "#/definitions/ErrorMessage"
+        500:
+          description: "error while updating data into db"
+          schema:
+            $ref: "#/definitions/ErrorMessage"
+        204:
+          description: "No Content"
+          schema:
+            $ref: "#/definitions/NoContent"
+    delete:
+      tags:
+        - "train"
+      summary: "Deletes Train"
+      operationId: "DeleteTrain"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Train"
+        400:
+          description: "Bad Request . Couldn't get id"
+          schema:
+            $ref: "#/definitions/ErrorMessage"
+        500:
+          description: "error while deleting data from db"
+          schema:
+            $ref: "#/definitions/ErrorMessage"
 definitions:
   HelloMessage:
     type: "object"
@@ -557,7 +571,7 @@ definitions:
         type: "string"
       surname:
         type: "string"
-  Tickets:
+  TicketFull:
     type: "object"
     properties:
       id:
@@ -589,6 +603,10 @@ definitions:
         type: "string"
       surname:
         type: "string"
+  Tickets:
+    type: "array"
+    items:
+      $ref: "#/definitions/TicketFull"
   ErrorMessage:
     type: "object"
     properties:

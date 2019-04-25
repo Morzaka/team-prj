@@ -160,3 +160,26 @@ func TestGetAllUsers(t *testing.T) {
 		t.Errorf("there were unfulfilled expectations: %s", err)
 	}
 }
+
+//TestGetUser tests function GetUser
+func TestGetUser(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+	}
+	Db = db
+	defer db.Close()
+	id, err := uuid.Parse("08307904-f18e-4fb8-9d18-29cfad38ffaf")
+	if err != nil {
+		t.Fatal(err)
+	}
+	row := sqlmock.NewRows([]string{"id", "name", "surname", "login", "password", "role", "email"}).AddRow(id, "Oksana", "Zhykina", "litleskew", "littleskew", "User", "oks8@gmail.com")
+	mock.ExpectQuery("SELECT").WillReturnRows(row)
+	if _, err = userTest.GetUser(id); err != nil {
+		t.Errorf("error was not expected while getting user: %s", err)
+	}
+	// we make sure that all expectations were met
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Errorf("there were unfulfilled expectations: %s", err)
+	}
+}
