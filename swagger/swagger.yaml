@@ -158,6 +158,233 @@ paths:
           description: "User was updated successfully"
           schema:
             $ref: "#/definitions/User"
+  /planes:
+    get:
+      summary: Get all planes from Database
+      tags:
+        - get
+      responses:
+        '200':
+          description: Planes get successfully
+          schema:
+            $ref: "#/definitions/Plane"
+        '404':
+          description: Can't find plane with such id
+  /plane:
+    post:
+      summary: Create plane to Database
+      tags:
+        - create
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: The plane to create
+          required: true
+          schema:
+            $ref: "#/definitions/Plane"
+      responses:
+        '201':
+          description: Plane create successfully
+          schema:
+            $ref: "#/definitions/Plane"
+        '400':
+          description: Can't create plane
+          schema:
+            $ref: "#/definitions/ErrorMessage"
+  /plane/{id}:
+    get:
+      summary: Get plane from Database
+      tags:
+        - get
+      consumes:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        '201':
+          description: Plane get successfully
+          schema:
+            $ref: "#/definitions/Plane"
+        '400':
+          description: Can't get plane
+          schema:
+            $ref: "#/definitions/ErrorMessage"
+    delete:
+      summary: Delete plane from DB
+      tags:
+        - delete
+      consumes:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        '201':
+          description: Plane delete successfully
+          schema:
+            $ref: "#/definitions/Plane"
+        '400':
+          description: Can't delete plane
+          schema:
+            $ref: "#/definitions/ErrorMessage"
+    patch:
+      summary: Update plane from Database
+      tags:
+        - update
+      consumes:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        '201':
+          description: Plane update successfully
+          schema:
+            $ref: "#/definitions/Plane"
+        '400':
+          description: Can't update plane
+          schema:
+            $ref: "#/definitions/ErrorMessage"
+  /tickets:
+    get:
+      tags:
+        - "tickets"
+      summary: "Returns list of tickets"
+      description: "Returns a map of status codes to quantities"
+      operationId: "getAllTickets"
+      produces:
+        - "application/json"
+      #parameters: []
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Tickets"
+        500:
+          description: "Database request failure"
+      security:
+        - api_key: []
+  /ticket:
+    post:
+      tags:
+        - "tickets"
+      summary: "Create new ticket item in DB"
+      description: ""
+      operationId: "createTicket"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "params for creating ticket"
+          required: true
+          schema:
+            $ref: "#/definitions/Ticket"
+      responses:
+        201:
+          description: "Ticked successful created"
+          schema:
+            $ref: "#/definitions/Tickets"
+        406:
+          description: "All fields must be complete"
+          schema:
+            $ref: "#/definitions/Ticket"
+        500:
+          description: "Database request failure"
+      security:
+        - api_key: []
+  /ticket/{ticketId}:
+    get:
+      tags:
+        - "tickets"
+      summary: "Find ticket by ID"
+      description: "For valid response use uuid format."
+      operationId: "getTicketById"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "ticketId"
+          in: "path"
+          description: "ID of ticket that needs to be fetched"
+          required: true
+          type: "string"
+          format: "uuid"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Tickets"
+        400:
+          description: "Invalid ID supplied"
+        500:
+          description: "Database request failure"
+    patch:
+      tags:
+        - "tickets"
+      summary: "Updated ticket"
+      description: "For valid response use uuid format."
+      operationId: "updateTicket"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "ticketId"
+          in: "path"
+          description: "ticket ID that need to be updated."
+          required: true
+          type: "string"
+          format: "uuid"
+        - in: "body"
+          name: "body"
+          description: "Updated ticket object"
+          required: true
+          schema:
+            $ref: "#/definitions/Ticket"
+      responses:
+        200:
+          description: "successfully updated"
+          schema:
+            $ref: "#/definitions/Tickets"
+        400:
+          description: "Invalid Ticked supplied"
+        404:
+          description: "Ticked not found"
+        500:
+          description: "Database request failure"
+      security:
+        - api_key: []
+    delete:
+      tags:
+        - "tickets"
+      summary: "Delete ticket by ID"
+      description: "For valid response use uuid format."
+      operationId: "deleteTicket"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "ticketId"
+          in: "path"
+          description: "ID of ticket that needs to be deleted."
+          required: true
+          type: "string"
+          format: "uuid"
+      responses:
+        400:
+          description: "Invalid ID supplied"
+        404:
+          description: "Ticket not found. Successfully deleted"
+        500:
+          description: "Database request failure"
+      security:
+        - api_key: []
 definitions:
   HelloMessage:
     type: "object"
@@ -196,6 +423,70 @@ definitions:
       Login:
         type: "string"
       Password:
+        type: "string"
+  Plane:
+    type: object
+    properties:
+      id:
+        type: string
+        description: The plane ID in DB in UUID format.
+      DepartureCity:
+        type: string
+        description: Plane departure city.
+      ArrivalCity:
+        type: string
+        description: Plane arrival city.
+  Ticket:
+    type: "object"
+    properties:
+      place:
+        type: "integer"
+        format: "int"
+      ticket_type:
+        type: "string"
+      discount:
+        type: "string"
+      price:
+        type: "number"
+        format: "float32"
+      total_price:
+        type: "number"
+        format: "float32"
+      name:
+        type: "string"
+      surname:
+        type: "string"
+  Tickets:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+        format: "uuid"
+      train_id:
+        type: "string"
+        format: "uuid"
+      plane_id:
+        type: "string"
+        format: "uuid"
+      user_id:
+        type: "string"
+        format: "uuid"
+      place:
+        type: "integer"
+        format: "int"
+      ticket_type:
+        type: "string"
+      discount:
+        type: "string"
+      price:
+        type: "number"
+        format: "float32"
+      total_price:
+        type: "number"
+        format: "float32"
+      name:
+        type: "string"
+      surname:
         type: "string"
   ErrorMessage:
     type: "object"
