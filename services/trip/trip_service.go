@@ -14,7 +14,7 @@ import (
 //emptyResponse variable will be sent in response
 var emptyResponse interface{}
 
-//ValidateForm function for data validation
+//ValidateFormTrip function for data validation
 func ValidateFormTrip(trip data.Trip) error {
 	if trip.TripName == "" || trip.TotalTripPrice <= 0 || trip.TripName != string(trip.TripName) || trip.
 		TotalTripPrice != float32(trip.TotalTripPrice) {

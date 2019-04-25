@@ -6,6 +6,7 @@ import (
 	"team-project/services/data"
 )
 
+//TripRepository interface for mocking database functions
 type TripRepository interface {
 	AddTrip(trip data.Trip) (data.Trip, error)
 	GetTrips() ([]data.Trip, error)
@@ -18,6 +19,7 @@ type tripRepository struct {
 	tripRepo TripRepository
 }
 
+//TripRepo  variable for referring to mocked interface
 var TripRepo TripRepository = &tripRepository{}
 
 var (

@@ -28,7 +28,7 @@ func ValidateForm(tk data.Ticket) error {
 
 //GetAllTickets for GETing information about all tickets
 func GetAllTickets(w http.ResponseWriter, r *http.Request) {
-	if !authorization.AdminRole(w, r){
+	if !authorization.AdminRole(w, r) {
 		common.RenderJSON(w, r, http.StatusForbidden, emptyResponse)
 		return
 	}
@@ -42,7 +42,7 @@ func GetAllTickets(w http.ResponseWriter, r *http.Request) {
 
 //GetOneTicket for GETing information about one tickets
 func GetOneTicket(w http.ResponseWriter, r *http.Request) {
-	if !authorization.LoggedIn(w, r){
+	if !authorization.LoggedIn(w, r) {
 		common.RenderJSON(w, r, http.StatusForbidden, emptyResponse)
 		return
 	}
@@ -57,7 +57,7 @@ func GetOneTicket(w http.ResponseWriter, r *http.Request) {
 
 //CreateTicket (POST) for creating one tickets & add to DB
 func CreateTicket(w http.ResponseWriter, r *http.Request) {
-	if !authorization.AdminRole(w, r){
+	if !authorization.AdminRole(w, r) {
 		common.RenderJSON(w, r, http.StatusForbidden, emptyResponse)
 		return
 	}
@@ -92,7 +92,7 @@ func CreateTicket(w http.ResponseWriter, r *http.Request) {
 
 //UpdateTicket (PATCH) for updating one tickets in DB
 func UpdateTicket(w http.ResponseWriter, r *http.Request) {
-	if !authorization.AdminRole(w, r){
+	if !authorization.AdminRole(w, r) {
 		common.RenderJSON(w, r, http.StatusForbidden, emptyResponse)
 		return
 	}
@@ -129,7 +129,7 @@ func UpdateTicket(w http.ResponseWriter, r *http.Request) {
 
 //DeleteTicket (DELETE) for deleting one tickets in DB by id
 func DeleteTicket(w http.ResponseWriter, r *http.Request) {
-	if !authorization.AdminRole(w, r){
+	if !authorization.AdminRole(w, r) {
 		common.RenderJSON(w, r, http.StatusForbidden, emptyResponse)
 		return
 	}
