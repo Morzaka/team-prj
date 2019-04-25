@@ -2,9 +2,9 @@ package authorization
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
+	"regexp"
 	"time"
 
 	"team-project/database"
@@ -24,6 +24,8 @@ var (
 	RedisClient *redis.Client
 	//LoggedIn variable holds the value of CheckAccess function
 	LoggedIn = CheckAccess
+	//Validate variable holds the value of Validation function
+	Validate = Validation
 )
 
 //Signin implements signing in
@@ -81,9 +83,13 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		logger.Logger.Errorf("Error, %s", err)
 	}
+	valid, msg := Validate(user)
+	if !valid {
+		common.RenderJSON(w, r, http.StatusBadRequest, msg)
+		return
+	}
 	users, err := database.Users.GetAllUsers()
 	if err != nil {
-		fmt.Println("No content in db")
 		common.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
 		return
 	}
@@ -235,4 +241,35 @@ func CheckAdmin(w http.ResponseWriter, r *http.Request) bool {
 		return true
 	}
 	return false
+}
+
+//Validation function checks whether user password login name and surname are valid
+//and are between 0 and 40 characters
+func Validation(user data.User) (bool, string) {
+	errMessage := ""
+	var checkPass = regexp.MustCompile(`^[[:graph:]]*$`)
+	var checkName = regexp.MustCompile(`^[A-Z]{1}[a-z]+$`)
+	var checkLogin = regexp.MustCompile(`^[[:graph:]]*$`)
+	var validPass, validName, validSurname, validLogin bool
+	if len(user.Password) >= 8 && checkPass.MatchString(user.Password) {
+		validPass = true
+	} else {
+		errMessage += "Invalid Password"
+	}
+	if checkName.MatchString(user.Name) && len(user.Name) < 40 {
+		validName = true
+	} else {
+		errMessage += " Invalid Name"
+	}
+	if checkName.MatchString(user.Surname) && len(user.Name) < 40 {
+		validSurname = true
+	} else {
+		errMessage += "Invalid Surname"
+	}
+	if checkLogin.MatchString(user.Login) && len(user.Login) < 40 {
+		validLogin = true
+	} else {
+		errMessage += " Invalid Login"
+	}
+	return validName && validLogin && validPass && validSurname, errMessage
 }
