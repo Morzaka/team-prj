@@ -233,14 +233,7 @@ func TestUpdateTrain(t *testing.T) {
 			expected:    http.StatusOK,
 			mockedTrain: testTrain,
 			mockedErr:   nil,
-		}, /*
-			{
-				tcase:       "UpdateTrainNoContent",
-				url:         "/api/v1/train/08307904-f18e-4fb8-9d18-29cfad38ffaf",
-				expected:    http.StatusNoContent,
-				mockedTrain: data.Train{},
-				mockedErr:   errors.New("failed to update"),
-			},*/
+		},
 	}
 	authorization.Admin = func(http.ResponseWriter, *http.Request) bool {
 		return true

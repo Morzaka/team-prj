@@ -8,6 +8,7 @@
   "PgPort": "5432",
   "PgUser":"postgres",
   "PgPassword":"postgres",
-  "PgName":"travel_test"
+  "PgName":"travel_test",
+  "JSONApi": "https://api.myjson.com/bins/x7rfk"
 }
 
