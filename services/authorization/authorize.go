@@ -24,6 +24,8 @@ var (
 	RedisClient *redis.Client
 	//LoggedIn variable holds the value of CheckAccess function
 	LoggedIn = CheckAccess
+	//Validate variable holds the value of Validation function
+	Validate = Validation
 )
 
 //Signin implements signing in
@@ -80,6 +82,11 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
 		logger.Logger.Errorf("Error, %s", err)
+	}
+	valid,msg:= Validate(user)
+	if !valid{
+		common.RenderJSON(w, r, http.StatusBadRequest, msg)
+		return
 	}
 	users, err := database.Users.GetAllUsers()
 	if err != nil {
@@ -254,7 +261,6 @@ func Validation(user data.User) (bool, string) {
 	} else {
 		errMessage += " Invalid Name"
 	}
-
 	if checkName.MatchString(user.Surname) && len(user.Name) < 40 {
 		validSurname = true
 	} else {
