@@ -15,7 +15,6 @@ require (
 	github.com/go-openapi/strfmt v0.19.0 // indirect
 	github.com/go-openapi/swag v0.19.0 // indirect
 	github.com/go-openapi/validate v0.19.0 // indirect
-	github.com/alicebob/miniredis v2.5.0+incompatible // indirect
 	github.com/go-redis/redis v6.15.2+incompatible
 	github.com/go-swagger/go-swagger v0.19.0 // indirect
 	github.com/go-zoo/bone v0.0.0-20190416234710-31c3a0bb520c
@@ -28,9 +27,9 @@ require (
 	github.com/mattn/go-colorable v0.1.1 // indirect
 	github.com/mgutz/ansi v0.0.0-20170206155736-9520e82c474b // indirect
 	github.com/sirupsen/logrus v1.4.1
-	github.com/urfave/negroni v1.0.0 // indirect
 	github.com/spf13/viper v1.3.2 // indirect
 	github.com/toqueteos/webbrowser v1.1.0 // indirect
+	github.com/urfave/negroni v1.0.0 // indirect
 	github.com/x-cray/logrus-prefixed-formatter v0.5.2
 	github.com/yuin/gopher-lua v0.0.0-20190206043414-8bfc7677f583 // indirect
 	golang.org/x/crypto v0.0.0-20190424203555-c05e17bb3b2d
