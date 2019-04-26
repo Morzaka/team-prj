@@ -2,13 +2,13 @@ package authorization
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"regexp"
 	"time"
 	"unsafe"
-	"errors"
 
 	"team-project/database"
 	"team-project/logger"
@@ -37,6 +37,7 @@ var (
 	errMessage     = ""
 	regulars       map[string]regexp.Regexp
 )
+
 //compileRegulars compiles regular expression and handles panic
 var compileRegulars = func() map[string]regexp.Regexp {
 
@@ -63,7 +64,6 @@ var compileRegulars = func() map[string]regexp.Regexp {
 	return regulars
 }
 
-
 //Signin implements signing in
 func Signin(w http.ResponseWriter, r *http.Request) {
 	if RedisClient == nil {
@@ -76,7 +76,7 @@ func Signin(w http.ResponseWriter, r *http.Request) {
 	}
 	dbpassword, err := database.Users.GetUserPassword(user.Login)
 	if err != nil {
-		common.RenderJSON(w, r, http.StatusUnauthorized, emptyResponse)
+		common.RenderJSON(w, r, emptyResponse)
 		return
 	}
 	//if entered password matches the password from database than user is registered
@@ -90,7 +90,7 @@ func Signin(w http.ResponseWriter, r *http.Request) {
 		//add cookie to redis db
 		_, err := RedisClient.LPush(cookie.Name, cookie.Value).Result()
 		if err != nil {
-			common.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
+			common.RenderJSON(w, r, emptyResponse)
 			return
 		}
 		//delele this session value from redis in 15 minutes
@@ -98,15 +98,15 @@ func Signin(w http.ResponseWriter, r *http.Request) {
 			time.Sleep(15 * time.Minute)
 			_, err := RedisClient.LRem(cookie.Name, 0, cookie.Value).Result()
 			if err != nil {
-				common.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
+				common.RenderJSON(w, r, emptyResponse)
 				return
 			}
 		}()
 		http.SetCookie(w, cookie)
-		common.RenderJSON(w, r, http.StatusOK, user)
+		common.RenderJSON(w, r, user)
 		//else if passwords don't match then render status unauthorized
 	} else {
-		common.RenderJSON(w, r, http.StatusUnauthorized, emptyResponse)
+		common.RenderJSON(w, r, emptyResponse)
 		return
 	}
 }
@@ -122,12 +122,12 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 	users, err := database.Users.GetAllUsers()
 	if err != nil {
 		fmt.Println("No content in db")
-		common.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
+		common.RenderJSON(w, r, emptyResponse)
 		return
 	}
 	for _, each := range users {
 		if each.Login == user.Login {
-			common.RenderJSON(w, r, http.StatusNotAcceptable, "Login is not allowed")
+			common.RenderJSON(w, r, "Login is not allowed")
 			return
 		}
 	}
@@ -140,11 +140,11 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 	//add user to database and get his id
 	user, err = database.Users.AddUser(user)
 	if err != nil {
-		common.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
+		common.RenderJSON(w, r, emptyResponse)
 		return
 	}
 	user.Role = "User"
-	common.RenderJSON(w, r, http.StatusOK, user)
+	common.RenderJSON(w, r, user)
 }
 
 //Logout implements logging out - deletes cookie from db
@@ -154,7 +154,7 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 	sessionToken := cookie.Name
 	_, err := RedisClient.LRem(sessionToken, 0, cookie.Value).Result()
 	if err != nil {
-		common.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
+		common.RenderJSON(w, r, emptyResponse)
 		return
 	}
 	cookie = &http.Cookie{
@@ -162,7 +162,7 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 		MaxAge: -1,
 	}
 	http.SetCookie(w, cookie)
-	common.RenderJSON(w, r, http.StatusNoContent, emptyResponse)
+	common.RenderJSON(w, r, emptyResponse)
 }
 
 //UpdateUserPage deletes user
@@ -170,7 +170,7 @@ func UpdateUserPage(w http.ResponseWriter, r *http.Request) {
 	var user data.User
 	id, err := uuid.Parse(bone.GetValue(r, "id"))
 	if err != nil {
-		common.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
+		common.RenderJSON(w, r, emptyResponse)
 		return
 	}
 	data, err := ioutil.ReadAll(r.Body)
@@ -191,14 +191,14 @@ func UpdateUserPage(w http.ResponseWriter, r *http.Request) {
 	//add user to database and get his id
 	affected, err := database.Users.UpdateUser(user, id)
 	if err != nil {
-		common.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
+		common.RenderJSON(w, r, emptyResponse)
 		return
 	}
 	user.ID = id
 	if affected > 0 {
-		common.RenderJSON(w, r, http.StatusOK, "User was updated successfully!")
+		common.RenderJSON(w, r, "User was updated successfully!")
 	} else {
-		common.RenderJSON(w, r, http.StatusNotFound, "No rows affected!")
+		common.RenderJSON(w, r, "No rows affected!")
 	}
 }
 
@@ -206,18 +206,18 @@ func UpdateUserPage(w http.ResponseWriter, r *http.Request) {
 func DeleteUserPage(w http.ResponseWriter, r *http.Request) {
 	id, err := uuid.Parse(bone.GetValue(r, "id"))
 	if err != nil {
-		common.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
+		common.RenderJSON(w, r, emptyResponse)
 		return
 	}
 	affected, err := database.Users.DeleteUser(id)
 	if err != nil {
-		common.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
+		common.RenderJSON(w, r, emptyResponse)
 		return
 	}
 	if affected > 0 {
-		common.RenderJSON(w, r, http.StatusOK, "User was deleted successfully!")
+		common.RenderJSON(w, r, "User was deleted successfully!")
 	} else {
-		common.RenderJSON(w, r, http.StatusNotFound, "No rows affected!")
+		common.RenderJSON(w, r, "No rows affected!")
 	}
 }
 
@@ -225,10 +225,10 @@ func DeleteUserPage(w http.ResponseWriter, r *http.Request) {
 func ListAllUsers(w http.ResponseWriter, r *http.Request) {
 	users, err := database.Users.GetAllUsers()
 	if err != nil {
-		common.RenderJSON(w, r, http.StatusNoContent, emptyResponse)
+		common.RenderJSON(w, r, emptyResponse)
 		return
 	}
-	common.RenderJSON(w, r, http.StatusOK, users)
+	common.RenderJSON(w, r, users)
 }
 
 //CheckAccess checks whether user is logged in to give him access to services
@@ -287,9 +287,9 @@ func Validation(user data.User) (bool, string) {
 	//var checkName = regexp.MustCompile(`^[A-Z]{1}[a-z]+$`)
 	//var checkLogin = regexp.MustCompile(`^[[:graph:]]*$`)
 
-	var checkPass= regulars["password"]
-	var checkName=regulars["name"]
-	var checkLogin=regulars["login"]
+	var checkPass = regulars["password"]
+	var checkName = regulars["name"]
+	var checkLogin = regulars["login"]
 
 	var validPass, validName, validSurname, validLogin bool
 	if len(user.Password) >= 8 && checkPass.MatchString(user.Password) {
@@ -375,4 +375,3 @@ func ValidateRegisterNotEmpty(user interface{}) bool {
 	return true
 
 }
-

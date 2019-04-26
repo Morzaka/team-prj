@@ -26,14 +26,14 @@ type IUser struct {
 // Users is an instance presented IUser
 var Users UserCRUD = &IUser{}
 
-var (
-	insertUser = `INSERT INTO public.user (id,name,surname,login,password,email)
+const (
+	insertUser = `INSERT INTO users (id,name,surname,login,password,email)
 	VALUES ($1, $2, $3, $4, $5, $6);`
-	selectUserPassword = `SELECT password FROM public.user WHERE login=$1;`
-	selectUserRole     = `SELECT role FROM public.user WHERE login=$1;`
-	selectAllUsers     = `SELECT * from public.user;`
-	updateUser         = `UPDATE public.user SET name = $2, surname = $3, login=$4, password=$5, email=$6 WHERE id = $1;`
-	deleteUser         = `DELETE FROM public.user WHERE id = $1;`
+	selectUserPassword = `SELECT password FROM users WHERE login=$1;`
+	selectUserRole     = `SELECT role FROM users WHERE login=$1;`
+	selectAllUsers     = `SELECT * from users;`
+	updateUser         = `UPDATE users SET name = $2, surname = $3, login=$4, password=$5, email=$6 WHERE id = $1;`
+	deleteUser         = `DELETE FROM users WHERE id = $1;`
 )
 
 //AddUser adds info about new user to the database

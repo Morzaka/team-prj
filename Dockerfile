@@ -48,7 +48,5 @@ ADD https://github.com/ufoscout/docker-compose-wait/releases/download/2.5.0/wait
 RUN chmod +x /wait
 
 #Run application with wait
-CMD /wait
+CMD /wait && ./team-project
 
-# Run the compiled binary.
-ENTRYPOINT ["./team-project"]
