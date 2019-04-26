@@ -26,8 +26,8 @@ var PlaneRepo PlaneRepository = &planeRepository{}
 var (
 	selectPlanes = `SELECT * FROM public.plane;`
 	selectPlane  = `SELECT * FROM public.plane WHERE id=$1;`
-	insertPlane  = `INSERT INTO public.plane (id, departure_City, arrival_City) VALUES ($1, $2, $3)`
-	updatePlane  = `UPDATE public.plane SET departure_City = $2, arrival_City = $3 WHERE id = $1;`
+	insertPlane  = `INSERT INTO public.plane (id, departureCity, arrivalCity) VALUES ($1, $2, $3)`
+	updatePlane  = `UPDATE public.plane SET departureCity = $2, arrivalCity = $3 WHERE id = $1;`
 	deletePlane  = `DELETE FROM public.plane WHERE id = $1;`
 )
 
