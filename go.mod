@@ -36,7 +36,7 @@ require (
 	github.com/spf13/viper v1.3.2 // indirect
 	github.com/toqueteos/webbrowser v1.1.0 // indirect
 	github.com/tsenart/go-tsz v0.0.0-20180814235614-0bd30b3df1c3 // indirect
-	github.com/tsenart/vegeta v12.3.0+incompatible // indirect
+	github.com/tsenart/vegeta v12.3.0+incompatible
 	github.com/urfave/negroni v1.0.0
 	github.com/x-cray/logrus-prefixed-formatter v0.5.2
 	github.com/yuin/gopher-lua v0.0.0-20190206043414-8bfc7677f583 // indirect

@@ -1,3 +1,5 @@
+-- +goose Up
+-- SQL in this section is executed when the migration is applied.
 -- Tickets
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE TABLE  IF NOT EXISTS tickets
@@ -35,3 +37,7 @@ VALUES (23, 'museum', '-10%', 23.23, 22.99, 'Frederik', 'Lonkardi');
 INSERT INTO tickets(place, ticket_type, discount, price, total_price, name,
                     surname)
 VALUES (3412, 'Museum', '', 5.23, 5.23, 'Valentina', 'Kit');
+-- +goose Down
+-- SQL in this section is executed when the migration is rolled back.
+
+drop table tickets

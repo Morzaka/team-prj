@@ -1,3 +1,5 @@
+-- +goose Up
+-- SQL in this section is executed when the migration is applied.
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE TABLE IF NOT EXISTS trips (
   TripID uuid NOT NULL,
@@ -20,3 +22,7 @@ INSERT INTO trips
   (TripID, TripName, TripTicketID, TripReturnTicketID, TotalTripPrice)
   VALUES ('3c180ee0-64ef-11e9-a923-1681be663d3e','CoolWeek','434a5614-64ef-11e9-a923-1681be663d3e',
   '56c90c3a-64ef-11e9-a923-1681be663d3e', 850);
+-- +goose Down
+-- SQL in this section is executed when the migration is rolled back.
+
+drop table trips;

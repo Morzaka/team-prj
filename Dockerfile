@@ -43,5 +43,12 @@ COPY --from=builder /team-project .
 # Declare the port on which the webserver will be exposed.
 EXPOSE 8080
 
+#Script to ensure all containers are synchronised
+ADD https://github.com/ufoscout/docker-compose-wait/releases/download/2.5.0/wait /wait
+RUN chmod +x /wait
+
+#Run application with wait
+CMD /wait
+
 # Run the compiled binary.
 ENTRYPOINT ["./team-project"]

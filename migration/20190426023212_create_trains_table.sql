@@ -1,3 +1,5 @@
+-- +goose Up
+-- SQL in this section is executed when the migration is applied.
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE TABLE  IF NOT EXISTS trains
 (
@@ -22,3 +24,7 @@ INSERT INTO trains
   INSERT INTO trains
   (id,  departure_city, arrival_city, departure_time, departure_date,arrival_time,arrival_date)
   VALUES ( uuid_generate_v4(), 'Uzgorod','Lviv' ,'07:30:00','2019-04-28', '16:55:00','2019-04-28');
+-- +goose Down
+-- SQL in this section is executed when the migration is rolled back.
+
+drop table trains;

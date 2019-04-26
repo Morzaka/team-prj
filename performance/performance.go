@@ -1,10 +1,10 @@
 package main
 
 import (
-"fmt"
-vegeta "github.com/tsenart/vegeta/lib"
+	"fmt"
+	vegeta "github.com/tsenart/vegeta/lib"
 	"math"
-"time"
+	"time"
 )
 
 func main() {
@@ -18,7 +18,7 @@ func main() {
 
 	var metrics vegeta.Metrics
 	//Rate is  vegeta struct to define attack frequency and time
-	rt:= vegeta.Rate{Freq: rate, Per: duration}
+	rt := vegeta.Rate{Freq: rate, Per: duration}
 	for res := range attacker.Attack(login, rt, duration, "") {
 		metrics.Add(res)
 	}
@@ -32,4 +32,3 @@ func main() {
 	fmt.Println("StatusCodes: ", metrics.StatusCodes)
 	fmt.Println("Success: ", metrics.Success)
 }
-
