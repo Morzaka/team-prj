@@ -8,6 +8,7 @@ import (
 	"regexp"
 	"time"
 	"unsafe"
+	"errors"
 
 	"team-project/database"
 	"team-project/logger"
@@ -31,6 +32,37 @@ var (
 	//Validate variable holds the value of Validation function
 	Validate = Validation
 )
+var (
+	compiledRegexp = false
+	errMessage     = ""
+	regulars       map[string]regexp.Regexp
+)
+//compileRegulars compiles regular expression and handles panic
+var compileRegulars = func() map[string]regexp.Regexp {
+
+	regulars := make(map[string]regexp.Regexp, 3)
+	defer func() {
+		if recover() != nil {
+			err := errors.New("recovered from panic")
+			logger.Logger.Error(err)
+		}
+	}()
+
+	passCheck, err := regexp.Compile(`^[[:graph:]]*$`)
+	nameCheck, err := regexp.Compile(`^[A-Z]{1}[a-z]+$`)
+	loginCheck, err := regexp.Compile(`^[[:graph:]]*$`)
+	if err != nil {
+		panic("regexp error")
+	}
+	recover()
+
+	regulars["password"] = *passCheck
+	regulars["name"] = *nameCheck
+	regulars["login"] = *loginCheck
+	compiledRegexp = true
+	return regulars
+}
+
 
 //Signin implements signing in
 func Signin(w http.ResponseWriter, r *http.Request) {
@@ -246,10 +278,19 @@ func CheckAdmin(w http.ResponseWriter, r *http.Request) bool {
 //Validation function checks whether user password login name and surname are valid
 //and are between 0 and 40 characters
 func Validation(user data.User) (bool, string) {
+	if compiledRegexp == false {
+		regulars = compileRegulars()
+	}
+
 	errMessage := ""
-	var checkPass = regexp.MustCompile(`^[[:graph:]]*$`)
-	var checkName = regexp.MustCompile(`^[A-Z]{1}[a-z]+$`)
-	var checkLogin = regexp.MustCompile(`^[[:graph:]]*$`)
+	//var checkPass = regexp.MustCompile(`^[[:graph:]]*$`)
+	//var checkName = regexp.MustCompile(`^[A-Z]{1}[a-z]+$`)
+	//var checkLogin = regexp.MustCompile(`^[[:graph:]]*$`)
+
+	var checkPass= regulars["password"]
+	var checkName=regulars["name"]
+	var checkLogin=regulars["login"]
+
 	var validPass, validName, validSurname, validLogin bool
 	if len(user.Password) >= 8 && checkPass.MatchString(user.Password) {
 		validPass = true
@@ -334,3 +375,4 @@ func ValidateRegisterNotEmpty(user interface{}) bool {
 	return true
 
 }
+
