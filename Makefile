@@ -37,4 +37,4 @@ migrate-up:
 	src/bin/goose -dir ./migrations postgres "user=mccuwyhjuexqwp password=cd534c973a2f026e46ff57ea94cf9fc6fa29951d7cdcaa18b96415d06e6264dd host=ec2-54-247-70-127.eu-west-1.compute.amazonaws.com dbname=da2utgpo2vg4ca sslmode=disable" up-to 20190426030708
 
 migrate-down:
-    src/bin/goose -dir ./migrations postgres "user=mccuwyhjuexqwp password=cd534c973a2f026e46ff57ea94cf9fc6fa29951d7cdcaa18b96415d06e6264dd host=ec2-54-247-70-127.eu-west-1.compute.amazonaws.com dbname=da2utgpo2vg4ca sslmode=disable" down
+	src/bin/goose -dir ./migrations postgres "user=mccuwyhjuexqwp password=cd534c973a2f026e46ff57ea94cf9fc6fa29951d7cdcaa18b96415d06e6264dd host=ec2-54-247-70-127.eu-west-1.compute.amazonaws.com dbname=da2utgpo2vg4ca sslmode=disable" down
