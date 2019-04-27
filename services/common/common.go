@@ -8,7 +8,7 @@ import (
 	"team-project/logger"
 )
 
-//renderJSON render json data to user
+//REnderJSON render json data to user
 func REnderJSON(w http.ResponseWriter, r *http.Request, status int, response interface{}) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(status)
