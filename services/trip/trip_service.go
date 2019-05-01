@@ -28,10 +28,10 @@ func GetTrips(w http.ResponseWriter, r *http.Request) {
 
 	trips, err := database.TripRepo.GetTrips()
 	if err != nil {
-		common.REnderJSON(w, r, http.StatusInternalServerError, emptyResponse)
+		common.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
 		return
 	}
-	common.REnderJSON(w, r, http.StatusOK, trips)
+	common.RenderJSON(w, r, http.StatusOK, trips)
 
 }
 
@@ -40,10 +40,10 @@ func GetTrip(w http.ResponseWriter, r *http.Request) {
 	id := uuid.Must(uuid.Parse(bone.GetValue(r, "id")))
 	trip, err := database.TripRepo.GetTrip(id)
 	if err != nil {
-		common.REnderJSON(w, r, http.StatusInternalServerError, emptyResponse)
+		common.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
 		return
 	}
-	common.REnderJSON(w, r, http.StatusOK, trip)
+	common.RenderJSON(w, r, http.StatusOK, trip)
 }
 
 //CreateTrip function add trip to trip table and generate uuid for new object
@@ -52,22 +52,22 @@ func CreateTrip(w http.ResponseWriter, r *http.Request) {
 	trip.TripID = uuid.New()
 	err := json.NewDecoder(r.Body).Decode(&trip)
 	if err != nil {
-		common.REnderJSON(w, r, http.StatusInternalServerError, emptyResponse)
+		common.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
 		return
 	}
 
 	err = ValidateFormTrip(trip)
 	if err != nil {
-		common.REnderJSON(w, r, http.StatusInternalServerError, emptyResponse)
+		common.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
 		return
 	}
 
 	_, err = database.TripRepo.AddTrip(trip)
 	if err != nil {
-		common.REnderJSON(w, r, http.StatusInternalServerError, emptyResponse)
+		common.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
 		return
 	}
-	common.REnderJSON(w, r, http.StatusOK, trip)
+	common.RenderJSON(w, r, http.StatusOK, trip)
 }
 
 //UpdateTrip function update trip data using id from request
@@ -79,15 +79,15 @@ func UpdateTrip(w http.ResponseWriter, r *http.Request) {
 
 	err := ValidateFormTrip(trip)
 	if err != nil {
-		common.REnderJSON(w, r, http.StatusInternalServerError, emptyResponse)
+		common.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
 		return
 	}
 	_, err = database.TripRepo.UpdateTrip(trip)
 	if err != nil {
-		common.REnderJSON(w, r, http.StatusInternalServerError, emptyResponse)
+		common.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
 		return
 	}
-	common.REnderJSON(w, r, http.StatusOK, trip)
+	common.RenderJSON(w, r, http.StatusOK, trip)
 }
 
 //DeleteTrip function delete data from trip table using id from request
@@ -95,8 +95,8 @@ func DeleteTrip(w http.ResponseWriter, r *http.Request) {
 	id := uuid.Must(uuid.Parse(bone.GetValue(r, "id")))
 	err := database.TripRepo.DeleteTrip(id)
 	if err != nil {
-		common.REnderJSON(w, r, http.StatusInternalServerError, emptyResponse)
+		common.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
 		return
 	}
-	common.REnderJSON(w, r, http.StatusOK, emptyResponse)
+	common.RenderJSON(w, r, http.StatusOK, emptyResponse)
 }

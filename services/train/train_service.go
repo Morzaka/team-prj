@@ -57,119 +57,119 @@ func Validate(t data.Train) error {
 //GetTrains is a handler that returns trains from db
 func GetTrains(w http.ResponseWriter, r *http.Request) {
 	if !authorization.AdminRole(w, r) {
-		common.REnderJSON(w, r, http.StatusForbidden, emptyResponse)
+		common.RenderJSON(w, r, http.StatusForbidden, emptyResponse)
 		return
 	}
 	trains, err := database.Trains.GetAllTrains()
 	if err != nil {
-		common.REnderJSON(w, r, http.StatusNotFound, emptyResponse)
+		common.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
 		return
 	}
 
 	for _, train := range trains {
 		if err = ValidateIfEmpty(train); err != nil {
-			common.REnderJSON(w, r, http.StatusBadRequest, emptyResponse)
+			common.RenderJSON(w, r, http.StatusNoContent, "Empty data found")
 			return
 		}
 		if err = Validate(train); err != nil {
-			common.REnderJSON(w, r, http.StatusBadRequest, emptyResponse)
+			common.RenderJSON(w, r, http.StatusNoContent, "Validation failed")
 			return
 		}
 	}
 
-	common.RenderJSON(w, r, trains)
+	common.RenderJSON(w, r, http.StatusOK, trains)
 }
 
 //GetSingleTrain is a handler that returns single train from db
 func GetSingleTrain(w http.ResponseWriter, r *http.Request) {
 	if !authorization.AdminRole(w, r) {
-		common.REnderJSON(w, r, http.StatusMethodNotAllowed, emptyResponse)
+		common.RenderJSON(w, r, http.StatusForbidden, emptyResponse)
 		return
 	}
 	id := uuid.Must(uuid.Parse(bone.GetValue(r, "id")))
 	newid := id.String()
 	train, err := database.Trains.GetTrain(newid)
 	if err != nil {
-		common.REnderJSON(w, r, http.StatusNotFound, emptyResponse)
+		common.RenderJSON(w, r, http.StatusNoContent, emptyResponse)
 		return
 	}
 	if err = ValidateIfEmpty(train); err != nil {
-		common.REnderJSON(w, r, http.StatusNoContent, emptyResponse)
+		common.RenderJSON(w, r, http.StatusNoContent, "Empty data found")
 		return
 	}
 	if err = Validate(train); err != nil {
-		common.REnderJSON(w, r, http.StatusNoContent, emptyResponse)
+		common.RenderJSON(w, r, http.StatusNoContent, "Validation failed")
 		return
 	}
-	common.REnderJSON(w, r, http.StatusOK, train)
+	common.RenderJSON(w, r, http.StatusOK, train)
 }
 
 //CreateTrain is a handler that creates train
 func CreateTrain(w http.ResponseWriter, r *http.Request) {
 	if !authorization.AdminRole(w, r) {
-		common.REnderJSON(w, r, http.StatusForbidden, emptyResponse)
+		common.RenderJSON(w, r, http.StatusForbidden, emptyResponse)
 		return
 	}
 	t := data.Train{}
-	err := json.NewDecoder(r.Body).Decode(&t)
+	json.NewDecoder(r.Body).Decode(&t)
 	if err := ValidateIfEmpty(t); err != nil {
-		common.REnderJSON(w, r, http.StatusNoContent, emptyResponse)
+		common.RenderJSON(w, r, http.StatusNoContent, "Empty data found")
 		return
 	}
 	if err := Validate(t); err != nil {
-		common.REnderJSON(w, r, http.StatusNoContent, emptyResponse)
+		common.RenderJSON(w, r, http.StatusNoContent, "Validation failed")
 		return
 	}
-	err = database.Trains.AddTrain(t)
+	err := database.Trains.AddTrain(t)
 	if err != nil {
-		common.REnderJSON(w, r, http.StatusInternalServerError, "Error occured while adding train to database")
+		common.RenderJSON(w, r, http.StatusInternalServerError, "Error occured while adding train to database")
 		return
 	}
-	common.REnderJSON(w, r, http.StatusOK, t)
+	common.RenderJSON(w, r, http.StatusOK, t)
 }
 
 //UpdateTrain is a handler that updates train in db
 func UpdateTrain(w http.ResponseWriter, r *http.Request) {
 	if !authorization.AdminRole(w, r) {
-		common.REnderJSON(w, r, http.StatusForbidden, emptyResponse)
+		common.RenderJSON(w, r, http.StatusForbidden, emptyResponse)
 		return
 	}
 	id := uuid.Must(uuid.Parse(bone.GetValue(r, "id")))
 	t := data.Train{}
-	err := json.NewDecoder(r.Body).Decode(&t)
+	json.NewDecoder(r.Body).Decode(&t)
 	if err := ValidateIfEmpty(t); err != nil {
-		common.REnderJSON(w, r, http.StatusNoContent, emptyResponse)
+		common.RenderJSON(w, r, http.StatusNoContent, "Empty data found")
 		return
 	}
 	if err := Validate(t); err != nil {
-		common.REnderJSON(w, r, http.StatusNoContent, emptyResponse)
+		common.RenderJSON(w, r, http.StatusNoContent, "Validation failed")
 		return
 	}
 	t.ID = id
-	err = database.Trains.UpdateTrain(t)
+	err := database.Trains.UpdateTrain(t)
 	if err != nil {
-		common.REnderJSON(w, r, http.StatusInternalServerError, "Couldn't update data")
+		common.RenderJSON(w, r, http.StatusInternalServerError, "Couldn't update data")
 		return
 	}
 	train, err := database.Trains.GetTrain(t.ID.String())
 	if err != nil {
-		common.REnderJSON(w, r, http.StatusNoContent, "Couldn't return updated data")
+		common.RenderJSON(w, r, http.StatusNoContent, "Couldn't return updated data")
 		return
 	}
-	common.REnderJSON(w, r, http.StatusOK, train)
+	common.RenderJSON(w, r, http.StatusOK, train)
 }
 
 //DeleteTrain is a handler that deletes train from db
 func DeleteTrain(w http.ResponseWriter, r *http.Request) {
 	if !authorization.AdminRole(w, r) {
-		common.REnderJSON(w, r, http.StatusForbidden, emptyResponse)
+		common.RenderJSON(w, r, http.StatusForbidden, emptyResponse)
 		return
 	}
 	id := uuid.Must(uuid.Parse(bone.GetValue(r, "id")))
 	err := database.Trains.DeleteTrain(id)
 	if err != nil {
-		common.REnderJSON(w, r, http.StatusInternalServerError, "Error occured while deleting train from database")
+		common.RenderJSON(w, r, http.StatusInternalServerError, "Error occured while deleting train from database")
 		return
 	}
-	common.REnderJSON(w, r, http.StatusOK, "Train was successfully updated")
+	common.RenderJSON(w, r, http.StatusOK, "Train was successfully updated")
 }

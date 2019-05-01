@@ -22,13 +22,13 @@ type tripRepository struct {
 //TripRepo  variable for referring to mocked interface
 var TripRepo TripRepository = &tripRepository{}
 
-const (
-	addTrip = `INSERT INTO trips (TripID, TripName,TripTicketID,TripReturnTicketID,TotalTripPrice)
+var (
+	addTrip = `INSERT INTO public.trip (TripID, TripName,TripTicketID,TripReturnTicketID,TotalTripPrice)
 	VALUES ($1, $2, $3, $4, $5);`
-	selectAllTrips = `SELECT * FROM trips;`
-	selectTrip     = `SELECT * FROM trips WHERE TripID=$1;`
-	updateTrip     = `UPDATE trips SET  TripName = $2, TripTicketID = $3, TripReturnTicketID = $4, TotalTripPrice = $5 WHERE TripID = $1;`
-	deleteTrip     = `DELETE FROM trips WHERE TripID = $1;`
+	selectAllTrips = `SELECT * FROM public.trip;`
+	selectTrip     = `SELECT * FROM public.trip WHERE TripID=$1;`
+	updateTrip     = `UPDATE public.trip SET  TripName = $2, TripTicketID = $3, TripReturnTicketID = $4, TotalTripPrice = $5 WHERE TripID = $1;`
+	deleteTrip     = `DELETE FROM public.trip WHERE TripID = $1;`
 )
 
 //AddTrip function add new trip into database table

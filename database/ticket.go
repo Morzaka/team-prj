@@ -23,7 +23,7 @@ type ticketRepository struct {
 // TicketRepo is a variable for accessing to Ticket mocked Interface
 var TicketRepo TicketRepository = &ticketRepository{}
 
-const (
+var (
 	getAllItems = "SELECT id, train_id, plane_id, user_id, place, " +
 		"ticket_type," +
 		" discount, price, total_price, name, surname FROM tickets;"

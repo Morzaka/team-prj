@@ -27,7 +27,7 @@ var Trains TrainCrud = &ITrain{}
 
 //GetAllTrains is a method which Gets Trains from table trains
 func (*ITrain) GetAllTrains() ([]data.Train, error) {
-	rows, err := Db.Query("select * from trains")
+	rows, err := Db.Query("select * from public.trains")
 	if err != nil {
 		return nil, err
 	}
@@ -73,7 +73,7 @@ func (*ITrain) AddTrain(t data.Train) error {
 
 //UpdateTrain is a method which Updates Train in table trains
 func (*ITrain) UpdateTrain(t data.Train) error {
-	_, err := Db.Exec("update trains set departure_city = $1 , arrival_city = $2, departure_time = $3, departure_date = $4, arrival_time = $5, arrival_date = $6 where id = $7", t.DepartureCity, t.ArrivalCity, t.DepartureTime, t.DepartureDate, t.ArrivalTime, t.ArrivalDate, t.ID)
+	_, err := Db.Exec("update public.trains set departure_city = $1 , arrival_city = $2, departure_time = $3, departure_date = $4, arrival_time = $5, arrival_date = $6 where id = $7", t.DepartureCity, t.ArrivalCity, t.DepartureTime, t.DepartureDate, t.ArrivalTime, t.ArrivalDate, t.ID)
 
 	if err != nil {
 		return err
