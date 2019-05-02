@@ -13,41 +13,40 @@ var (
 	db     = map[string]interface{}{}
 	dbLock sync.Mutex
 	//redis  map[string]interface{}
-	R Redis
-	lock  sync.Mutex
-	initialisedRedis bool=false
+	R                Redis
+	lock             sync.Mutex
+	initialisedRedis bool = false
 )
 
-type Redis struct{
-	DB   map[string] interface{}
+type Redis struct {
+	DB map[string]interface{}
 }
 
-func initialiseRedis (redis *Redis){
-	(*redis).DB = make( map[string]interface{},100)
-   initialisedRedis=true
+func initialiseRedis(redis *Redis) {
+	(*redis).DB = make(map[string]interface{}, 100)
+	initialisedRedis = true
 }
-
 
 //LPush pushes empty interface value into Redis
-func LPush(redis *Redis ,key string,value interface{}){
-	if initialisedRedis==false{
+func LPush(redis *Redis, key string, value interface{}) {
+	if initialisedRedis == false {
 		initialiseRedis(redis)
 	}
 	lock.Lock()
 	defer lock.Unlock()
-	(*redis).DB[key]=value
+	(*redis).DB[key] = value
 
 }
 
 //LGet gets empty interface value from Redis
-func LGet(redis *Redis,key string,value interface{}) interface{}{
+func LGet(redis *Redis, key string, value interface{}) interface{} {
 
 	lock.Lock()
 	defer lock.Unlock()
 
-	value, ok :=(*redis).DB[key]
+	value, ok := (*redis).DB[key]
 	if !ok {
-		logger.Logger.Errorf( "Key %q not found", key)
+		logger.Logger.Errorf("Key %q not found", key)
 		return nil
 	}
 
@@ -55,19 +54,18 @@ func LGet(redis *Redis,key string,value interface{}) interface{}{
 }
 
 //LRemove removes key from Redis
-func LRange(redis *Redis,key string ){
+func LRange(redis *Redis, key string) {
 	lock.Lock()
 	defer lock.Unlock()
-	_, ok :=(*redis).DB[key]
+	_, ok := (*redis).DB[key]
 	if !ok {
-		logger.Logger.Errorf( "Key %q not found", key)
+		logger.Logger.Errorf("Key %q not found", key)
 		return
 	}
-	if ok{
-		delete((*redis).DB,key)
+	if ok {
+		delete((*redis).DB, key)
 	}
 }
-
 
 //Entry is a map entry,fits responses and requests
 type Entry struct {
@@ -116,6 +114,7 @@ func dbGetHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	sendResponse(entry, w)
 }
+
 //Serve function to serve database in http mode
 //func serve() {
 //	defer recover()

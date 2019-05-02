@@ -217,7 +217,6 @@ func DeleteUserPage(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-
 //GetOneUser gets user from db by id
 func GetOneUser(w http.ResponseWriter, r *http.Request) {
 	id, err := uuid.Parse(bone.GetValue(r, "id"))
@@ -277,7 +276,6 @@ func CheckAdmin(w http.ResponseWriter, r *http.Request) bool {
 	}
 	return false
 }
-
 
 //Validation function checks whether user password login name and surname are valid
 //and are between 0 and 40 characters
