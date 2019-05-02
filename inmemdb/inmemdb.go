@@ -12,6 +12,7 @@ import (
 var (
 	db               = map[string]interface{}{}
 	dbLock           sync.Mutex
+	//Redis is struct wrapper for in memory database
 	Redis            REdis
 	lock             sync.Mutex
 	initialisedRedis = false
