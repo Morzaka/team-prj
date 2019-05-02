@@ -2,6 +2,8 @@ package database
 
 import (
 	"database/sql"
+	"fmt"
+
 	"github.com/go-redis/redis"
 	"net/url"
 	"os"
@@ -16,9 +18,20 @@ var (
 	Client *redis.Client
 )
 
+
+const (
+	host     = "localhost"
+	port     = 5432
+	user     = "postgres"
+	password = "admin"
+	dbname   = "postgres"
+)
+
 //PostgresInit connects to postgres database
 func PostgresInit() error {
-	db, err := sql.Open("postgres", os.Getenv("DATABASE_URL")) // heroku requires to get connection from env variable
+	connection:=fmt.Sprintf("host=%s port=%s user=%s "+ "password=%s dbname=%s sslmode=disable",
+		host,port,user,password,dbname)
+	db, err := sql.Open("postgres",connection)
 	if err != nil {
 		return err
 	}

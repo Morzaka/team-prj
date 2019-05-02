@@ -217,15 +217,6 @@ func DeleteUserPage(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-//ListAllUsers makes a request to db to get all users
-func ListAllUsers(w http.ResponseWriter, r *http.Request) {
-	users, err := database.Users.GetAllUsers()
-	if err != nil {
-		common.RenderJSON(w, r, http.StatusNoContent, emptyResponse)
-		return
-	}
-	common.RenderJSON(w, r, http.StatusOK, users)
-}
 
 //GetOneUser gets user from db by id
 func GetOneUser(w http.ResponseWriter, r *http.Request) {
@@ -239,6 +230,7 @@ func GetOneUser(w http.ResponseWriter, r *http.Request) {
 		common.RenderJSON(w, r, http.StatusNoContent, emptyResponse)
 		return
 	}
+
 	common.RenderJSON(w, r, http.StatusOK, user)
 }
 
@@ -285,6 +277,7 @@ func CheckAdmin(w http.ResponseWriter, r *http.Request) bool {
 	}
 	return false
 }
+
 
 //Validation function checks whether user password login name and surname are valid
 //and are between 0 and 40 characters
