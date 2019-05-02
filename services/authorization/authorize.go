@@ -160,6 +160,15 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, cookie)
 	common.RenderJSON(w, r, http.StatusNoContent, emptyResponse)
 }
+//ListAllUsers makes a request to db to get all users
+func ListAllUsers(w http.ResponseWriter, r *http.Request) {
+	users, err := database.Users.GetAllUsers()
+	if err != nil {
+		common.RenderJSON(w, r, http.StatusNoContent, emptyResponse)
+		return
+	}
+	common.RenderJSON(w, r, http.StatusOK, users)
+}
 
 //UpdateUserPage deletes user
 func UpdateUserPage(w http.ResponseWriter, r *http.Request) {
