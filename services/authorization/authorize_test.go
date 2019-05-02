@@ -32,6 +32,7 @@ func testRouter() *bone.Mux {
 	subV1.DeleteFunc("/user/:id", DeleteUserPage)
 	subV1.PatchFunc("/user/:id", UpdateUserPage)
 	subV1.GetFunc("/users", ListAllUsers)
+	subV1.GetFunc("/user/:id", GetOneUser)
 	return router
 }
 
@@ -326,7 +327,10 @@ func TestUpdateUserPage(t *testing.T) {
 
 //TestDeleteUserPage tests DeleteUserPage function
 func TestDeleteUserPage(t *testing.T) {
-	id := uuid.Must(uuid.Parse("08307904-f18e-4fb8-9d18-29cfad38ffaf"))
+	id, err := uuid.Parse("08307904-f18e-4fb8-9d18-29cfad38ffaf")
+	if err != nil {
+		t.Fatal(err)
+	}
 	tests := []TestCase{
 		{
 			name:           "Success_Delete_User",
@@ -423,6 +427,45 @@ func TestCheckAccess(t *testing.T) {
 		}
 	}
 	RedisClient = database.Client
+}
+
+func TestGetUserByLogin(t *testing.T) {
+	id, err := uuid.Parse("08307904-f18e-4fb8-9d18-29cfad38ffaf")
+	if err != nil {
+		t.Fatal(err)
+	}
+	tests := []TestCase{
+		{
+			name:        "Get_Users_200",
+			url:         "/api/v1/user/08307904-f18e-4fb8-9d18-29cfad38ffaf",
+			statusWant:  http.StatusOK,
+			mockedUser:  data.User{ID: id},
+			mockedError: nil,
+		},
+		{
+			name:        "Get_Users_404",
+			url:         "/api/v1/user/08307904-f18e-4fb8-9d18-29cfad38ffaf",
+			statusWant:  http.StatusNoContent,
+			mockedUser:  data.User{ID: id},
+			mockedError: errors.New("db error"),
+		},
+	}
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	for _, tc := range tests {
+		rec := httptest.NewRecorder()
+		req, _ := http.NewRequest(http.MethodGet, tc.url, nil)
+
+		usersMock := database.NewMockUserCRUD(mockCtrl)
+		database.Users = usersMock
+
+		usersMock.EXPECT().GetUser(tc.mockedUser.ID).Return(tc.mockedUser, tc.mockedError)
+		testRouter().ServeHTTP(rec, req)
+		if rec.Code != tc.statusWant {
+			t.Errorf("Expected: %d , got %d", tc.statusWant, rec.Code)
+		}
+
+	}
 }
 
 //TestCheckAdmin tests CheckAdmin function

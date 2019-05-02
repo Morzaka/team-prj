@@ -2,11 +2,27 @@ package common
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 
 	"team-project/logger"
 )
+
+//RenderJSON render json data to user
+func RenderJSON(w http.ResponseWriter, r *http.Request, status int, response interface{}) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	if response == nil {
+		return
+	}
+	data, err := json.Marshal(response)
+	if err != nil {
+		logger.Logger.Errorf("Error, %s", err)
+	}
+	_, err = w.Write(data)
+	if err != nil {
+		logger.Logger.Errorf("Error, %s", err)
+	}
+}
 
 //REnderJSON render json data to user
 func REnderJSON(w http.ResponseWriter, r *http.Request, status int, response interface{}) {
@@ -75,13 +91,13 @@ func SendError(w http.ResponseWriter, r *http.Request, status int, message strin
 	}
 
 	if errMessage != nil {
-		log.Printf(`"%s %s" err: %s`, r.Method, r.URL, errMessage)
+		logger.Logger.Printf(`"%s %s" err: %s`, r.Method, r.URL, errMessage)
 	}
 	REnderJSON(w, r, status, data)
 }
 
-//RenderJSON is used for rendering JSON response body with appropriate headers
-func RenderJSON(w http.ResponseWriter, r *http.Request, response interface{}) {
+//RENDERJSON is used for rendering JSON response body with appropriate headers
+func RENDERJSON(w http.ResponseWriter, r *http.Request, response interface{}) {
 	switch r.Method {
 	case http.MethodPost:
 		REnderJSON(w, r, http.StatusCreated, response)

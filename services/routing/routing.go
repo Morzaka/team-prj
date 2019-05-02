@@ -84,5 +84,5 @@ func FindPath(w http.ResponseWriter, r *http.Request) {
 
 		}
 	}
-	common.RenderJSON(w, r, pathResult)
+	common.RENDERJSON(w, r, pathResult)
 }
