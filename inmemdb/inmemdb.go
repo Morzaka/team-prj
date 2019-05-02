@@ -10,25 +10,25 @@ import (
 )
 
 var (
-	db     = map[string]interface{}{}
-	dbLock sync.Mutex
-	//redis  map[string]interface{}
-	R                Redis
+	db               = map[string]interface{}{}
+	dbLock           sync.Mutex
+	Redis            REdis
 	lock             sync.Mutex
-	initialisedRedis bool = false
+	initialisedRedis = false
 )
 
-type Redis struct {
+//REdis is wrapper for key value database
+type REdis struct {
 	DB map[string]interface{}
 }
 
-func initialiseRedis(redis *Redis) {
+func initialiseRedis(redis *REdis) {
 	(*redis).DB = make(map[string]interface{}, 100)
 	initialisedRedis = true
 }
 
 //LPush pushes empty interface value into Redis
-func LPush(redis *Redis, key string, value interface{}) {
+func LPush(redis *REdis, key string, value interface{}) {
 	if initialisedRedis == false {
 		initialiseRedis(redis)
 	}
@@ -39,7 +39,7 @@ func LPush(redis *Redis, key string, value interface{}) {
 }
 
 //LGet gets empty interface value from Redis
-func LGet(redis *Redis, key string, value interface{}) interface{} {
+func LGet(redis *REdis, key string, value interface{}) interface{} {
 
 	lock.Lock()
 	defer lock.Unlock()
@@ -53,8 +53,8 @@ func LGet(redis *Redis, key string, value interface{}) interface{} {
 	return value
 }
 
-//LRemove removes key from Redis
-func LRange(redis *Redis, key string) {
+//LRem removes key from Redis
+func LRem(redis *REdis, key string) {
 	lock.Lock()
 	defer lock.Unlock()
 	_, ok := (*redis).DB[key]
