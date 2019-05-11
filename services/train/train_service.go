@@ -22,7 +22,7 @@ var (
 //ValidateIfEmpty is a validation if train is empty
 func ValidateIfEmpty(t data.Train) error {
 	if t.DepartureCity == "" || t.ArrivalCity == "" || t.DepartureTime == "" || t.DepartureDate == "" || t.ArrivalTime == "" || t.ArrivalDate == "" {
-		return errors.New("Some incoming data is empty =(")
+		return errors.New("Some incoming data is empty")
 	}
 	return nil
 }
