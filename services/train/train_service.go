@@ -1,6 +1,5 @@
 package train
 
-import "C"
 import (
 	"encoding/json"
 	"errors"
@@ -36,14 +35,14 @@ func NameIsValid(str string) bool {
 
 //TimeIsValid is a validation if trains time data is valid
 func TimeIsValid(str string) bool {
-	var validName = regexp.MustCompile(`^(2[0-3]|[01]?[0-9]):([0-5]?[0-9])$`)
-	return validName.MatchString(str)
+	var validTime = regexp.MustCompile(`^(2[0-3]|[01]?[0-9]):([0-5]?[0-9])$`)
+	return validTime.MatchString(str)
 }
 
 //DateIsValid is a validation if trains date data is valid
 func DateIsValid(str string) bool {
-	var validName = regexp.MustCompile(`^\s*(3[01]|[12][0-9]|0?[1-9])\.(1[012]|0?[1-9])\.((?:19|20)\d{2})\s*$`)
-	return validName.MatchString(str)
+	var validDate = regexp.MustCompile(`^\s*(3[01]|[12][0-9]|0?[1-9])\.(1[012]|0?[1-9])\.((?:19|20)\d{2})\s*$`)
+	return validDate.MatchString(str)
 }
 
 //Validate is a function that validates trains name, date, time data
@@ -68,11 +67,11 @@ func GetTrains(w http.ResponseWriter, r *http.Request) {
 
 	for _, train := range trains {
 		if err = ValidateIfEmpty(train); err != nil {
-			common.RenderJSON(w, r, http.StatusNoContent, emptyResponse)
+			common.RenderJSON(w, r, http.StatusNoContent, "Empty data found")
 			return
 		}
 		if err = Validate(train); err != nil {
-			common.RenderJSON(w, r, http.StatusNoContent, emptyResponse)
+			common.RenderJSON(w, r, http.StatusNoContent, "Validation failed")
 			return
 		}
 	}
@@ -94,11 +93,11 @@ func GetSingleTrain(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err = ValidateIfEmpty(train); err != nil {
-		common.RenderJSON(w, r, http.StatusNoContent, emptyResponse)
+		common.RenderJSON(w, r, http.StatusNoContent, "Empty data found")
 		return
 	}
 	if err = Validate(train); err != nil {
-		common.RenderJSON(w, r, http.StatusNoContent, emptyResponse)
+		common.RenderJSON(w, r, http.StatusNoContent, "Validation failed")
 		return
 	}
 	common.RenderJSON(w, r, http.StatusOK, train)
@@ -113,11 +112,11 @@ func CreateTrain(w http.ResponseWriter, r *http.Request) {
 	t := data.Train{}
 	json.NewDecoder(r.Body).Decode(&t)
 	if err := ValidateIfEmpty(t); err != nil {
-		common.RenderJSON(w, r, http.StatusNoContent, emptyResponse)
+		common.RenderJSON(w, r, http.StatusNoContent, "Empty data found")
 		return
 	}
 	if err := Validate(t); err != nil {
-		common.RenderJSON(w, r, http.StatusNoContent, emptyResponse)
+		common.RenderJSON(w, r, http.StatusNoContent, "Validation failed")
 		return
 	}
 	err := database.Trains.AddTrain(t)
@@ -138,11 +137,11 @@ func UpdateTrain(w http.ResponseWriter, r *http.Request) {
 	t := data.Train{}
 	json.NewDecoder(r.Body).Decode(&t)
 	if err := ValidateIfEmpty(t); err != nil {
-		common.RenderJSON(w, r, http.StatusNoContent, emptyResponse)
+		common.RenderJSON(w, r, http.StatusNoContent, "Empty data found")
 		return
 	}
 	if err := Validate(t); err != nil {
-		common.RenderJSON(w, r, http.StatusNoContent, emptyResponse)
+		common.RenderJSON(w, r, http.StatusNoContent, "Validation failed")
 		return
 	}
 	t.ID = id
