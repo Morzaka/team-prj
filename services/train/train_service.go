@@ -55,7 +55,7 @@ func Validate(t data.Train) error {
 
 //GetTrains is a handler that returns trains from db
 func GetTrains(w http.ResponseWriter, r *http.Request) {
-	if !authorization.Admin(w, r) {
+	if !authorization.AdminRole(w, r) {
 		common.RenderJSON(w, r, http.StatusForbidden, emptyResponse)
 		return
 	}
@@ -81,7 +81,7 @@ func GetTrains(w http.ResponseWriter, r *http.Request) {
 
 //GetSingleTrain is a handler that returns single train from db
 func GetSingleTrain(w http.ResponseWriter, r *http.Request) {
-	if !authorization.Admin(w, r) {
+	if !authorization.AdminRole(w, r) {
 		common.RenderJSON(w, r, http.StatusForbidden, emptyResponse)
 		return
 	}
@@ -105,7 +105,7 @@ func GetSingleTrain(w http.ResponseWriter, r *http.Request) {
 
 //CreateTrain is a handler that creates train
 func CreateTrain(w http.ResponseWriter, r *http.Request) {
-	if !authorization.Admin(w, r) {
+	if !authorization.AdminRole(w, r) {
 		common.RenderJSON(w, r, http.StatusForbidden, emptyResponse)
 		return
 	}
@@ -129,7 +129,7 @@ func CreateTrain(w http.ResponseWriter, r *http.Request) {
 
 //UpdateTrain is a handler that updates train in db
 func UpdateTrain(w http.ResponseWriter, r *http.Request) {
-	if !authorization.Admin(w, r) {
+	if !authorization.AdminRole(w, r) {
 		common.RenderJSON(w, r, http.StatusForbidden, emptyResponse)
 		return
 	}
@@ -160,7 +160,7 @@ func UpdateTrain(w http.ResponseWriter, r *http.Request) {
 
 //DeleteTrain is a handler that deletes train from db
 func DeleteTrain(w http.ResponseWriter, r *http.Request) {
-	if !authorization.Admin(w, r) {
+	if !authorization.AdminRole(w, r) {
 		common.RenderJSON(w, r, http.StatusForbidden, emptyResponse)
 		return
 	}

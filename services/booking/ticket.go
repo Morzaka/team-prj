@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"team-project/services/authorization"
 
 	"team-project/database"
 	"team-project/services/common"
@@ -27,6 +28,10 @@ func ValidateForm(tk data.Ticket) error {
 
 //GetAllTickets for GETing information about all tickets
 func GetAllTickets(w http.ResponseWriter, r *http.Request) {
+	if !authorization.AdminRole(w, r) {
+		common.RenderJSON(w, r, http.StatusForbidden, emptyResponse)
+		return
+	}
 	tkts, err := database.TicketRepo.AllTickets()
 	if err != nil {
 		common.RenderJSON(w, r, http.StatusInternalServerError, tkts)
@@ -37,6 +42,10 @@ func GetAllTickets(w http.ResponseWriter, r *http.Request) {
 
 //GetOneTicket for GETing information about one tickets
 func GetOneTicket(w http.ResponseWriter, r *http.Request) {
+	if !authorization.LoggedIn(w, r) {
+		common.RenderJSON(w, r, http.StatusForbidden, emptyResponse)
+		return
+	}
 	id := uuid.Must(uuid.Parse(bone.GetValue(r, "id")))
 	tk, err := database.TicketRepo.GetTicket(id)
 	if err != nil {
@@ -48,6 +57,10 @@ func GetOneTicket(w http.ResponseWriter, r *http.Request) {
 
 //CreateTicket (POST) for creating one tickets & add to DB
 func CreateTicket(w http.ResponseWriter, r *http.Request) {
+	if !authorization.AdminRole(w, r) {
+		common.RenderJSON(w, r, http.StatusForbidden, emptyResponse)
+		return
+	}
 	tk := data.Ticket{}
 	tk.ID = uuid.New()
 	err := json.NewDecoder(r.Body).Decode(&tk)
@@ -79,6 +92,10 @@ func CreateTicket(w http.ResponseWriter, r *http.Request) {
 
 //UpdateTicket (PATCH) for updating one tickets in DB
 func UpdateTicket(w http.ResponseWriter, r *http.Request) {
+	if !authorization.AdminRole(w, r) {
+		common.RenderJSON(w, r, http.StatusForbidden, emptyResponse)
+		return
+	}
 	// get ID value from client (json format)
 	id := uuid.Must(uuid.Parse(bone.GetValue(r, "id")))
 	tk := data.Ticket{}
@@ -112,12 +129,16 @@ func UpdateTicket(w http.ResponseWriter, r *http.Request) {
 
 //DeleteTicket (DELETE) for deleting one tickets in DB by id
 func DeleteTicket(w http.ResponseWriter, r *http.Request) {
+	if !authorization.AdminRole(w, r) {
+		common.RenderJSON(w, r, http.StatusForbidden, emptyResponse)
+		return
+	}
 	id := uuid.Must(uuid.Parse(bone.GetValue(r, "id")))
 	err := database.TicketRepo.DeleteTicket(id)
 	if err != nil {
 		common.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
 		return
 	}
-	common.RenderJSON(w, r, http.StatusNotFound,
+	common.RenderJSON(w, r, http.StatusOK,
 		"Ticket was deleted successfully.")
 }
