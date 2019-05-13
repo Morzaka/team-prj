@@ -13,8 +13,12 @@ stages:
 lint:
   stage: vetting
   script:
-    - go get -u golang.org/x/lint/golint
-    - golint -set_exit_status ./...
+    - wget -O - -q https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s vX.Y.Z
+    - golangci-lint --version
+    #- go get -u golang.org/x/lint/golint
+    #- go get -u github.com/kisielk/errcheck
+    #- golint -set_exit_status ./...
+    #- errcheck ./...
 
 unitests:
   stage: tests

@@ -20,7 +20,13 @@ func GetPlanes() ([]data.Plane, error) {
 	if err != nil {
 		return []data.Plane{}, err
 	}
-	defer rows.Close()
+	defer func() error {
+		err := rows.Close()
+		if err != nil {
+			return err
+		}
+		return nil
+	}()
 	planes := []data.Plane{}
 	for rows.Next() {
 		p := data.Plane{}
