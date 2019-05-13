@@ -61,17 +61,17 @@ func GetTrains(w http.ResponseWriter, r *http.Request) {
 	}
 	trains, err := database.Trains.GetAllTrains()
 	if err != nil {
-		common.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
+		common.RenderJSON(w, r, http.StatusBadRequest, emptyResponse)
 		return
 	}
 
 	for _, train := range trains {
 		if err = ValidateIfEmpty(train); err != nil {
-			common.RenderJSON(w, r, http.StatusNoContent, "Empty data found")
+			common.RenderJSON(w, r, http.StatusBadRequest, "Empty data found")
 			return
 		}
 		if err = Validate(train); err != nil {
-			common.RenderJSON(w, r, http.StatusNoContent, "Validation failed")
+			common.RenderJSON(w, r, http.StatusBadRequest, "Validation failed")
 			return
 		}
 	}
@@ -89,15 +89,15 @@ func GetSingleTrain(w http.ResponseWriter, r *http.Request) {
 	newid := id.String()
 	train, err := database.Trains.GetTrain(newid)
 	if err != nil {
-		common.RenderJSON(w, r, http.StatusNoContent, emptyResponse)
+		common.RenderJSON(w, r, http.StatusBadRequest, emptyResponse)
 		return
 	}
 	if err = ValidateIfEmpty(train); err != nil {
-		common.RenderJSON(w, r, http.StatusNoContent, "Empty data found")
+		common.RenderJSON(w, r, http.StatusBadRequest, "Empty data found")
 		return
 	}
 	if err = Validate(train); err != nil {
-		common.RenderJSON(w, r, http.StatusNoContent, "Validation failed")
+		common.RenderJSON(w, r, http.StatusBadRequest, "Validation failed")
 		return
 	}
 	common.RenderJSON(w, r, http.StatusOK, train)
@@ -112,16 +112,16 @@ func CreateTrain(w http.ResponseWriter, r *http.Request) {
 	t := data.Train{}
 	json.NewDecoder(r.Body).Decode(&t)
 	if err := ValidateIfEmpty(t); err != nil {
-		common.RenderJSON(w, r, http.StatusNoContent, "Empty data found")
+		common.RenderJSON(w, r, http.StatusBadRequest, "Empty data found")
 		return
 	}
 	if err := Validate(t); err != nil {
-		common.RenderJSON(w, r, http.StatusNoContent, "Validation failed")
+		common.RenderJSON(w, r, http.StatusBadRequest, "Validation failed")
 		return
 	}
 	err := database.Trains.AddTrain(t)
 	if err != nil {
-		common.RenderJSON(w, r, http.StatusInternalServerError, "Error occured while adding train to database")
+		common.RenderJSON(w, r, http.StatusBadRequest, "Error occured while adding train to database")
 		return
 	}
 	common.RenderJSON(w, r, http.StatusOK, t)
@@ -137,17 +137,17 @@ func UpdateTrain(w http.ResponseWriter, r *http.Request) {
 	t := data.Train{}
 	json.NewDecoder(r.Body).Decode(&t)
 	if err := ValidateIfEmpty(t); err != nil {
-		common.RenderJSON(w, r, http.StatusNoContent, "Empty data found")
+		common.RenderJSON(w, r, http.StatusBadRequest, "Empty data found")
 		return
 	}
 	if err := Validate(t); err != nil {
-		common.RenderJSON(w, r, http.StatusNoContent, "Validation failed")
+		common.RenderJSON(w, r, http.StatusBadRequest, "Validation failed")
 		return
 	}
 	t.ID = id
 	err := database.Trains.UpdateTrain(t)
 	if err != nil {
-		common.RenderJSON(w, r, http.StatusInternalServerError, "Couldn't update data")
+		common.RenderJSON(w, r, http.StatusBadRequest, "Couldn't update data")
 		return
 	}
 	train, err := database.Trains.GetTrain(t.ID.String())
@@ -167,7 +167,7 @@ func DeleteTrain(w http.ResponseWriter, r *http.Request) {
 	id := uuid.Must(uuid.Parse(bone.GetValue(r, "id")))
 	err := database.Trains.DeleteTrain(id)
 	if err != nil {
-		common.RenderJSON(w, r, http.StatusInternalServerError, "Error occured while deleting train from database")
+		common.RenderJSON(w, r, http.StatusBadRequest, "Error occured while deleting train from database")
 		return
 	}
 	common.RenderJSON(w, r, http.StatusOK, "Train was successfully updated")
