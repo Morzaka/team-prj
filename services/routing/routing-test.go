@@ -21,7 +21,7 @@ func TestRouting(t *testing.T) {
 	"end":"Kyiv"
 }`
 
-	if initialised == false {
+	if !initialised {
 		RouteStorage = getData()
 	}
 

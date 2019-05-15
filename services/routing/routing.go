@@ -59,7 +59,7 @@ func getData() map[string][]string {
 //FindPath generates routes
 func FindPath(w http.ResponseWriter, r *http.Request) {
 
-	if initialised == false {
+	if !initialised {
 		RouteStorage = getData()
 	}
 

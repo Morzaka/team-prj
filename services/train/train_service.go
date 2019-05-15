@@ -47,7 +47,7 @@ func DateIsValid(str string) bool {
 
 //Validate is a function that validates trains name, date, time data
 func Validate(t data.Train) error {
-	if NameIsValid(t.ArrivalCity) == false || NameIsValid(t.DepartureCity) == false || DateIsValid(t.DepartureDate) == false || DateIsValid(t.ArrivalDate) == false || TimeIsValid(t.ArrivalTime) == false || TimeIsValid(t.DepartureTime) == false {
+	if !NameIsValid(t.ArrivalCity) || !NameIsValid(t.DepartureCity) || !DateIsValid(t.DepartureDate) || !DateIsValid(t.ArrivalDate) || !TimeIsValid(t.ArrivalTime) || !TimeIsValid(t.DepartureTime) {
 		return errors.New("Some data is invalid")
 	}
 	return nil
