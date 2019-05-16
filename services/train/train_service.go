@@ -7,6 +7,7 @@ import (
 	"regexp"
 
 	"team-project/database"
+	"team-project/logger"
 	"team-project/services/authorization"
 	"team-project/services/common"
 	"team-project/services/data"
@@ -110,7 +111,10 @@ func CreateTrain(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	t := data.Train{}
-	json.NewDecoder(r.Body).Decode(&t)
+	err := json.NewDecoder(r.Body).Decode(&t)
+	if err != nil {
+		logger.Logger.Error("Error while unmarshaling data")
+	}
 	if err := ValidateIfEmpty(t); err != nil {
 		common.RenderJSON(w, r, http.StatusBadRequest, "Empty data found")
 		return
@@ -119,7 +123,7 @@ func CreateTrain(w http.ResponseWriter, r *http.Request) {
 		common.RenderJSON(w, r, http.StatusBadRequest, "Validation failed")
 		return
 	}
-	err := database.Trains.AddTrain(t)
+	err = database.Trains.AddTrain(t)
 	if err != nil {
 		common.RenderJSON(w, r, http.StatusBadRequest, "Error occured while adding train to database")
 		return
@@ -135,7 +139,10 @@ func UpdateTrain(w http.ResponseWriter, r *http.Request) {
 	}
 	id := uuid.Must(uuid.Parse(bone.GetValue(r, "id")))
 	t := data.Train{}
-	json.NewDecoder(r.Body).Decode(&t)
+	err := json.NewDecoder(r.Body).Decode(&t)
+	if err != nil {
+		logger.Logger.Error("Error while unmarshaling data")
+	}
 	if err := ValidateIfEmpty(t); err != nil {
 		common.RenderJSON(w, r, http.StatusBadRequest, "Empty data found")
 		return
@@ -145,7 +152,7 @@ func UpdateTrain(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	t.ID = id
-	err := database.Trains.UpdateTrain(t)
+	err = database.Trains.UpdateTrain(t)
 	if err != nil {
 		common.RenderJSON(w, r, http.StatusBadRequest, "Couldn't update data")
 		return

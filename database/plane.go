@@ -3,6 +3,7 @@ package database
 import (
 	"github.com/google/uuid"
 
+	"team-project/logger"
 	"team-project/services/data"
 )
 
@@ -37,12 +38,11 @@ func (*planeRepository) GetPlanes() ([]data.Plane, error) {
 	if err != nil {
 		return []data.Plane{}, err
 	}
-	defer func() error {
+	defer func() {
 		err := rows.Close()
 		if err != nil {
-			return err
+			logger.Logger.Errorf("Error, %s", err)
 		}
-		return nil
 	}()
 	planes := []data.Plane{}
 	for rows.Next() {

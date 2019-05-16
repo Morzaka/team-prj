@@ -47,7 +47,10 @@ func getData() map[string][]string {
 		logger.Logger.Error("Error while reading http request to JSONApi")
 	}
 	routes := new(data.RouteStructs)
-	json.Unmarshal(respBytes, &routes)
+	err = json.Unmarshal(respBytes, &routes)
+	if err != nil {
+		logger.Logger.Error("Error while unmarshaling data")
+	}
 
 	for _, v := range *routes {
 		routeS[v.Index] = v.Routes

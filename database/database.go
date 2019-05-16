@@ -18,6 +18,11 @@ var (
 	Client *redis.Client
 )
 
+//ReturnDB return db
+func ReturnDB(db *sql.DB) *sql.DB {
+	return db
+}
+
 //PostgresInit connects to postgres database
 func PostgresInit() error {
 	db, err := sql.Open("postgres", os.Getenv("DATABASE_URL")) // heroku requires to get connection from env variable

@@ -25,7 +25,10 @@ func TestRouting(t *testing.T) {
 		RouteStorage = getData()
 	}
 
-	json.Unmarshal([]byte(cityJSON), &stations)
+	err := json.Unmarshal([]byte(cityJSON), &stations)
+	if err != nil {
+		t.Error("Error while unmarshaling")
+	}
 
 	for key, value := range RouteStorage {
 		if indexStart := IndexOfString(value, stations.StartRoute); indexStart != -1 {
@@ -33,7 +36,6 @@ func TestRouting(t *testing.T) {
 				result := data.Routes{RouteID: key, Stations: stations}
 				pathResult = append(pathResult, result)
 			}
-
 		}
 	}
 
