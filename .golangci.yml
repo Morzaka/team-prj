@@ -31,4 +31,5 @@ linters:
   enable-all: false
   disable:
     - unused
+    - structcheck
   disable-all: false
