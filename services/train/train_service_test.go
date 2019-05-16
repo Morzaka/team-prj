@@ -108,7 +108,7 @@ func TestGetTrains(t *testing.T) {
 		{
 			tcase:        "InternalServerError",
 			url:          "/api/v1/trains",
-			expected:     http.StatusInternalServerError,
+			expected:     http.StatusBadRequest,
 			mockedTrains: []data.Train{},
 			mockedErr:    errors.New("db error"),
 		},
@@ -150,7 +150,7 @@ func TestGetSingleTrain(t *testing.T) {
 		{
 			tcase:       "NoContentGetTrain",
 			url:         "/api/v1/train/08307904-f18e-4fb8-9d18-29cfad38aaaf",
-			expected:    http.StatusNoContent,
+			expected:    http.StatusBadRequest,
 			testTrainID: "08307904-f18e-4fb8-9d18-29cfad38aaaf",
 			mockedTrain: data.Train{},
 			mockedErr:   errors.New("db error , no data found"),
@@ -192,7 +192,7 @@ func TestCreateTrain(t *testing.T) {
 		{
 			tcase:       "CreateTrainNoContent",
 			url:         "/api/v1/train",
-			expected:    http.StatusInternalServerError,
+			expected:    http.StatusBadRequest,
 			mockedTrain: testTrain,
 			mockedErr:   errors.New("failed to create"),
 		},
@@ -272,7 +272,7 @@ func TestDeleteTrain(t *testing.T) {
 		{
 			tcase:     "DeleteTrainError",
 			url:       "/api/v1/train/08307904-f18e-4fb8-9d18-29cfad38ffaf",
-			expected:  http.StatusInternalServerError,
+			expected:  http.StatusBadRequest,
 			mockedErr: errors.New("db error"),
 		},
 	}
