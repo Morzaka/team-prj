@@ -9,7 +9,7 @@ linters-settings:
     check-type-assertions: false
     check-blank: false
   govet:
-    check-shadowing: true
+    check-shadowing: false
   golint:
     min-confidence: 0.8
   gofmt:
