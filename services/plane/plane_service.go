@@ -41,12 +41,12 @@ func CreatePlane(w http.ResponseWriter, r *http.Request) {
 	p.ID = uuid.New()
 	err := json.NewDecoder(r.Body).Decode(&p)
 	if err != nil {
-		common.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
+		common.RenderJSON(w, r, http.StatusBadRequest, emptyResponse)
 		return
 	}
 	_, err = database.PlaneRepo.AddPlane(p)
 	if err != nil {
-		common.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
+		common.RenderJSON(w, r, http.StatusBadRequest, emptyResponse)
 		return
 	}
 	common.RenderJSON(w, r, http.StatusCreated, p)
