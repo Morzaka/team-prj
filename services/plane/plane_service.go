@@ -2,12 +2,13 @@ package plane
 
 import (
 	"encoding/json"
-	"github.com/go-zoo/bone"
-	"github.com/google/uuid"
 	"net/http"
 	"team-project/database"
 	"team-project/services/common"
 	"team-project/services/data"
+
+	"github.com/go-zoo/bone"
+	"github.com/google/uuid"
 )
 
 var emptyResponse interface{}
@@ -38,10 +39,14 @@ func GetPlane(w http.ResponseWriter, r *http.Request) {
 func CreatePlane(w http.ResponseWriter, r *http.Request) {
 	p := data.Plane{}
 	p.ID = uuid.New()
-	json.NewDecoder(r.Body).Decode(&p)
-	_, err := database.PlaneRepo.AddPlane(p)
+	err := json.NewDecoder(r.Body).Decode(&p)
 	if err != nil {
-		common.RenderJSON(w, r, http.StatusInternalServerError, emptyResponse)
+		common.RenderJSON(w, r, http.StatusBadRequest, emptyResponse)
+		return
+	}
+	_, err = database.PlaneRepo.AddPlane(p)
+	if err != nil {
+		common.RenderJSON(w, r, http.StatusBadRequest, emptyResponse)
 		return
 	}
 	common.RenderJSON(w, r, http.StatusCreated, p)
@@ -51,9 +56,13 @@ func CreatePlane(w http.ResponseWriter, r *http.Request) {
 func UpdatePlane(w http.ResponseWriter, r *http.Request) {
 	id := uuid.Must(uuid.Parse(bone.GetValue(r, "id")))
 	p := data.Plane{}
-	json.NewDecoder(r.Body).Decode(&p)
+	err := json.NewDecoder(r.Body).Decode(&p)
+	if err != nil {
+		common.RenderJSON(w, r, 500, emptyResponse)
+		return
+	}
 	p.ID = id
-	_, err := database.PlaneRepo.UpdatePlane(p, p.ID)
+	_, err = database.PlaneRepo.UpdatePlane(p, p.ID)
 	if err != nil {
 		common.RenderJSON(w, r, 500, emptyResponse)
 		return

@@ -1,13 +1,8 @@
 image: golang:1.12
 
 before_script:
-  - echo "deb http://toolbelt.heroku.com/ubuntu ./" > /etc/apt/sources.list.d/heroku.list
-  - wget -O- https://toolbelt.heroku.com/apt/release.key | apt-key add -
-  - apt-get update -yq
-  - apt-get install -y heroku-toolbelt
   - git config user.email "supermaaan@test.com"
   - git config user.name "Super puper"
-  - go get -u github.com/go-swagger/go-swagger/cmd/swagger
 
 stages:
   - vetting
@@ -18,26 +13,28 @@ stages:
 lint:
   stage: vetting
   script:
-    - go get -u golang.org/x/lint/golint
-    - golint -set_exit_status ./...
+    - curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(go env GOPATH)/bin v1.16.0
+    - golangci-lint run ./...
 
 unitests:
   stage: tests
   script:
-    - go get -u github.com/gorilla/mux
     - go test -covermode=count ./...
     - go vet
 
 validating:
   stage: validateSwagger
   script:
+    - go get -u github.com/go-swagger/go-swagger/cmd/swagger
     - make validate
 
 deploying:
   stage: deploy
   script:
-    #- heroku git:remote -a team-project-testing
-    #- git remote add heroku https://heroku:35ce1746-94bf-4d66-a729-5778d2987b9f@git.heroku.com/team-projectv1.git
+    - echo "deb http://toolbelt.heroku.com/ubuntu ./" > /etc/apt/sources.list.d/heroku.list
+    - wget -O- https://toolbelt.heroku.com/apt/release.key | apt-key add -
+    - apt-get update -yq
+    - apt-get install -y heroku-toolbelt
     - git checkout -b publish-to-heroku
     - git commit --allow-empty -m "$CI_COMMIT_MESSAGE"
     - git branch -v

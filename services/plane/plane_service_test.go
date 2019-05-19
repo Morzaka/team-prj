@@ -133,7 +133,7 @@ func TestCreatePlane(t *testing.T) {
 		{
 			name:        "Post_Plane_500",
 			url:         "/api/v1/plane",
-			want:        http.StatusInternalServerError,
+			want:        http.StatusBadRequest,
 			mockedPlane: plane,
 			mockedError: errors.New("db error"),
 		},
