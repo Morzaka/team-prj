@@ -33,7 +33,7 @@ var (
 
 // GetPlanes is a function for getting all Planes from table
 func (*planeRepository) GetPlanes() ([]data.Plane, error) {
-	rows, err := Db.Query(selectPlanes)
+	rows, err := GetDBManager().Db.Query(selectPlanes)
 	if err != nil {
 		return []data.Plane{}, err
 	}
@@ -53,7 +53,7 @@ func (*planeRepository) GetPlanes() ([]data.Plane, error) {
 // GetPlane is a function for getting Plane using id
 func (*planeRepository) GetPlane(id uuid.UUID) (data.Plane, error) {
 	p := data.Plane{}
-	row := Db.QueryRow(selectPlane, id)
+	row := GetDBManager().Db.QueryRow(selectPlane, id)
 	err := row.Scan(&p.ID, &p.DepartureCity, &p.ArrivalCity)
 	if err != nil {
 		return p, err
@@ -63,7 +63,7 @@ func (*planeRepository) GetPlane(id uuid.UUID) (data.Plane, error) {
 
 // UpdatePlane is a function for updating Plane using id
 func (*planeRepository) UpdatePlane(plane data.Plane, id uuid.UUID) (data.Plane, error) {
-	_, err := Db.Exec(updatePlane, id, plane.DepartureCity, plane.ArrivalCity)
+	_, err := GetDBManager().Db.Exec(updatePlane, id, plane.DepartureCity, plane.ArrivalCity)
 	if err != nil {
 		return data.Plane{}, err
 	}
@@ -72,7 +72,7 @@ func (*planeRepository) UpdatePlane(plane data.Plane, id uuid.UUID) (data.Plane,
 
 // AddPlane is a function for adding new Plane to table
 func (*planeRepository) AddPlane(plane data.Plane) (data.Plane, error) {
-	_, err := Db.Exec(insertPlane, plane.ID, plane.DepartureCity, plane.ArrivalCity)
+	_, err := GetDBManager().Db.Exec(insertPlane, plane.ID, plane.DepartureCity, plane.ArrivalCity)
 	if err != nil {
 		return data.Plane{}, err
 	}
@@ -81,7 +81,7 @@ func (*planeRepository) AddPlane(plane data.Plane) (data.Plane, error) {
 
 // DeletePlane is a function for deleting Plane using id
 func (*planeRepository) DeletePlane(id uuid.UUID) error {
-	_, err := Db.Exec(deletePlane, id)
+	_, err := GetDBManager().Db.Exec(deletePlane, id)
 	if err != nil {
 		return err
 	}

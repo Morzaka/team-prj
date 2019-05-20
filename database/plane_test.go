@@ -28,7 +28,7 @@ func openMockPlane(t *testing.T) (*sql.DB, sqlmock.Sqlmock) {
 	if err != nil {
 		t.Fatalf("failed to open sqlmock database: %s", err)
 	}
-	Db = db
+	GetDBManager().Db = db
 
 	return db, mock
 }

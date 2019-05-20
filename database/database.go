@@ -2,32 +2,45 @@ package database
 
 import (
 	"database/sql"
-	"github.com/go-redis/redis"
 	"net/url"
 	"os"
+	"team-project-testing/logger"
+
+	"github.com/go-redis/redis"
+
 	//pq lib for using postgres
 	_ "github.com/lib/pq"
 )
 
 var (
-	//Db is a pointer to opened database
-	Db *sql.DB
 	//Client  for redis instance
 	Client *redis.Client
 )
 
+//DBManager is a structure for singletom pattern
+type DBManager struct {
+	Db            *sql.DB
+	isInitialized bool
+}
+
+var postgresInstance = PostgresInit()
+
+//GetDBManager is a function that returns instance of DBManager (in our case only for postgres)
+func GetDBManager() DBManager {
+	return postgresInstance
+}
+
 //PostgresInit connects to postgres database
-func PostgresInit() error {
+func PostgresInit() DBManager {
 	db, err := sql.Open("postgres", os.Getenv("DATABASE_URL")) // heroku requires to get connection from env variable
 	if err != nil {
-		return err
+		panic(err)
 	}
 	err = db.Ping()
 	if err != nil {
-		return err
+		logger.Logger.Error("Error occured while checking connection")
 	}
-	Db = db
-	return nil
+	return DBManager{Db: db, isInitialized: true}
 }
 
 //RedisInit initializes a new redis client

@@ -41,7 +41,7 @@ var (
 //AddUser adds info about new user to the database
 func (*IUser) AddUser(user data.User) (data.User, error) {
 	//insert values to the database
-	_, err := Db.Exec(insertUser, user.ID, user.Name, user.Surname, user.Login, user.Password, user.Email)
+	_, err := GetDBManager().Db.Exec(insertUser, user.ID, user.Name, user.Surname, user.Login, user.Password, user.Email)
 	if err != nil {
 		return data.User{}, err
 	}
@@ -51,7 +51,7 @@ func (*IUser) AddUser(user data.User) (data.User, error) {
 //GetUser gets user by login
 func (*IUser) GetUser(id uuid.UUID) (data.User, error) {
 	var user data.User
-	err := Db.QueryRow(selectUser, id).Scan(&user.ID, &user.Name, &user.Surname, &user.Login, &user.Password, &user.Role, &user.Email)
+	err := GetDBManager().Db.QueryRow(selectUser, id).Scan(&user.ID, &user.Name, &user.Surname, &user.Login, &user.Password, &user.Role, &user.Email)
 	//if there's no matches for login return empty value
 	if err != nil {
 		return user, err
@@ -63,7 +63,7 @@ func (*IUser) GetUser(id uuid.UUID) (data.User, error) {
 func (*IUser) GetUserPassword(login string) (string, error) {
 	var password string
 	//get user's password for given login
-	err := Db.QueryRow(selectUserPassword, login).Scan(&password)
+	err := GetDBManager().Db.QueryRow(selectUserPassword, login).Scan(&password)
 	//if there's no matches for login return empty value
 	if err != nil {
 		return password, err
@@ -75,7 +75,7 @@ func (*IUser) GetUserPassword(login string) (string, error) {
 //GetUserRole get's user's role and returns it with nil error, otherwise returns error
 func (*IUser) GetUserRole(login string) (string, error) {
 	var role string
-	err := Db.QueryRow(selectUserRole, login).Scan(&role)
+	err := GetDBManager().Db.QueryRow(selectUserRole, login).Scan(&role)
 	if err != nil {
 		return role, err
 	}
@@ -85,7 +85,7 @@ func (*IUser) GetUserRole(login string) (string, error) {
 //UpdateUser updates user's personal information
 func (*IUser) UpdateUser(user data.User, id uuid.UUID) (int64, error) {
 	var count int64
-	res, err := Db.Exec(updateUser, id, user.Name, user.Surname, user.Login, user.Password, user.Email)
+	res, err := GetDBManager().Db.Exec(updateUser, id, user.Name, user.Surname, user.Login, user.Password, user.Email)
 	if err != nil {
 		return count, err
 	}
@@ -99,7 +99,7 @@ func (*IUser) UpdateUser(user data.User, id uuid.UUID) (int64, error) {
 //DeleteUser deletes user's page from db
 func (*IUser) DeleteUser(id uuid.UUID) (int64, error) {
 	var count int64
-	res, err := Db.Exec(deleteUser, id)
+	res, err := GetDBManager().Db.Exec(deleteUser, id)
 	if err != nil {
 		return count, err
 	}
@@ -113,7 +113,7 @@ func (*IUser) DeleteUser(id uuid.UUID) (int64, error) {
 //GetAllUsers returns slice with all users in db with possible error
 func (*IUser) GetAllUsers() ([]data.User, error) {
 	var users []data.User
-	rows, err := Db.Query(selectAllUsers)
+	rows, err := GetDBManager().Db.Query(selectAllUsers)
 	if err != nil {
 		return users, err
 	}

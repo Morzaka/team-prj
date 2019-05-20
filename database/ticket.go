@@ -43,7 +43,7 @@ var (
 //GetAllTickets sends a query for all tickets
 func (*ticketRepository) AllTickets() ([]data.Ticket, error) {
 	//rows, err := configurations.DB.Query("SELECT * FROM tickets")
-	rows, err := Db.Query(getAllItems)
+	rows, err := GetDBManager().Db.Query(getAllItems)
 	if err != nil {
 		return nil, err
 	}
@@ -71,7 +71,7 @@ func (*ticketRepository) AllTickets() ([]data.Ticket, error) {
 //GetTicket sends a query for one ticket
 func (*ticketRepository) GetTicket(id uuid.UUID) (data.Ticket, error) {
 	tk := data.Ticket{}
-	row := Db.QueryRow(getOneItem, id)
+	row := GetDBManager().Db.QueryRow(getOneItem, id)
 
 	err := row.Scan(&tk.ID, &tk.TrainID, &tk.PlaneID, &tk.UserID,
 		&tk.Place, &tk.TicketType, &tk.Discount, &tk.Price, &tk.TotalPrice,
@@ -86,7 +86,7 @@ func (*ticketRepository) GetTicket(id uuid.UUID) (data.Ticket, error) {
 
 //CreateTicket sends a query for creating new one ticket
 func (*ticketRepository) CreateTicket(tk data.Ticket) error {
-	_, err := Db.Exec(addOneItem, tk.ID, tk.Place, tk.TicketType, tk.Discount,
+	_, err := GetDBManager().Db.Exec(addOneItem, tk.ID, tk.Place, tk.TicketType, tk.Discount,
 		tk.Price, tk.TotalPrice, tk.Name, tk.Surname)
 	if err != nil {
 		return err
@@ -96,7 +96,7 @@ func (*ticketRepository) CreateTicket(tk data.Ticket) error {
 
 //UpdateTicket sends a query for updating one ticket by ID
 func (*ticketRepository) UpdateTicket(tk data.Ticket) error {
-	_, err := Db.Exec(updateItem, tk.ID, tk.Place, tk.TicketType, tk.Discount,
+	_, err := GetDBManager().Db.Exec(updateItem, tk.ID, tk.Place, tk.TicketType, tk.Discount,
 		tk.Price, tk.TotalPrice, tk.Name, tk.Surname)
 	if err != nil {
 		return err
@@ -106,7 +106,7 @@ func (*ticketRepository) UpdateTicket(tk data.Ticket) error {
 
 //DeleteTicket sends a query for deleting one ticket by ID
 func (*ticketRepository) DeleteTicket(id uuid.UUID) error {
-	_, err := Db.Exec(deleteItem, id)
+	_, err := GetDBManager().Db.Exec(deleteItem, id)
 	if err != nil {
 		return err
 	}

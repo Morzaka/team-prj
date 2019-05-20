@@ -30,12 +30,6 @@ func main() {
 		fmt.Printf("Error logger not loaded, %s \n", err)
 		return
 	}
-	err = database.PostgresInit()
-	if err != nil {
-		fmt.Printf("Error while connecting to postgres database, %s \n", err)
-		return
-	}
-	defer database.Db.Close()
 	err = database.RedisInit()
 	if err != nil {
 		fmt.Printf("Error while initializing redis client, %s \n", err)
