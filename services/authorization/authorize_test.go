@@ -32,6 +32,7 @@ func testRouter() *bone.Mux {
 	subV1.DeleteFunc("/user/:id", DeleteUserPage)
 	subV1.PatchFunc("/user/:id", UpdateUserPage)
 	subV1.GetFunc("/users", ListAllUsers)
+	subV1.GetFunc("/user/:id", GetOneUser)
 	return router
 }
 
@@ -58,6 +59,7 @@ type TestCase struct {
 	mockedRole          string
 	mockedAffected      int64
 	mockedLogicalResult bool
+	messageWant         string
 	cookieSet           bool
 	openRedis           bool
 	resultWant          bool
@@ -131,7 +133,10 @@ func TestSignin(t *testing.T) {
 
 //TestSignup tests Signup function
 func TestSignup(t *testing.T) {
-	id := uuid.Must(uuid.Parse("08307904-f18e-4fb8-9d18-29cfad38ffaf"))
+	id, err := uuid.Parse("08307904-f18e-4fb8-9d18-29cfad38ffaf")
+	if err != nil {
+		t.Fatal(err)
+	}
 	tests := []TestCase{
 		{
 			name:           "Failure_LoginNotAllowed",
@@ -161,12 +166,16 @@ func TestSignup(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 	for _, tc := range tests {
+		Validate = func(user data.User) (bool, string) {
+			return true, ""
+		}
 		rec := httptest.NewRecorder()
 		jsonBody, err := json.Marshal(tc.mockedUser)
 		if err != nil {
 			t.Fatal(err)
 		}
 		req, _ := http.NewRequest(http.MethodPost, tc.url, bytes.NewBuffer(jsonBody))
+
 		usersMock := database.NewMockUserCRUD(mockCtrl)
 		modelMock := model.NewMockModel(mockCtrl)
 		model.HelperModel = modelMock
@@ -181,6 +190,7 @@ func TestSignup(t *testing.T) {
 			t.Errorf("Expected %d, got %d", tc.statusWant, rec.Code)
 		}
 	}
+	Validate = Validation
 }
 
 //TestLogout tests Logout function
@@ -317,7 +327,10 @@ func TestUpdateUserPage(t *testing.T) {
 
 //TestDeleteUserPage tests DeleteUserPage function
 func TestDeleteUserPage(t *testing.T) {
-	id := uuid.Must(uuid.Parse("08307904-f18e-4fb8-9d18-29cfad38ffaf"))
+	id, err := uuid.Parse("08307904-f18e-4fb8-9d18-29cfad38ffaf")
+	if err != nil {
+		t.Fatal(err)
+	}
 	tests := []TestCase{
 		{
 			name:           "Success_Delete_User",
@@ -416,6 +429,45 @@ func TestCheckAccess(t *testing.T) {
 	RedisClient = database.Client
 }
 
+func TestGetUserByLogin(t *testing.T) {
+	id, err := uuid.Parse("08307904-f18e-4fb8-9d18-29cfad38ffaf")
+	if err != nil {
+		t.Fatal(err)
+	}
+	tests := []TestCase{
+		{
+			name:        "Get_Users_200",
+			url:         "/api/v1/user/08307904-f18e-4fb8-9d18-29cfad38ffaf",
+			statusWant:  http.StatusOK,
+			mockedUser:  data.User{ID: id},
+			mockedError: nil,
+		},
+		{
+			name:        "Get_Users_404",
+			url:         "/api/v1/user/08307904-f18e-4fb8-9d18-29cfad38ffaf",
+			statusWant:  http.StatusNoContent,
+			mockedUser:  data.User{ID: id},
+			mockedError: errors.New("db error"),
+		},
+	}
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	for _, tc := range tests {
+		rec := httptest.NewRecorder()
+		req, _ := http.NewRequest(http.MethodGet, tc.url, nil)
+
+		usersMock := database.NewMockUserCRUD(mockCtrl)
+		database.Users = usersMock
+
+		usersMock.EXPECT().GetUser(tc.mockedUser.ID).Return(tc.mockedUser, tc.mockedError)
+		testRouter().ServeHTTP(rec, req)
+		if rec.Code != tc.statusWant {
+			t.Errorf("Expected: %d , got %d", tc.statusWant, rec.Code)
+		}
+
+	}
+}
+
 //TestCheckAdmin tests CheckAdmin function
 func TestCheckAdmin(t *testing.T) {
 	tests := []TestCase{
@@ -465,4 +517,42 @@ func TestCheckAdmin(t *testing.T) {
 		}
 	}
 	LoggedIn = CheckAccess
+}
+
+func TestValidation(t *testing.T) {
+	tests := []TestCase{
+		{
+			mockedUser: data.User{
+				Name: "Oksana", Surname: "Zhykina", Login: "oks_zh", Password: "oksana88zh", Email: "oks88zh@gmail.com",
+			},
+			messageWant: "",
+			resultWant:  true,
+		},
+		{
+			mockedUser: data.User{
+				Name: "Oksana", Surname: "Zhykina", Login: "oks_zh", Password: "ok", Email: "oks88zh@gmail.com",
+			},
+			messageWant: "Invalid Password",
+			resultWant:  false,
+		},
+		{
+			mockedUser: data.User{
+				Name: "356oks", Surname: "Zhykina", Login: "oks_zh", Password: "oks_zh888", Email: "oks88zh@gmail.com",
+			},
+			messageWant: " Invalid Name",
+			resultWant:  false,
+		},
+		{
+			mockedUser: data.User{
+				Name: "Oksana", Surname: "999zhyk", Login: "oks_zh", Password: "oks_zh888", Email: "oks88zh@gmail.com",
+			},
+			messageWant: "Invalid Surname",
+			resultWant:  false,
+		},
+	}
+	for _, tc := range tests {
+		if valid, msg := Validation(tc.mockedUser); valid != tc.resultWant && msg != tc.messageWant {
+			t.Errorf("Expected %t, %s, got %t, %s", tc.resultWant, tc.messageWant, valid, msg)
+		}
+	}
 }

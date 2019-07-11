@@ -9,6 +9,7 @@ type User struct {
 	Password string    `json:"password"`
 	Name     string    `json:"name"`
 	Surname  string    `json:"surname"`
+	Email    string    `json:"email"`
 	Role     string    `json:"role"`
 }
 
@@ -16,12 +17,6 @@ type User struct {
 type Signin struct {
 	Login    string `json:"login"`
 	Password string `json:"password"`
-}
-
-//Comment structure
-type Comment struct {
-	User    string   `json:"user"`
-	Comment []string `json:"comment"`
 }
 
 //Trip database structure
@@ -53,7 +48,7 @@ type Plane struct {
 
 //Routes contains result of algorithm
 type Routes struct {
-	RouteID  int      `json:"route"`
+	RouteID  string   `json:"route"`
 	Stations Stations `json:"stations"`
 }
 
@@ -62,6 +57,15 @@ type Stations struct {
 	StartRoute string `json:"start"`
 	EndRoute   string `json:"end"`
 }
+
+//RouteStruct is a struct of Routes
+type RouteStruct struct {
+	Index  string   `json:"index"`
+	Routes []string `json:"routes"`
+}
+
+// RouteStructs is a slice of Struct of Routes
+type RouteStructs []RouteStruct
 
 //Ticket datastructure
 type Ticket struct {
@@ -83,6 +87,3 @@ type Ticket struct {
 	//Arrival_date   time.Time `json:"arrival_date"`
 	//Arrival_time   time.Time `json:"arrival_time"`
 }
-
-//Tickets is a slice of Ticket
-type Tickets []Ticket

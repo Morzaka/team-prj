@@ -79,6 +79,21 @@ func (mr *MockUserCRUDMockRecorder) GetAllUsers() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllUsers", reflect.TypeOf((*MockUserCRUD)(nil).GetAllUsers))
 }
 
+// GetUser mocks base method
+func (m *MockUserCRUD) GetUser(arg0 uuid.UUID) (data.User, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetUser", arg0)
+	ret0, _ := ret[0].(data.User)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetUser indicates an expected call of GetUser
+func (mr *MockUserCRUDMockRecorder) GetUser(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUser", reflect.TypeOf((*MockUserCRUD)(nil).GetUser), arg0)
+}
+
 // GetUserPassword mocks base method
 func (m *MockUserCRUD) GetUserPassword(arg0 string) (string, error) {
 	m.ctrl.T.Helper()

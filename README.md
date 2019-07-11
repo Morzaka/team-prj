@@ -4,24 +4,30 @@
 -
 **Download and install all resources**
 
-install `Golang`, `Redis`, `PostgreSQL`, `Docker`, `docker-compose`
+install `Go`, `Redis`, `PostgreSQL`, `Docker`, `docker-compose`
 
 run
-* `git clone git@gitlab.com:golang-lv-388/team-project.git`
-* `git clone https://gitlab.com/golang-lv-388/team-project.git`
-* `go get -d -v ./...`
-* `go install -v ./...`
-* `go get -u golang.org/x/vgo`
+* ssh `git clone git@gitlab.com:golang-lv-388/team-project.git`
+* https `git clone https://gitlab.com/golang-lv-388/team-project.git`
 * `go build`
 
-**Web server start:**
+**Server address**
+
+> https://team-projectv1.herokuapp.com/
+
+**Web server run local start:**
 -
-* go `run main.go`
+>For running local make changes to the file `database/database.go`
+>Change second argument in method `sql.Open` to `fmt.Sprintf("host=%s port=%s 
+user=%s "+
+"password=%s dbname=%s sslmode=disable", configurations.Config.PgHost, 
+configurations.Config.PgPort, configurations.Config.PgUser,
+configurations.Config.PgPassword, configurations.Config.PgName)`
+> In the `main.go` file reassign the variable `port` to **string** `"8080"` 
+>
+* `go run main.go`
 > listen http://localhost:8080
 
 **Run web server in a docker container:**
- * remove `go.sum` and `go.mode` files
- * run `vgo build`
  * run `docker-compose up --build`
 > listen http://localhost:8080
-

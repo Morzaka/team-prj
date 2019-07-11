@@ -20,6 +20,7 @@ type Configuration struct {
 	PgUser      string `json:"PgUser"`
 	PgPassword  string `json:"PgPassword"`
 	PgName      string `json:"PgName"`
+	JSONApi     string `json:"JSONApi"`
 }
 
 // LoadConfig loads configurations once

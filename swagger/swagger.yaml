@@ -1,90 +1,643 @@
-swagger: '2.0'
+swagger: "2.0"
 info:
-  title: Team project Service API
-  version: 1.0.0
+  title: "Team project Service API"
+  version: "1.0.0"
 schemes:
-  - http
-host: localhost:8080
-basePath: /api/v1
+  - "http"
+host: "localhost:8080"
+basePath: "/api/v1"
 produces:
-  - application/json
+  - "application/json"
 consumes:
-  - application/json
+  - "application/json"
 paths:
   /hello/{name}:
     get:
-      summary: Hello message test
+      summary: "Hello message test"
       tags:
-        - HelloMessage
+        - "HelloMessage"
       parameters:
-        - name: name
-          in: path
+        - name: "name"
+          in: "path"
           required: true
-          type: string
+          type: "string"
       responses:
         '200':
-          description: Message is successfully
+          description: "Message is successful"
           schema:
             $ref: "#/definitions/HelloMessage"
         '404':
-          description: Failed
+          description: "Failed"
           schema:
             $ref: "#/definitions/ErrorMessage"
-  /User:
-    get:
-      summary: Get all users info
+  /register:
+    post:
+      summary: "User's registration"
       tags:
-        - get all users
-      responses:
-        '200':
-          description: All users sent
+        - "authorization"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "body"
+          in: "body"
+          description: "User object tha needs to be added to the database"
+          required: true
           schema:
             $ref: "#/definitions/User"
-        '404':
-          description: Failed to add user
+      responses:
+        '500':
+          description: "Internal server error with db"
+          schema:
+            $ref: '#/definitions/Response'
+        '406':
+          description: "Registration not allowed"
           schema:
             $ref: "#/definitions/ErrorMessage"
+        '200':
+          description: "User was registered successfully"
+          schema:
+            $ref: "#/definitions/User"
+  /login:
     post:
-      summary: Post user to DB
+      summary: "User's logging in"
       tags:
-        - post user
+        - "authorization"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "body"
+          in: "body"
+          description: "User credentials to log in"
+          required: true
+          schema:
+            $ref: "#/definitions/Login"
+      responses:
+        '500':
+          description: "Error with redis/postgres db"
+          schema:
+            $ref: "#/definitions/Response"
+        '401':
+          description: "User is not registered or entered invalid credentials"
+          schema:
+            $ref: "#/definitions/Response"
+        '200':
+          description: "User logged in"
+          schema:
+            $ref: "#/definitions/Login"
+  /logout:
+    post:
+      summary: "Logging out"
+      tags:
+        - "authorization"
+      responses:
+        '500':
+          description: "Internal server error with database"
+          schema:
+            $ref: "#/definitions/Response"
+        '204':
+          description: "User was logged out successfully"
+  /users:
+    get:
+      summary: "Get all users from database"
+      tags:
+        - "authorization"
+      responses:
+        '204':
+          description: "No users in database to return"
+          schema:
+            $ref: "#/definitions/Response"
+        '200':
+          description: "Got list of users"
+          schema:
+            $ref: "#/definitions/Users"
+  /user/{id}:
+    delete:
+      summary: "Delete user from database"
+      tags:
+        - "authorization"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          type: "string"
+      responses:
+        '500':
+          description: "Internal server error with database"
+          schema:
+            $ref: "#/definitions/Response"
+        '404':
+          description: "User was not found in database"
+          schema:
+            $ref: "#/definitions/Response"
+        '200':
+          description: "User was deleted successfully"
+          schema:
+            $ref: "#/definitions/Response"
+    patch:
+      summary: "Update user in database"
+      tags:
+        - "authorization"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          type: "string"
+      responses:
+        '500':
+          description: "Internal server error with database"
+          schema:
+            $ref: "#/definitions/Response"
+        '404':
+          description: "User was not found in database"
+          schema:
+            $ref: "#/definitions/Response"
+        '200':
+          description: "User was updated successfully"
+          schema:
+            $ref: "#/definitions/User"
+    get:
+      summary: "Get user by login"
+      tags:
+        - "authorization"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          type: "string"
+      responses:
+        '404':
+          description: "User was not found in database"
+          schema:
+            $ref: "#/definitions/Response"
+        '200':
+          description: "User was returned successfully"
+          schema:
+            $ref: "#/definitions/User"
+  /planes:
+    get:
+      summary: Get all planes from Database
+      tags:
+        - plane
+      responses:
+        '200':
+          description: Planes get successfully
+          schema:
+            $ref: "#/definitions/Plane"
+        '404':
+          description: Can't find plane with such id
+  /plane:
+    post:
+      summary: Create plane to Database
+      tags:
+        - plane
       consumes:
         - application/json
       parameters:
         - in: body
           name: body
-          description: The user to create
+          description: The plane to create
           required: true
           schema:
-            $ref: "#/definitions/User"
+            $ref: "#/definitions/Plane"
       responses:
         '201':
-          description: User created
+          description: Plane create successfully
           schema:
-            $ref: "#/definitions/User"
+            $ref: "#/definitions/Plane"
         '400':
-          description: Can't add this user or can't parse POST body
+          description: Can't create plane
+          schema:
+            $ref: "#/definitions/ErrorMessage"
+  /plane/{id}:
+    get:
+      summary: Get plane from Database
+      tags:
+        - plane
+      consumes:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        '201':
+          description: Plane get successfully
+          schema:
+            $ref: "#/definitions/Plane"
+        '400':
+          description: Can't get plane
+          schema:
+            $ref: "#/definitions/ErrorMessage"
+    delete:
+      summary: Delete plane from DB
+      tags:
+        - plane
+      consumes:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        '201':
+          description: Plane delete successfully
+          schema:
+            $ref: "#/definitions/Plane"
+        '400':
+          description: Can't delete plane
+          schema:
+            $ref: "#/definitions/ErrorMessage"
+    patch:
+      summary: Update plane from Database
+      tags:
+        - plane
+      consumes:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        '201':
+          description: Plane update successfully
+          schema:
+            $ref: "#/definitions/Plane"
+        '400':
+          description: Can't update plane
+          schema:
+            $ref: "#/definitions/ErrorMessage"
+  /tickets:
+    get:
+      tags:
+        - "tickets"
+      summary: "Returns list of tickets"
+      description: "Returns a map of status codes to quantities"
+      operationId: "getAllTickets"
+      produces:
+        - "application/json"
+      #parameters: []
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Tickets"
+        500:
+          description: "Database request failure"
+      # security:
+      #   - api_key: []
+  /ticket:
+    post:
+      tags:
+        - "tickets"
+      summary: "Create new ticket item in DB"
+      description: ""
+      operationId: "createTicket"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "params for creating ticket"
+          required: true
+          schema:
+            $ref: "#/definitions/Ticket"
+      responses:
+        201:
+          description: "Ticked successful created"
+          schema:
+            $ref: "#/definitions/TicketFull"
+        406:
+          description: "All fields must be complete"
+          schema:
+            $ref: "#/definitions/Ticket"
+        500:
+          description: "Database request failure"
+      # security:
+      #   - api_key: []
+  /ticket/{ticketId}:
+    get:
+      tags:
+        - "tickets"
+      summary: "Find ticket by ID"
+      description: "For valid response use uuid format."
+      operationId: "getTicketById"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "ticketId"
+          in: "path"
+          description: "ID of ticket that needs to be fetched"
+          required: true
+          type: "string"
+          format: "uuid"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/TicketFull"
+        400:
+          description: "Invalid ID supplied"
+        500:
+          description: "Database request failure"
+    patch:
+      tags:
+        - "tickets"
+      summary: "Updated ticket"
+      description: "For valid response use uuid format."
+      operationId: "updateTicket"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "ticketId"
+          in: "path"
+          description: "ticket ID that need to be updated."
+          required: true
+          type: "string"
+          format: "uuid"
+        - in: "body"
+          name: "body"
+          description: "Updated ticket object"
+          required: true
+          schema:
+            $ref: "#/definitions/Ticket"
+      responses:
+        200:
+          description: "successfully updated"
+          schema:
+            $ref: "#/definitions/TicketFull"
+        400:
+          description: "Invalid Ticked supplied"
+        404:
+          description: "Ticked not found"
+        500:
+          description: "Database request failure"
+      # security:
+      #   - api_key: []
+    delete:
+      tags:
+        - "tickets"
+      summary: "Delete ticket by ID"
+      description: "For valid response use uuid format."
+      operationId: "deleteTicket"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "ticketId"
+          in: "path"
+          description: "ID of ticket that needs to be deleted."
+          required: true
+          type: "string"
+          format: "uuid"
+      responses:
+        400:
+          description: "Invalid ID supplied"
+        404:
+          description: "Ticket not found. Successfully deleted"
+        500:
+          description: "Database request failure"
+      # security:
+      #   - api_key: []
+  /trains:
+    get:
+      tags:
+        - "train"
+      summary: "Gets all trains"
+      operationId : "getTrains"
+      responses:
+        '200':
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Trains"
+        '500':
+          description: "error while getting data from db"
+          schema:
+            $ref: "#/definitions/ErrorMessage"
+        '204':
+          description: "No Content"
+          schema:
+            $ref: "#/definitions/NoContent"
+  /train:
+    get:
+      tags:
+        - "train"
+      summary: "Gets single train"
+      operationId: "getTrain"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Train"
+        400:
+          description: "Bad Request . Couldn't get id"
+          schema:
+            $ref: "#/definitions/ErrorMessage"
+        204:
+          description: "No Content"
+          schema:
+            $ref: "#/definitions/NoContent"
+    post:
+      tags:
+        - "train"
+      summary: "Creates train"
+      operationId: "CreateTrain"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Train"
+        500:
+          description: "error while adding data into db"
+          schema:
+            $ref: "#/definitions/ErrorMessage"
+        204:
+          description: "No Content"
+          schema:
+            $ref: "#/definitions/NoContent"
+    patch:
+      tags:
+        - "train"
+      summary: "Updates train"
+      operationId: "UpdateTrain"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Train"
+        400:
+          description: "Bad Request . Couldn't get id"
+          schema:
+            $ref: "#/definitions/ErrorMessage"
+        500:
+          description: "error while updating data into db"
+          schema:
+            $ref: "#/definitions/ErrorMessage"
+        204:
+          description: "No Content"
+          schema:
+            $ref: "#/definitions/NoContent"
+    delete:
+      tags:
+        - "train"
+      summary: "Deletes Train"
+      operationId: "DeleteTrain"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Train"
+        400:
+          description: "Bad Request . Couldn't get id"
+          schema:
+            $ref: "#/definitions/ErrorMessage"
+        500:
+          description: "error while deleting data from db"
           schema:
             $ref: "#/definitions/ErrorMessage"
 definitions:
   HelloMessage:
-    type: object
+    type: "object"
     properties:
       name:
-        type: string
-        description: User name.
+        type: "string"
+        description: "User name"
   User:
-    type: object
+    type: "object"
     properties:
       ID:
-        type: string
-        description: The user ID in DB in UUID format.
+        type: "string"
       Name:
-        type: string
-        description: User name.
-  ErrorMessage:
+        type: "string"
+      Surname:
+        type: "string"
+      Login:
+        type: "string"
+      Password:
+        type: "string"
+      Email:
+        type: "string"
+  Users:
+    type: "array"
+    items:
+      $ref: "#/definitions/User"
+  Response:
+    type: "object"
+    properties:
+      ResponseBody:
+        type: "string"
+        description: "Response generated due to the request: empty interface or string message"
+  Login:
+    type: "object"
+    properties:
+      Login:
+        type: "string"
+      Password:
+        type: "string"
+  Plane:
     type: object
     properties:
-      Message:
+      id:
         type: string
-        description: Error message
+        description: The plane ID in DB in UUID format.
+      DepartureCity:
+        type: string
+        description: Plane departure city.
+      ArrivalCity:
+        type: string
+        description: Plane arrival city.
+  Ticket:
+    type: "object"
+    properties:
+      place:
+        type: "integer"
+        format: "int"
+      ticket_type:
+        type: "string"
+      discount:
+        type: "string"
+      price:
+        type: "number"
+        format: "float32"
+      total_price:
+        type: "number"
+        format: "float32"
+      name:
+        type: "string"
+      surname:
+        type: "string"
+  TicketFull:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+        format: "uuid"
+      train_id:
+        type: "string"
+        format: "uuid"
+      plane_id:
+        type: "string"
+        format: "uuid"
+      user_id:
+        type: "string"
+        format: "uuid"
+      place:
+        type: "integer"
+        format: "int"
+      ticket_type:
+        type: "string"
+      discount:
+        type: "string"
+      price:
+        type: "number"
+        format: "float32"
+      total_price:
+        type: "number"
+        format: "float32"
+      name:
+        type: "string"
+      surname:
+        type: "string"
+  Tickets:
+    type: "array"
+    items:
+      $ref: "#/definitions/TicketFull"
+  ErrorMessage:
+    type: "object"
+    properties:
+      Message:
+        type: "string"
+        description: "Error message"
+  Trains:
+    type: "array"
+    items:
+      $ref: "#/definitions/Train"
+  Train:
+    type: "object"
+    properties:
+      ID:
+        type: "string"
+        format: "uuid"
+      DepartureCity:
+        type: "string"
+      ArrivalCity:
+        type: "string"
+      DepartureTime:
+        type: "string"
+      DepartureDate:
+        type: "string"
+      ArrivalTime:
+        type: "string"
+      ArrivalDate:
+        type: "string"
+  NoContent:
+    type: "object"
+    properties:
+      Message:
+        type: "string"
+        description: "No Content error message"
